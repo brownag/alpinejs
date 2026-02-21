@@ -1,0 +1,310 @@
+#' Settings Panel
+#'
+#' A preferences/settings interface with nested data structures.
+#' Demonstrates tabs, toggles, and grouped settings.
+#'
+#' Run: Rscript inst/examples/03-settings-panel.R
+
+library(alpinejs)
+library(htmltools)
+
+save_output <- interactive()
+
+app <- alpine_tag("div",
+  class = "settings-container",
+  style = "max-width: 800px; margin: 40px auto; font-family: sans-serif;",
+
+  # Header
+  alpine_tag("h1","Settings", style = "color: #333; margin-bottom: 20px;"),
+
+  # Tabs
+ 	alpine_tag("div",
+    style = "display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #eee;",
+
+    alpine_tag("button",
+      "General",
+      style = "background: none; border: none; padding: 15px 20px; cursor: pointer; border-bottom: 3px solid transparent; color: #666;"
+    ) |>
+      alpine_on("click", "activeTab = 'general'") |>
+      alpine_bind("style", "activeTab === 'general' ? 'border-bottom-color: #007bff; color: #007bff; font-weight: bold;' : 'color: #666;'"),
+
+    alpine_tag("button",
+      "Notifications",
+      style = "background: none; border: none; padding: 15px 20px; cursor: pointer; border-bottom: 3px solid transparent; color: #666;"
+    ) |>
+      alpine_on("click", "activeTab = 'notifications'") |>
+      alpine_bind("style", "activeTab === 'notifications' ? 'border-bottom-color: #007bff; color: #007bff; font-weight: bold;' : 'color: #666;'"),
+
+    alpine_tag("button",
+      "Privacy",
+      style = "background: none; border: none; padding: 15px 20px; cursor: pointer; border-bottom: 3px solid transparent; color: #666;"
+    ) |>
+      alpine_on("click", "activeTab = 'privacy'") |>
+      alpine_bind("style", "activeTab === 'privacy' ? 'border-bottom-color: #007bff; color: #007bff; font-weight: bold;' : 'color: #666;'")
+  ),
+
+  # General tab
+ 	alpine_tag("div",
+    style = "padding: 20px; background: #f9f9f9; border-radius: 8px;",
+
+    # Profile section
+    alpine_tag("h3","Profile", style = "margin-top: 0; color: #333;"),
+   	alpine_tag("div",
+      style = "margin-bottom: 20px;",
+      alpine_tag("label","Username", style = "display: block; margin-bottom: 5px; color: #666;"),
+      alpine_tag("input",
+        type = "text",
+        style = "width: 100%; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+      ) |>
+        alpine_model("general.username")
+    ),
+
+   	alpine_tag("div",
+      style = "margin-bottom: 20px;",
+      alpine_tag("label","Email", style = "display: block; margin-bottom: 5px; color: #666;"),
+      alpine_tag("input",
+        type = "email",
+        style = "width: 100%; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+      ) |>
+        alpine_model("general.email")
+    ),
+
+    # Theme section
+    alpine_tag("h3","Theme", style = "margin-top: 30px; color: #333;"),
+   	alpine_tag("div",
+      style = "display: flex; gap: 20px;",
+      alpine_tag("label",
+        alpine_tag("input",type = "radio", value = "light") |>
+          alpine_model("general.theme"),
+        "Light",
+        style = "cursor: pointer; display: flex; align-items: center; gap: 8px;"
+      ),
+      alpine_tag("label",
+        alpine_tag("input",type = "radio", value = "dark") |>
+          alpine_model("general.theme"),
+        "Dark",
+        style = "cursor: pointer; display: flex; align-items: center; gap: 8px;"
+      )
+    )
+  ) |>
+    alpine_show("activeTab === 'general'"),
+
+  # Notifications tab
+ 	alpine_tag("div",
+    style = "padding: 20px; background: #f9f9f9; border-radius: 8px;",
+
+    alpine_tag("h3","Email Notifications", style = "margin-top: 0; color: #333;"),
+
+   	alpine_tag("div",
+      style = "margin-bottom: 15px;",
+      alpine_tag("label",
+        alpine_tag("input",type = "checkbox") |>
+          alpine_model("notifications.emailOnComment"),
+        " Notify on comments",
+        style = "cursor: pointer; display: flex; align-items: center; gap: 10px;"
+      ),
+      alpine_tag("p","Receive an email when someone comments on your posts", style = "margin: 5px 0 0 28px; color: #999; font-size: 14px;")
+    ),
+
+   	alpine_tag("div",
+      style = "margin-bottom: 15px;",
+      alpine_tag("label",
+        alpine_tag("input",type = "checkbox") |>
+          alpine_model("notifications.emailOnFollow"),
+        " Notify on new followers",
+        style = "cursor: pointer; display: flex; align-items: center; gap: 10px;"
+      ),
+      alpine_tag("p","Receive an email when someone follows you", style = "margin: 5px 0 0 28px; color: #999; font-size: 14px;")
+    ),
+
+   	alpine_tag("div",
+      style = "margin-bottom: 15px;",
+      alpine_tag("label",
+        alpine_tag("input",type = "checkbox") |>
+          alpine_model("notifications.emailOnLike"),
+        " Notify on likes",
+        style = "cursor: pointer; display: flex; align-items: center; gap: 10px;"
+      ),
+      alpine_tag("p","Receive an email when someone likes your content", style = "margin: 5px 0 0 28px; color: #999; font-size: 14px;")
+    ),
+
+    alpine_tag("h3","Frequency", style = "margin-top: 30px; color: #333;"),
+   	alpine_tag("div",
+      alpine_tag("label","Digest frequency", style = "display: block; margin-bottom: 8px; color: #666;"),
+      alpine_tag("select",
+        alpine_tag("option",value = "daily", "Daily digest"),
+        alpine_tag("option",value = "weekly", "Weekly digest"),
+        alpine_tag("option",value = "never", "Never"),
+        style = "padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+      ) |>
+        alpine_model("notifications.digestFrequency")
+    )
+  ) |>
+    alpine_show("activeTab === 'notifications'"),
+
+  # Privacy tab
+ 	alpine_tag("div",
+    style = "padding: 20px; background: #f9f9f9; border-radius: 8px;",
+
+    alpine_tag("h3","Profile Visibility", style = "margin-top: 0; color: #333;"),
+
+   	alpine_tag("div",
+      style = "margin-bottom: 20px;",
+      alpine_tag("label",
+        alpine_tag("input",type = "checkbox") |>
+          alpine_model("privacy.profilePublic"),
+        " Make profile public",
+        style = "cursor: pointer; display: flex; align-items: center; gap: 10px;"
+      )
+    ),
+
+   	alpine_tag("div",
+      style = "margin-bottom: 20px;",
+      alpine_tag("label",
+        alpine_tag("input",type = "checkbox") |>
+          alpine_model("privacy.allowMessages"),
+        " Allow direct messages",
+        style = "cursor: pointer; display: flex; align-items: center; gap: 10px;"
+      )
+    ),
+
+    alpine_tag("h3","Data", style = "margin-top: 30px; color: #333;"),
+
+    alpine_tag("button",
+      "Download My Data",
+      style = "background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;"
+    ) |>
+      alpine_on("click", "downloadData()"),
+
+   	alpine_tag("div",
+      style = "margin-top: 20px;",
+      alpine_tag("button",
+        "Delete Account",
+        style = "background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;"
+      ) |>
+        alpine_on("click", "deleteAccount()")
+    )
+  ) |>
+    alpine_show("activeTab === 'privacy'"),
+
+  # Save button
+ 	alpine_tag("div",
+    style = "margin-top: 30px; display: flex; gap: 10px;",
+    alpine_tag("button",
+      "Save Changes",
+      style = "background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-weight: bold;"
+    ) |>
+      alpine_on("click", "saveSettings()"),
+
+    alpine_tag("button",
+      "Cancel",
+      style = "background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer;"
+    ) |>
+      alpine_on("click", "resetSettings()")
+  ),
+
+  # Status message
+ 	alpine_tag("div",
+    style = "margin-top: 15px; padding: 12px; background: #d4edda; color: #155724; border-radius: 4px;"
+  ) |>
+    alpine_show("status") |>
+    alpine_text("status")
+) |>
+  alpine_data(
+    activeTab = "general",
+    status = "",
+
+    general = alpine_object(
+      username = "john_doe",
+      email = "john@example.com",
+      theme = "light"
+    ),
+
+    notifications = alpine_object(
+      emailOnComment = TRUE,
+      emailOnFollow = TRUE,
+      emailOnLike = FALSE,
+      digestFrequency = "weekly"
+    ),
+
+    privacy = alpine_object(
+      profilePublic = TRUE,
+      allowMessages = TRUE
+    ),
+
+    # Methods
+    saveSettings = htmlwidgets::JS("
+      function() {
+        localStorage.setItem('userSettings', JSON.stringify({
+          general: this.general,
+          notifications: this.notifications,
+          privacy: this.privacy
+        }));
+        this.status = 'Settings saved successfully!';
+        setTimeout(() => { this.status = ''; }, 3000);
+      }
+    "),
+
+    resetSettings = htmlwidgets::JS("
+      function() {
+        this.general = {
+          username: 'john_doe',
+          email: 'john@example.com',
+          theme: 'light'
+        };
+        this.notifications = {
+          emailOnComment: true,
+          emailOnFollow: true,
+          emailOnLike: false,
+          digestFrequency: 'weekly'
+        };
+        this.privacy = {
+          profilePublic: true,
+          allowMessages: true
+        };
+        localStorage.removeItem('userSettings');
+        this.status = 'Settings reset to defaults';
+        setTimeout(() => { this.status = ''; }, 3000);
+      }
+    "),
+
+    loadSettings = htmlwidgets::JS("
+      function() {
+        const saved = localStorage.getItem('userSettings');
+        if (saved) {
+          const data = JSON.parse(saved);
+          this.general = data.general;
+          this.notifications = data.notifications;
+          this.privacy = data.privacy;
+        }
+      }
+    "),
+
+    init = htmlwidgets::JS("
+      function() {
+        this.loadSettings();
+      }
+    "),
+
+    downloadData = htmlwidgets::JS("
+      function() {
+        alert('Your data export will be sent to: ' + this.general.email);
+      }
+    "),
+
+    deleteAccount = htmlwidgets::JS("
+      function() {
+        if (confirm('Are you sure? This cannot be undone.')) {
+          alert('Account deletion initiated');
+        }
+      }
+    ")
+  ) |>
+  alpine_init("init()") |>
+  htmltools::browsable()
+
+# Save to file
+if (save_output) {
+  htmltools::save_html(app, file = "03-settings-panel.html")
+}
+cat("Saved to:", output_file, "\n")

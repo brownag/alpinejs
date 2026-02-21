@@ -1,0 +1,160 @@
+---
+title: "Example: Todo List Application"
+---
+
+
+
+```{r, eval=TRUE, echo=FALSE, results='asis'}
+library(alpinejs)
+library(htmltools)
+
+app <- alpine_tag("div",
+  class = "todo-container",
+  style = "max-width: 600px; margin: 40px auto; font-family: sans-serif;",
+
+  # Header
+  alpine_tag("h1","Todo List", style = "color: #333; margin-bottom: 20px;"),
+
+  # Input section
+  alpine_tag("div",
+    style = "display: flex; gap: 10px; margin-bottom: 20px;",
+    alpine_tag("input",
+      type = "text",
+      placeholder = "What needs to be done?",
+      style = "flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+    ) |>
+      alpine_model("newTodo", .trim = TRUE),
+    alpine_tag("button",
+      "Add",
+      style = "padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;"
+    ) |>
+      alpine_on("click", "addTodo()")
+  ),
+
+  # Filter tabs
+  alpine_tag("div",
+    style = "display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;",
+    alpine_tag("button",
+      "All",
+      style = "background: none; border: none; cursor: pointer; padding: 8px; border-bottom: 2px solid transparent;"
+    ) |>
+      alpine_on("click", "filter = 'all'") |>
+      alpine_bind("style", "filter === 'all' ? 'border-bottom-color: #007bff; color: #007bff;' : 'color: #777;'"),
+    alpine_tag("button",
+      "Active",
+      style = "background: none; border: none; cursor: pointer; padding: 8px; border-bottom: 2px solid transparent;"
+    ) |>
+      alpine_on("click", "filter = 'active'") |>
+      alpine_bind("style", "filter === 'active' ? 'border-bottom-color: #007bff; color: #007bff;' : 'color: #777;'"),
+    alpine_tag("button",
+      "Completed",
+      style = "background: none; border: none; cursor: pointer; padding: 8px; border-bottom: 2px solid transparent;"
+    ) |>
+      alpine_on("click", "filter = 'completed'") |>
+      alpine_bind("style", "filter === 'completed' ? 'border-bottom-color: #007bff; color: #007bff;' : 'color: #777;'")
+  ),
+
+  # Todo list
+  alpine_for(
+    alpine_tag("div",
+      style = "display: flex; align-items: center; padding: 12px; border: 1px solid #eee; margin-bottom: 8px; border-radius: 4px; background: white;",
+
+      # Checkbox
+      alpine_tag("input",
+        type = "checkbox",
+        style = "margin-right: 12px; cursor: pointer; width: 20px; height: 20px;"
+      ) |>
+        alpine_bind("checked", "todo.completed") |>
+        alpine_on("change", "todo.completed = $el.checked; saveTodos()"),
+
+      # Todo text
+      alpine_tag("span",
+        style = "flex: 1;"
+      ) |>
+        alpine_text("todo.text") |>
+        alpine_bind("style", "todo.completed ? 'text-decoration: line-through; color: #999;' : 'color: #333;'"),
+
+      # Delete button
+      alpine_tag("button",
+        "×",
+        style = "background: none; border: none; color: #dc3545; cursor: pointer; font-size: 24px; padding: 0; width: 30px; height: 30px;"
+      ) |>
+        alpine_on("click", "deleteTodo(todo.id)")
+    ),
+    "todo in filteredTodos()",
+    key = "todo.id"
+  ),
+
+  # Stats
+  alpine_tag("div",
+    style = "margin-top: 20px; padding-top: 10px; border-top: 1px solid #eee; color: #666; font-size: 14px;",
+    alpine_tag("span") |>
+      alpine_text("'Active: ' + activeTodos() + ', Completed: ' + completedTodos()")
+  )
+) |>
+  alpine_init("todos = JSON.parse(localStorage.getItem('todos') || '[]')") |>
+  alpine_data(
+    newTodo = "",
+    todos = alpine_array(),
+    filter = "all",
+
+    # Methods
+    addTodo = htmlwidgets::JS("
+      function() {
+        if (!this.newTodo.trim()) return;
+        this.todos.push({
+          id: Date.now(),
+          text: this.newTodo,
+          completed: false
+        });
+        this.newTodo = '';
+        this.saveTodos();
+      }
+    "),
+
+    deleteTodo = htmlwidgets::JS("
+      function(id) {
+        this.todos = this.todos.filter(t => t.id !== id);
+        this.saveTodos();
+      }
+    "),
+
+    saveTodos = htmlwidgets::JS("
+      function() {
+        localStorage.setItem('todos', JSON.stringify(this.todos));
+      }
+    "),
+
+    filterTodos = htmlwidgets::JS("
+      function(filterType) {
+        if (filterType === 'active') {
+          return this.todos.filter(t => !t.completed);
+        } else if (filterType === 'completed') {
+          return this.todos.filter(t => t.completed);
+        }
+        return this.todos;
+      }
+    "),
+
+    filteredTodos = htmlwidgets::JS("
+      function() {
+        return this.filterTodos(this.filter);
+      }
+    "),
+
+    activeTodos = htmlwidgets::JS("
+      function() {
+        return this.todos.filter(t => !t.completed).length;
+      }
+    "),
+
+    completedTodos = htmlwidgets::JS("
+      function() {
+        return this.todos.filter(t => t.completed).length;
+      }
+    ")
+  ) |>
+  htmltools::browsable()
+
+app
+```

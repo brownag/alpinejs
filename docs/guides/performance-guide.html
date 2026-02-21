@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Performance Guide | alpinejs</title>
+  <!-- Load Crosstalk for cross-widget reactivity -->
+  <script src="https://cdn.jsdelivr.net/npm/crosstalk@1.2.0/dist/crosstalk.min.js"></script>
+  <!-- Load Alpine.js for interactive components -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+  <style>
+    /* 1990s Web 1.0 aesthetic - authentic retro feel */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Verdana, Geneva, sans-serif;
+      line-height: 1.6;
+      color: #000;
+      background: #c0c0c0;
+      font-size: 14px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: #dfdfdf;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #dfdfdf;
+      padding-top: 0.8rem;
+    }
+
+    nav a {
+      color: #0000ff;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    nav a:visited {
+      color: #800080;
+    }
+
+    nav a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Main content */
+    main {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      padding: 1rem;
+      background: #fff;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      min-height: calc(100vh - 250px);
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1.5rem 0 0.5rem;
+      font-weight: bold;
+      line-height: 1.3;
+    }
+
+    h1 { 
+      font-size: 2rem;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+      margin-top: 0;
+      color: #0000ff;
+    }
+
+    h2 { 
+      font-size: 1.4rem;
+      color: #0000cc;
+      border-bottom: 1px solid #000;
+    }
+
+    h3 { font-size: 1.1rem; color: #000080; }
+    h4 { font-size: 1rem; color: #000; font-weight: bold; }
+
+    /* Paragraphs & text */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #800080;
+    }
+
+    a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Inline code */
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+      color: #000;
+      border: 1px solid #ccc;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #f0f0f0;
+      border: 1px solid #999;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.4;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #000;
+      border: none;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid #999;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #333;
+      font-style: italic;
+      background: #f5f5f5;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #999;
+      margin: 1.5rem 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      border: 1px solid #999;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border: 1px solid #999;
+    }
+
+    th {
+      background: #c0c0c0;
+      font-weight: bold;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #999;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      color: #000;
+      font-size: 0.85rem;
+      margin: 2rem 1rem 0;
+      background: #dfdfdf;
+    }
+
+    footer a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    footer a:visited {
+      color: #800080;
+    }
+
+    /* Horizontal rule dividers */
+    .divider {
+      border: none;
+      height: 2px;
+      background: linear-gradient(to right, #dfdfdf 0%, #000 50%, #dfdfdf 100%);
+      margin: 1.5rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      main {
+        padding: 0.8rem;
+      }
+
+      header {
+        padding: 0.8rem;
+      }
+
+      nav {
+        gap: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html" style="color: #000; text-decoration: none;">alpinejs</a></h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../guides/">Guides</a>
+      <a href="../examples/">Examples</a>
+      <a href="../reference/">Reference</a>
+      <a href="https://github.com/brownag/alpinejs" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    
+<div class="frontmatter">
+<div class="title"><h1>Performance &amp; Best Practices</h1></div>
+</div>
+<div class="body">
+<h2 id="sec:overview">Overview</h2>
+<p>This vignette covers optimization strategies, debugging techniques, and best practices for building performant, maintainable Alpine.js applications in R.</p>
+<h2 id="sec:performance-optimization">Performance Optimization</h2>
+<h3 id="sec:1-reduce-dom-size">1. Reduce DOM Size</h3>
+<p>Minimize the number of DOM nodes, especially in loops:</p>
+<pre><code class="language-r"># Slow approach: Renders every field for every item
+alpine_tag(&quot;ul&quot;,
+  alpine_tag(&quot;li&quot;,
+    &quot;:for&quot; = &quot;item in items&quot;,
+    # 20 child elements per item
+    alpine_tag(&quot;span&quot;,
+      alpine_attr(`x-bind:textContent` = &quot;item.name&quot;)
+    ),
+    alpine_tag(&quot;span&quot;,
+      alpine_attr(`x-bind:textContent` = &quot;item.email&quot;)
+    ),
+    alpine_tag(&quot;span&quot;,
+      alpine_attr(`x-bind:textContent` = &quot;item.status&quot;)
+    )
+    # ... many more spans
+  )
+)
+
+# Faster approach: Use single computed property
+alpine_tag(&quot;ul&quot;,
+  alpine_tag(&quot;li&quot;,
+    &quot;:for&quot; = &quot;item in items&quot;,
+    alpine_tag(&quot;span&quot;,
+      alpine_attr(`x-bind:textContent` = &quot;formatItem(item)&quot;)
+    )
+  )
+) |>
+  alpine_data(
+    items = list(...),
+    formatItem = htmlwidgets::JS(&quot;
+      function(item) {
+        return item.name + ' (' + item.email + ')';
+      }
+    &quot;)
+  )
+</code></pre>
+<h3 id="sec:2-use-computed-properties-strategically">2. Use Computed Properties Strategically</h3>
+<p>Pre-compute expensive operations instead of recalculating on every render:</p>
+<pre><code class="language-r"># Slow approach: Recalculates on every update
+alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;span&quot;,
+    alpine_attr(`x-bind:textContent` = &quot;items.filter(i => i.active).length&quot;)
+  )
+)
+
+# Faster approach: Computed property with caching
+alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;span&quot;,
+    alpine_attr(`x-bind:textContent` = &quot;activeCount&quot;)
+  )
+) |>
+  alpine_data(
+    items = list(...),
+    activeCount = htmlwidgets::JS(&quot;
+      get activeCount() {
+        return this.items.filter(i => i.active).length;
+      }
+    &quot;)
+  )
+</code></pre>
+<h3 id="sec:3-debounce-expensive-operations">3. Debounce Expensive Operations</h3>
+<p>Use <code>.debounce</code> modifier for search, filter, and validation:</p>
+<pre><code class="language-r"># Slow approach: API call on every keystroke
+alpine_tag(&quot;input&quot;) |>
+  alpine_model(&quot;query&quot;) |>
+  alpine_on(&quot;change&quot;, &quot;performSearch()&quot;)
+
+# Faster approach: Debounced search (wait 300ms)
+alpine_tag(&quot;input&quot;) |>
+  alpine_model(&quot;query&quot;, .debounce = 300) |>
+  alpine_on(&quot;change&quot;, &quot;performSearch()&quot;)
+</code></pre>
+<h3 id="sec:4-limit-loop-rendering-with-pagination">4. Limit Loop Rendering with Pagination</h3>
+<p>Large datasets should be paginated client-side or server-side:</p>
+<pre><code class="language-r"># Recommended approach: Show only current page
+alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;ul&quot;,
+    alpine_tag(&quot;li&quot;,
+      &quot;:for&quot; = &quot;(item, idx) in visibleItems&quot;,
+      alpine_tag(&quot;span&quot;,
+        alpine_attr(`x-bind:textContent` = &quot;item.name&quot;)
+      )
+    )
+  ),
+  
+  # Pagination controls
+  alpine_tag(&quot;button&quot;, &quot;Previous&quot;) |>
+    alpine_on(&quot;click&quot;, &quot;page--&quot;),
+  alpine_tag(&quot;span&quot;,
+    alpine_attr(`x-bind:textContent` = &quot;page&quot;)
+  ),
+  alpine_tag(&quot;button&quot;, &quot;Next&quot;) |>
+    alpine_on(&quot;click&quot;, &quot;page++&quot;)
+) |>
+  alpine_data(
+    items = list(...),  # 10,000 items
+    page = 1,
+    pageSize = 20,
+    visibleItems = htmlwidgets::JS(&quot;
+      get visibleItems() {
+        const start = (this.page - 1) * this.pageSize;
+        return this.items.slice(start, start + this.pageSize);
+      }
+    &quot;)
+  )
+</code></pre>
+<h3 id="sec:5-avoid-excessive-event-listeners">5. Avoid Excessive Event Listeners</h3>
+<p>Attach listeners at parent level (event delegation):</p>
+<pre><code class="language-r"># Slow approach: Separate listener for each item
+alpine_tag(&quot;ul&quot;,
+  alpine_tag(&quot;li&quot;,
+    &quot;:for&quot; = &quot;item in items&quot;,
+    alpine_tag(&quot;span&quot;,
+      alpine_attr(`x-bind:textContent` = &quot;item.name&quot;)
+    ),
+    alpine_tag(&quot;button&quot;, &quot;Delete&quot;) |>
+      alpine_on(&quot;click&quot;, &quot;deleteItem(item.id)&quot;)
+  )
+)
+
+# Faster approach: Single parent listener with event delegation
+alpine_tag(&quot;ul&quot;,
+  alpine_tag(&quot;li&quot;,
+    &quot;:for&quot; = &quot;item in items&quot;,
+    alpine_tag(&quot;span&quot;,
+      alpine_attr(`x-bind:textContent` = &quot;item.name&quot;)
+    ),
+    alpine_tag(&quot;button&quot;, &quot;:data-id&quot; = &quot;item.id&quot;, &quot;Delete&quot;)
+  ) |>
+    alpine_on(&quot;click&quot;, &quot;handleDelete(event)&quot;)  # Single listener
+) |>
+  alpine_data(
+    items = list(...),
+    handleDelete = htmlwidgets::JS(&quot;
+      function(e) {
+        if (e.target.tagName === 'BUTTON') {
+          this.deleteItem(e.target.dataset.id);
+        }
+      }
+    &quot;)
+  )
+</code></pre>
+<h2 id="sec:data-amp-state-management">Data &amp; State Management</h2>
+<h3 id="sec:1-structure-state-logically">1. Structure State Logically</h3>
+<p>Group related data in nested objects:</p>
+<pre><code class="language-r"># Poor organization: Flat structure
+alpine_data(
+  username = &quot;&quot;,
+  email = &quot;&quot;,
+  phone = &quot;&quot;,
+  address = &quot;&quot;,
+  city = &quot;&quot;,
+  country = &quot;&quot;
+  # ... many more fields
+)
+
+# Better organization: Nested objects
+alpine_data(
+  user = htmlwidgets::JS(&quot;
+    {
+      username: '',
+      email: '',
+      phone: ''
+    }
+  &quot;),
+  address = htmlwidgets::JS(&quot;
+    {
+      street: '',
+      city: '',
+      country: ''
+    }
+  &quot;)
+)
+
+# Access as: this.user.email, this.address.city
+</code></pre>
+<h3 id="sec:2-use-proper-data-types">2. Use Proper Data Types</h3>
+<p>Match JavaScript types to your data:</p>
+<pre><code class="language-r"># Incorrect: Numbers as strings
+alpine_data(
+  age = &quot;25&quot;,      # String, not number
+  balance = &quot;100&quot;  # String, not number
+)
+
+# Correct: Use proper types
+alpine_data(
+  age = htmlwidgets::JS(&quot;25&quot;),      # Number
+  balance = htmlwidgets::JS(&quot;100&quot;)  # Number
+)
+</code></pre>
+<h3 id="sec:3-validate-on-client-only-when-appropriate">3. Validate on Client Only When Appropriate</h3>
+<p>Use client validation for UX, server validation for security:</p>
+<pre><code class="language-r"># Form with client-side feedback
+alpine_tag(&quot;form&quot;,
+  alpine_tag(&quot;input&quot;,
+    type = &quot;email&quot;,
+    placeholder = &quot;Email&quot;
+  ) |>
+    alpine_model(&quot;email&quot;, .lazy = TRUE),
+  
+  alpine_tag(&quot;div&quot;,
+    &quot;Invalid email&quot; |>
+      alpine_show(&quot;email &amp;&amp; !isValidEmail()&quot;)
+  ),
+  
+  alpine_tag(&quot;button&quot;, &quot;Submit&quot;) |>
+    htmlwidgets::html_attr(&quot;disabled&quot;, htmlwidgets::JS(&quot;!isValidEmail()&quot;))
+) |>
+  alpine_data(
+    email = &quot;&quot;,
+    isValidEmail = htmlwidgets::JS(&quot;
+      function() {
+        return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(this.email);
+      }
+    &quot;)
+  )
+
+# ⚠️ ALWAYS validate on server too for security
+</code></pre>
+<h2 id="sec:debugging-amp-inspection">Debugging &amp; Inspection</h2>
+<h3 id="sec:1-use-browser-developer-tools">1. Use Browser Developer Tools</h3>
+<p>Alpine.js state is accessible in console:</p>
+<pre><code class="language-r">alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    message = &quot;Hello&quot;,
+    count = 0,
+    increment = htmlwidgets::JS(&quot;
+      function() {
+        console.log('Current state:', {
+          message: this.message,
+          count: this.count
+        });
+        this.count++;
+      }
+    &quot;)
+  )
+</code></pre>
+<p>Open browser console and type: <code>document.body.__x.$data</code></p>
+<h3 id="sec:2-log-component-state">2. Log Component State</h3>
+<p>Add logging to track state changes:</p>
+<pre><code class="language-r">alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;button&quot;, &quot;Click me&quot;) |>
+    alpine_on(&quot;click&quot;, &quot;logState()&quot;)
+) |>
+  alpine_data(
+    clicks = 0,
+    logState = htmlwidgets::JS(&quot;
+      function() {
+        this.clicks++;
+        console.log('Clicks:', this.clicks);
+        console.log('Full state:', this);
+      }
+    &quot;)
+  )
+</code></pre>
+<h3 id="sec:3-use-alpine-devtools-browser-extension">3. Use Alpine DevTools (Browser Extension)</h3>
+<p>Install <a href="https://chrome.google.com/webstore/detail/alpinejs-devtools">Alpine.js DevTools</a> for visual debugging:</p>
+<ul>
+<li>Inspect component state</li>
+<li>Watch state changes in real-time</li>
+<li>Trigger methods from DevTools</li>
+<li>Time travel through state history</li>
+</ul>
+<h2 id="sec:code-organization">Code Organization</h2>
+<h3 id="sec:1-keep-components-focused">1. Keep Components Focused</h3>
+<p>One responsibility per component:</p>
+<pre><code class="language-r"># Poor: Component doing too many things
+alpine_data(
+  // Sales data
+  sales = list(...),
+  // UI state
+  selectedTab = &quot;&quot;,
+  // Filters
+  filterCategory = &quot;&quot;,
+  // Sorting
+  sortBy = &quot;&quot;,
+  // Form data
+  formField = &quot;&quot;,
+  // ... 50 more lines
+)
+
+# Better: Component for specific feature
+alpine_data(
+  sales = list(...),      # One concern
+  selectedTab = &quot;recent&quot;
+)
+</code></pre>
+<h3 id="sec:2-extract-reusable-functions">2. Extract Reusable Functions</h3>
+<p>Create helper functions for complex logic:</p>
+<pre><code class="language-r"># ❌ INLINE: Hard to test and reuse
+alpine_data(
+  items = list(...),
+  processAndFilter = htmlwidgets::JS(&quot;
+    function() {
+      return this.items
+        .map(item => ({
+          ...item,
+          calculated: item.a + item.b
+        }))
+        .filter(item => item.calculated > 100)
+        .sort((a, b) => b.calculated - a.calculated);
+    }
+  &quot;)
+)
+
+# PREFERRED: Reusable functions
+alpine_data(
+  items = list(...),
+  add = htmlwidgets::JS(&quot;(a, b) => a + b&quot;),
+  processAndFilter = htmlwidgets::JS(&quot;
+    function() {
+      return this.items
+        .map(item => ({...item, calculated: this.add(item.a, item.b)}))
+        .filter(item => item.calculated > 100)
+        .sort((a, b) => b.calculated - a.calculated);
+    }
+  &quot;)
+)
+</code></pre>
+<h3 id="sec:3-use-meaningful-names">3. Use Meaningful Names</h3>
+<p>Clear naming improves readability:</p>
+<pre><code class="language-r"># NOT RECOMMENDED: Vague naming
+alpine_data(
+  d = list(...),
+  fn = htmlwidgets::JS(&quot;function() {...}&quot;),
+  x = &quot;&quot;
+)
+
+# PREFERRED: Clear naming
+alpine_data(
+  documentList = list(...),
+  formatDocument = htmlwidgets::JS(&quot;function() {...}&quot;),
+  searchQuery = &quot;&quot;
+)
+</code></pre>
+<h2 id="sec:testing-strategies">Testing Strategies</h2>
+<h3 id="sec:1-test-state-transitions">1. Test State Transitions</h3>
+<pre><code class="language-r"># Example test pseudo-code
+test_that(&quot;Counter increments correctly&quot;, {
+  # Create component with counter
+  component <- alpine_tag(&quot;div&quot;) |>
+    alpine_data(count = 0, increment = JS(&quot;function() { this.count++; }&quot;))
+  
+  # Verify initial state
+  # Trigger action
+  # Verify new state
+})
+</code></pre>
+<h3 id="sec:2-test-edge-cases">2. Test Edge Cases</h3>
+<pre><code class="language-r"># Test boundary conditions
+test_cases <- list(
+  list(input = -1, expected = 0),      # Negative
+  list(input = 0, expected = 0),       # Zero
+  list(input = 1, expected = 1),       # Single
+  list(input = 1000000, expected = NA) # Large number
+)
+</code></pre>
+<h3 id="sec:3-performance-tests">3. Performance Tests</h3>
+<p>Use browser timing tools:</p>
+<pre><code class="language-r"># Measure operation timing
+alpine_data(
+  slowOperation = htmlwidgets::JS(&quot;
+    function() {
+      const start = performance.now();
+      // ... operation ...
+      const duration = performance.now() - start;
+      console.log('Operation took ' + duration + 'ms');
+    }
+  &quot;)
+)
+</code></pre>
+<h2 id="sec:security-best-practices">Security Best Practices</h2>
+<h3 id="sec:1-validate-all-user-input">1. Validate All User Input</h3>
+<pre><code class="language-r"># Client-side feedback (UX)
+alpine_tag(&quot;input&quot;) |>
+  alpine_model(&quot;username&quot;, .trim = TRUE) |>
+  alpine_on(&quot;change&quot;, &quot;validateUsername()&quot;)
+
+# Server-side validation (security)
+# Always validate on the server!
+</code></pre>
+<h3 id="sec:2-escape-output-for-xss-protection">2. Escape Output for XSS Protection</h3>
+<pre><code class="language-r"># NOT RECOMMENDED: Renders HTML as-is
+alpine_tag(&quot;div&quot;,
+  alpine_attr(`x-bind:innerHTML` = &quot;userInput&quot;)
+)
+
+# RECOMMENDED: Renders as text
+alpine_tag(&quot;div&quot;,
+  alpine_attr(`x-bind:textContent` = &quot;userInput&quot;)
+)
+</code></pre>
+<h3 id="sec:3-use-csp-compatible-patterns">3. Use CSP-Compatible Patterns</h3>
+<pre><code class="language-r"># NOT RECOMMENDED: Eval with user data
+alpine_data(
+  expression = JS(&quot;eval(userData)&quot;)  # Dangerous!
+)
+
+# RECOMMENDED: Pre-defined operations
+alpine_data(
+  operation = &quot;add&quot;,  # String, not code
+  operations = JS(&quot;
+    {
+      add: (a, b) => a + b,
+      subtract: (a, b) => a - b
+    }
+  &quot;)
+)
+</code></pre>
+<h2 id="sec:common-patterns">Common Patterns</h2>
+<h3 id="sec:pattern-1-loading-state">Pattern 1: Loading State</h3>
+<pre><code class="language-r">alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;button&quot;, &quot;Fetch Data&quot;) |>
+    alpine_on(&quot;click&quot;, &quot;fetchData()&quot;)
+) |>
+  alpine_data(
+    isLoading = htmlwidgets::JS(&quot;false&quot;),
+    fetchData = htmlwidgets::JS(&quot;
+      async function() {
+        this.isLoading = true;
+        try {
+          const response = await fetch('/api/data');
+          const data = await response.json();
+          // Process data
+        } finally {
+          this.isLoading = false;
+        }
+      }
+    &quot;)
+  )
+</code></pre>
+<h3 id="sec:pattern-2-error-handling">Pattern 2: Error Handling</h3>
+<pre><code class="language-r">alpine_data(
+  error = &quot;&quot;,
+  operation = htmlwidgets::JS(&quot;
+    async function() {
+      this.error = '';
+      try {
+        // Perform operation
+      } catch (e) {
+        this.error = e.message;
+      }
+    }
+  &quot;)
+)
+</code></pre>
+<h3 id="sec:pattern-3-undo-redo">Pattern 3: Undo/Redo</h3>
+<pre><code class="language-r">alpine_data(
+  state = htmlwidgets::JS(&quot;{ value: 0 }&quot;),
+  history = htmlwidgets::JS(&quot;[]&quot;),
+  undo = htmlwidgets::JS(&quot;
+    function() {
+      if (this.history.length > 0) {
+        this.state = this.history.pop();
+      }
+    }
+  &quot;)
+)
+</code></pre>
+<h2 id="sec:checklist-production-ready">Checklist: Production Ready</h2>
+<ul>
+<li><input type="checkbox" /> All user input validated (client + server)</li>
+<li><input type="checkbox" /> State structure is clear and organized</li>
+<li><input type="checkbox" /> No unnecessary re-renders (debouncing in place)</li>
+<li><input type="checkbox" /> Pagination for large datasets</li>
+<li><input type="checkbox" /> Error handling with user-friendly messages</li>
+<li><input type="checkbox" /> Loading/async states handled</li>
+<li><input type="checkbox" /> Responsive on mobile devices</li>
+<li><input type="checkbox" /> Browser DevTools work without errors</li>
+<li><input type="checkbox" /> CSP-compatible (if using CSP)</li>
+<li><input type="checkbox" /> Performance acceptable on slow connections</li>
+</ul>
+<h2 id="sec:see-also">See Also</h2>
+<ul>
+<li><a href="getting-started.qmd">Getting Started</a></li>
+<li><a href="crosstalk-integration.qmd">Crosstalk Integration</a></li>
+<li><a href="https://alpinejs.dev/">Alpine.js Performance Guide</a></li>
+</ul>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+<nav style="margin-bottom: 1.5rem; font-size: 0.9em;">
+      <a href="../index.html" style="color: #0000ff; text-decoration: underline;">Home</a> &gt;
+      <a href="../guides/index.html" style="color: #0000ff; text-decoration: underline;">Guides</a> &gt;
+      <span style="color: #666;">Performance Guide</span>
+      </nav>
+  </main>
+
+  <footer>
+    <p>
+      alpinejs &mdash; R interface for Alpine.js<br>
+      <a href="https://github.com/brownag/alpinejs">View on GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

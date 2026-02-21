@@ -1,0 +1,28 @@
+Package: alpinejs
+Title: Lightweight Reactive HTML User Interfaces with 'Alpine.js'
+Version: 0.1.0
+Authors@R: person("Andrew", "Brown", , "brown.andrewg@gmail.com",
+    role = c("aut", "cre"),
+    comment = c(ORCID = "0000-0002-4565-533X"))
+Maintainer: Andrew Brown <brown.andrewg@gmail.com>
+Description: Compose interactive JavaScript applications entirely in R using
+    'Alpine.js'. Write component state, event handlers, and logic as R code.
+    The package generates the HTML and Alpine.js directives. All interactivity
+    runs client-side with no server dependency. Features reactive data binding,
+    R-to-JSON serialization with type preservation, a plugin system, and
+    pre-built components for accordions, modals, tabs, and forms.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends: 
+    R (>= 4.0)
+Imports: 
+    htmltools (>= 0.5.0),
+    jsonlite (>= 1.7.0),
+    htmlwidgets (>= 1.5.0)
+Suggests:
+    testthat (>= 3.0.0),
+    crosstalk (>= 1.1.0)
+URL: https://github.com/brownag/alpinejs, https://brownag.github.io/alpinejs/
+BugReports: https://github.com/brownag/alpinejs/issues

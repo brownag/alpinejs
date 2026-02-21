@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Components & Patterns | alpinejs</title>
+  <!-- Load Crosstalk for cross-widget reactivity -->
+  <script src="https://cdn.jsdelivr.net/npm/crosstalk@1.2.0/dist/crosstalk.min.js"></script>
+  <!-- Load Alpine.js for interactive components -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+  <style>
+    /* 1990s Web 1.0 aesthetic - authentic retro feel */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Verdana, Geneva, sans-serif;
+      line-height: 1.6;
+      color: #000;
+      background: #c0c0c0;
+      font-size: 14px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: #dfdfdf;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #dfdfdf;
+      padding-top: 0.8rem;
+    }
+
+    nav a {
+      color: #0000ff;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    nav a:visited {
+      color: #800080;
+    }
+
+    nav a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Main content */
+    main {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      padding: 1rem;
+      background: #fff;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      min-height: calc(100vh - 250px);
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1.5rem 0 0.5rem;
+      font-weight: bold;
+      line-height: 1.3;
+    }
+
+    h1 { 
+      font-size: 2rem;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+      margin-top: 0;
+      color: #0000ff;
+    }
+
+    h2 { 
+      font-size: 1.4rem;
+      color: #0000cc;
+      border-bottom: 1px solid #000;
+    }
+
+    h3 { font-size: 1.1rem; color: #000080; }
+    h4 { font-size: 1rem; color: #000; font-weight: bold; }
+
+    /* Paragraphs & text */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #800080;
+    }
+
+    a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Inline code */
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+      color: #000;
+      border: 1px solid #ccc;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #f0f0f0;
+      border: 1px solid #999;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.4;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #000;
+      border: none;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid #999;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #333;
+      font-style: italic;
+      background: #f5f5f5;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #999;
+      margin: 1.5rem 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      border: 1px solid #999;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border: 1px solid #999;
+    }
+
+    th {
+      background: #c0c0c0;
+      font-weight: bold;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #999;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      color: #000;
+      font-size: 0.85rem;
+      margin: 2rem 1rem 0;
+      background: #dfdfdf;
+    }
+
+    footer a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    footer a:visited {
+      color: #800080;
+    }
+
+    /* Horizontal rule dividers */
+    .divider {
+      border: none;
+      height: 2px;
+      background: linear-gradient(to right, #dfdfdf 0%, #000 50%, #dfdfdf 100%);
+      margin: 1.5rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      main {
+        padding: 0.8rem;
+      }
+
+      header {
+        padding: 0.8rem;
+      }
+
+      nav {
+        gap: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html" style="color: #000; text-decoration: none;">alpinejs</a></h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../guides/">Guides</a>
+      <a href="../examples/">Examples</a>
+      <a href="../reference/">Reference</a>
+      <a href="https://github.com/brownag/alpinejs" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    
+<div class="frontmatter">
+<div class="title"><h1>Pre-built Components and Patterns</h1></div>
+</div>
+<div class="body">
+<pre><code class="language-r">library(alpinejs)
+</code></pre>
+<h1 id="chp:pre-built-components-and-patterns">Pre-built Components and Patterns</h1>
+<p>This vignette covers alpinejs’s pre-built interactive components: accordions, modals, and tabs. These are ready-to-use patterns built on top of Alpine.js.</p>
+<h2 id="sec:accordion-component">Accordion Component</h2>
+<p>An accordion displays collapsible panels where one or more can be open at a time.</p>
+<h3 id="sec:basic-accordion">Basic Accordion</h3>
+<pre><code class="language-r">alpine_accordion(
+  items = list(
+    list(title = &quot;What is Alpine.js?&quot;, content = &quot;Alpine.js is a lightweight, rugged JavaScript framework.&quot;),
+    list(title = &quot;Why use alpinejs?&quot;, content = &quot;Write interactive UIs in pure R without JavaScript.&quot;),
+    list(title = &quot;Is it production-ready?&quot;, content = &quot;Yes! Alpine.js is stable and widely used.&quot;)
+  ),
+  class = &quot;faq-accordion&quot;
+)
+#> <div class=&quot;faq-accordion&quot; x-data=&quot;{&amp;quot;collapsed&amp;quot;:[true,true,true],&amp;quot;togglePanel&amp;quot;:function(index) { this.$nextTick(() =&amp;gt; { this.collapsed[index] = !this.collapsed[index]; }); }}&quot;>
+#>   <div class=&quot;accordion-item&quot;>
+#>     <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(0)&quot;>What is Alpine.js?</button>
+#>     <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[0]&quot;>Alpine.js is a lightweight, rugged JavaScript framework.</div>
+#>   </div>
+#>   <div class=&quot;accordion-item&quot;>
+#>     <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(1)&quot;>Why use alpinejs?</button>
+#>     <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[1]&quot;>Write interactive UIs in pure R without JavaScript.</div>
+#>   </div>
+#>   <div class=&quot;accordion-item&quot;>
+#>     <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(2)&quot;>Is it production-ready?</button>
+#>     <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[2]&quot;>Yes! Alpine.js is stable and widely used.</div>
+#>   </div>
+#> </div>
+</code></pre>
+<h3 id="sec:accordion-with-custom-styling">Accordion with Custom Styling</h3>
+<pre><code class="language-r"># Styled accordion (uses inline CSS for demo)
+alpine_accordion(
+  items = list(
+    list(
+      title = &quot;Section 1&quot;,
+      content = result <- alpine_tag(&quot;div&quot;,
+        style = &quot;padding: 15px; background-color: #f5f5f5;&quot;,
+        alpine_tag(&quot;p&quot;, &quot;Content for section 1&quot;),
+        alpine_tag(&quot;ul&quot;,
+          alpine_tag(&quot;li&quot;, &quot;Point A&quot;),
+          alpine_tag(&quot;li&quot;, &quot;Point B&quot;),
+          alpine_tag(&quot;li&quot;, &quot;Point C&quot;)
+        )
+      )
+    ),
+    list(
+      title = &quot;Section 2&quot;,
+      content = alpine_tag(&quot;div&quot;,
+        style = &quot;padding: 15px; background-color: #f5f5f5;&quot;,
+        alpine_tag(&quot;p&quot;, &quot;Content for section 2&quot;),
+        alpine_tag(&quot;code&quot;, &quot;Some code goes here&quot;)
+      )
+    )
+  ),
+  class = &quot;accordion&quot;,
+  title_class = &quot;accordion-title&quot;,
+  content_class = &quot;accordion-body&quot;
+)
+#> <div class=&quot;accordion&quot; x-data=&quot;{&amp;quot;collapsed&amp;quot;:[true,true],&amp;quot;togglePanel&amp;quot;:function(index) { this.$nextTick(() =&amp;gt; { this.collapsed[index] = !this.collapsed[index]; }); }}&quot;>
+#>   <div class=&quot;accordion-item accordion-title&quot;>
+#>     <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(0)&quot;>Section 1</button>
+#>     <div class=&quot;accordion-content accordion-body&quot; x-show=&quot;!collapsed[0]&quot;>
+#>       <div style=&quot;padding: 15px; background-color: #f5f5f5;&quot;>
+#>         <p>Content for section 1</p>
+#>         <ul>
+#>           <li>Point A</li>
+#>           <li>Point B</li>
+#>           <li>Point C</li>
+#>         </ul>
+#>       </div>
+#>     </div>
+#>   </div>
+#>   <div class=&quot;accordion-item accordion-title&quot;>
+#>     <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(1)&quot;>Section 2</button>
+#>     <div class=&quot;accordion-content accordion-body&quot; x-show=&quot;!collapsed[1]&quot;>
+#>       <div style=&quot;padding: 15px; background-color: #f5f5f5;&quot;>
+#>         <p>Content for section 2</p>
+#>         <code>Some code goes here</code>
+#>       </div>
+#>     </div>
+#>   </div>
+#> </div>
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div style=&quot;padding: 15px; background-color: #f5f5f5;&quot;>
+#>   <p>Content for section 1</p>
+#>   <ul>
+#>     <li>Point A</li>
+#>     <li>Point B</li>
+#>     <li>Point C</li>
+#>   </ul>
+#> </div>
+#> ```
+</code></pre>
+<h3 id="sec:how-it-works">How It Works</h3>
+<p>The accordion uses Alpine.js internally:</p>
+<pre><code class="language-javascript">// Generated x-data state
+{
+  collapsed: [false, true, true],  // which panels are open
+  togglePanel(index) { 
+    this.collapsed[index] = !this.collapsed[index];
+  }
+}
+</code></pre>
+<p>Each panel header has <code>@click=&quot;togglePanel(index)&quot;</code> and each body has <code>x-show=&quot;!collapsed[index]&quot;</code>.</p>
+<h2 id="sec:modal-component">Modal Component</h2>
+<p>A modal dialog overlays the page and captures user attention.</p>
+<h3 id="sec:basic-modal">Basic Modal</h3>
+<pre><code class="language-r">alpine_modal(
+  trigger_label = &quot;Open Dialog&quot;,
+  title = &quot;Confirm Action&quot;,
+  content = &quot;Are you sure you want to proceed?&quot;
+)
+#> <div x-data=&quot;{&amp;quot;modalOpen&amp;quot;:false}&quot;>
+#>   <button class=&quot;btn btn-primary&quot; @click=&quot;modalOpen = true&quot;>Open Dialog</button>
+#>   <div class=&quot;modal-backdrop&quot; style=&quot;position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;&quot; x-show=&quot;modalOpen&quot; @click=&quot;modalOpen = false&quot;></div>
+#>   <div class=&quot;modal-dialog&quot; style=&quot;position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; z-index: 1000; min-width: 300px;&quot; x-show=&quot;modalOpen&quot;>
+#>     <div class=&quot;modal-header&quot;>
+#>       <h2 style=&quot;margin: 0 0 15px 0;&quot;>Confirm Action</h2>
+#>       <button style=&quot;position: absolute; top: 10px; right: 10px; border: none; background: none; font-size: 24px; cursor: pointer;&quot; @click=&quot;modalOpen = false&quot;>x</button>
+#>     </div>
+#>     <div class=&quot;modal-body&quot; style=&quot;margin-bottom: 15px;&quot;>Are you sure you want to proceed?</div>
+#>     <div class=&quot;modal-footer&quot; style=&quot;display: flex; gap: 10px; justify-content: flex-end;&quot;>
+#>       <button class=&quot;btn btn-secondary&quot; @click=&quot;modalOpen = false&quot;>Close</button>
+#>     </div>
+#>   </div>
+#> </div>
+</code></pre>
+<h3 id="sec:modal-with-rich-content">Modal with Rich Content</h3>
+<pre><code class="language-r"># Modal with complex content
+alpine_modal(
+  trigger_label = &quot;Learn More&quot;,
+  title = &quot;About Our Product&quot;,
+  content = result <- alpine_tag(&quot;div&quot;,
+    style = &quot;line-height: 1.6;&quot;,
+    alpine_tag(&quot;p&quot;, &quot;Combines R and web technologies.&quot;),
+    alpine_tag(&quot;h3&quot;, &quot;Features:&quot;),
+    alpine_tag(&quot;ul&quot;,
+      alpine_tag(&quot;li&quot;, &quot;R interface to Alpine.js&quot;),
+      alpine_tag(&quot;li&quot;, &quot;Type conversion&quot;),
+      alpine_tag(&quot;li&quot;, &quot;Reactive bindings&quot;)
+    ),
+    alpine_tag(&quot;p&quot;,
+      &quot;Built with &quot;,
+      alpine_tag(&quot;a&quot;, &quot;Alpine.js&quot;, href = &quot;https://alpinejs.dev/&quot;, target = &quot;_blank&quot;),
+      &quot; and &quot;,
+      alpine_tag(&quot;a&quot;, &quot;htmltools&quot;, href = &quot;https://rstudio.github.io/htmltools/&quot;, target = &quot;_blank&quot;)
+    )
+  ),
+  close_label = &quot;Got it!&quot;
+)
+#> <div x-data=&quot;{&amp;quot;modalOpen&amp;quot;:false}&quot;>
+#>   <button class=&quot;btn btn-primary&quot; @click=&quot;modalOpen = true&quot;>Learn More</button>
+#>   <div class=&quot;modal-backdrop&quot; style=&quot;position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;&quot; x-show=&quot;modalOpen&quot; @click=&quot;modalOpen = false&quot;></div>
+#>   <div class=&quot;modal-dialog&quot; style=&quot;position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; z-index: 1000; min-width: 300px;&quot; x-show=&quot;modalOpen&quot;>
+#>     <div class=&quot;modal-header&quot;>
+#>       <h2 style=&quot;margin: 0 0 15px 0;&quot;>About Our Product</h2>
+#>       <button style=&quot;position: absolute; top: 10px; right: 10px; border: none; background: none; font-size: 24px; cursor: pointer;&quot; @click=&quot;modalOpen = false&quot;>x</button>
+#>     </div>
+#>     <div class=&quot;modal-body&quot; style=&quot;margin-bottom: 15px;&quot;>
+#>       <div style=&quot;line-height: 1.6;&quot;>
+#>         <p>Combines R and web technologies.</p>
+#>         <h3>Features:</h3>
+#>         <ul>
+#>           <li>R interface to Alpine.js</li>
+#>           <li>Type conversion</li>
+#>           <li>Reactive bindings</li>
+#>         </ul>
+#>         <p>
+#>           Built with 
+#>           <a href=&quot;https://alpinejs.dev/&quot; target=&quot;_blank&quot;>Alpine.js</a>
+#>            and 
+#>           <a href=&quot;https://rstudio.github.io/htmltools/&quot; target=&quot;_blank&quot;>htmltools</a>
+#>         </p>
+#>       </div>
+#>     </div>
+#>     <div class=&quot;modal-footer&quot; style=&quot;display: flex; gap: 10px; justify-content: flex-end;&quot;>
+#>       <button class=&quot;btn btn-secondary&quot; @click=&quot;modalOpen = false&quot;>Got it!</button>
+#>     </div>
+#>   </div>
+#> </div>
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div style=&quot;line-height: 1.6;&quot;>
+#>   <p>Combines R and web technologies.</p>
+#>   <h3>Features:</h3>
+#>   <ul>
+#>     <li>R interface to Alpine.js</li>
+#>     <li>Type conversion</li>
+#>     <li>Reactive bindings</li>
+#>   </ul>
+#>   <p>
+#>     Built with 
+#>     <a href=&quot;https://alpinejs.dev/&quot; target=&quot;_blank&quot;>Alpine.js</a>
+#>      and 
+#>     <a href=&quot;https://rstudio.github.io/htmltools/&quot; target=&quot;_blank&quot;>htmltools</a>
+#>   </p>
+#> </div>
+#> ```
+</code></pre>
+<h3 id="sec:modal-without-trigger-button">Modal Without Trigger Button</h3>
+<p>For programmatic control (e.g., triggered after a server action):</p>
+<pre><code class="language-r"># Modal without automatic trigger
+modal_component <- alpine_modal(
+  trigger_label = NULL,  # No button
+  title = &quot;Processing...&quot;,
+  content = &quot;Your request is being processed. Please wait.&quot;,
+  backdrop = FALSE  # No backdrop for a lighter feel
+)
+
+# Would be shown via JavaScript:
+# modalOpen = true;
+</code></pre>
+<h3 id="sec:customizing-modal-appearance">Customizing Modal Appearance</h3>
+<p>The modal renders with basic inline styles. To customize, add CSS:</p>
+<pre><code class="language-css">/* Minimal custom modal styling */
+.modal-dialog {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.modal-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 10px;
+}
+
+.modal-footer {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 15px;
+}
+</code></pre>
+<h2 id="sec:transitions-x-transition">Transitions (x-transition)</h2>
+<p><code>alpine_transition()</code> adds enter/leave animations to any element controlled by
+<code>alpine_show()</code>. Two modes are available: a built-in transition helper (fade + scale)
+and CSS class mode for full control with utility frameworks like Tailwind.</p>
+<h3 id="sec:built-in-transition-helper">Built-in Transition Helper</h3>
+<pre><code class="language-r"># Default fade + scale transition
+alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;button&quot;, &quot;Toggle&quot;,
+    alpine_attr(`@click` = &quot;open = !open&quot;)
+  ),
+  alpine_tag(&quot;div&quot;,
+    style = &quot;padding: 10px; background: #e8f4fd; margin-top: 8px;&quot;,
+    &quot;This content fades in and out.&quot;
+  ) |>
+    alpine_show(&quot;open&quot;) |>
+    alpine_transition()
+) |>
+  alpine_data(open = FALSE)
+#> <div x-data=&quot;{&amp;quot;open&amp;quot;:false}&quot;>
+#>   <button @click=&quot;open = !open&quot;>Toggle</button>
+#>   <div style=&quot;padding: 10px; background: #e8f4fd; margin-top: 8px;&quot; x-show=&quot;open&quot; x-transition=&quot;&quot;>This content fades in and out.</div>
+#> </div>
+</code></pre>
+<h3 id="sec:custom-duration-and-opacity-only">Custom Duration and Opacity Only</h3>
+<pre><code class="language-r"># Opacity-only fade, 400ms
+alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;button&quot;, &quot;Fade&quot;,
+    alpine_attr(`@click` = &quot;visible = !visible&quot;)
+  ),
+  alpine_tag(&quot;p&quot;, &quot;Fades smoothly with no scale effect.&quot;) |>
+    alpine_show(&quot;visible&quot;) |>
+    alpine_transition(.opacity = TRUE, .duration = 400)
+) |>
+  alpine_data(visible = TRUE)
+#> <div x-data=&quot;{&amp;quot;visible&amp;quot;:true}&quot;>
+#>   <button @click=&quot;visible = !visible&quot;>Fade</button>
+#>   <p x-show=&quot;visible&quot; x-transition.opacity.duration.400ms=&quot;&quot;>Fades smoothly with no scale effect.</p>
+#> </div>
+</code></pre>
+<h3 id="sec:scale-transition-with-custom-origin">Scale Transition with Custom Origin</h3>
+<pre><code class="language-r"># Scale from top, 300ms
+alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;button&quot;, &quot;Open Dropdown&quot;,
+    alpine_attr(`@click` = &quot;open = !open&quot;)
+  ),
+  alpine_tag(&quot;ul&quot;,
+    style = &quot;border: 1px solid #ccc; padding: 8px;&quot;,
+    alpine_tag(&quot;li&quot;, &quot;Option A&quot;),
+    alpine_tag(&quot;li&quot;, &quot;Option B&quot;),
+    alpine_tag(&quot;li&quot;, &quot;Option C&quot;)
+  ) |>
+    alpine_show(&quot;open&quot;) |>
+    alpine_transition(.scale = TRUE, .scale_value = 90, .origin = &quot;top&quot;, .duration = 200)
+) |>
+  alpine_data(open = FALSE)
+#> <div x-data=&quot;{&amp;quot;open&amp;quot;:false}&quot;>
+#>   <button @click=&quot;open = !open&quot;>Open Dropdown</button>
+#>   <ul style=&quot;border: 1px solid #ccc; padding: 8px;&quot; x-show=&quot;open&quot; x-transition.scale.90.origin.top.duration.200ms=&quot;&quot;>
+#>     <li>Option A</li>
+#>     <li>Option B</li>
+#>     <li>Option C</li>
+#>   </ul>
+#> </div>
+</code></pre>
+<h3 id="sec:css-class-mode-tailwind-style">CSS Class Mode (Tailwind-style)</h3>
+<p>For full control over transition phases, provide CSS class strings for each phase.
+This matches how Tailwind CSS transitions are structured:</p>
+<pre><code class="language-r"># CSS class mode -- attach separate x-transition:phase=&quot;classes&quot; attributes
+alpine_tag(&quot;div&quot;, &quot;Slides in&quot;) |>
+  alpine_show(&quot;open&quot;) |>
+  alpine_transition(
+    .enter       = &quot;transition ease-out duration-300&quot;,
+    .enter_start = &quot;opacity-0 translate-x-4&quot;,
+    .enter_end   = &quot;opacity-100 translate-x-0&quot;,
+    .leave       = &quot;transition ease-in duration-200&quot;,
+    .leave_start = &quot;opacity-100 translate-x-0&quot;,
+    .leave_end   = &quot;opacity-0 translate-x-4&quot;
+  )
+</code></pre>
+<p>Note: CSS class mode requires the CSS classes to be defined in your stylesheet
+(e.g., via Tailwind CSS or custom classes). The helper mode works with no extra CSS.</p>
+<h2 id="sec:tabs-component">Tabs Component</h2>
+<h3 id="sec:basic-tabs">Basic Tabs</h3>
+<pre><code class="language-r">alpine_tabs(
+  tabs = list(
+    list(label = &quot;Overview&quot;, content = &quot;This is the overview tab&quot;),
+    list(label = &quot;Details&quot;, content = &quot;Detailed information goes here&quot;),
+    list(label = &quot;Contact&quot;, content = &quot;Contact us for more information&quot;)
+  )
+)
+#> <div class=&quot;tabs-container&quot; x-data=&quot;{&amp;quot;activeTab&amp;quot;:0}&quot;>
+#>   <div class=&quot;tabs-list&quot; style=&quot;display: flex; gap: 10px; border-bottom: 1px solid #ccc; margin-bottom: 15px;&quot;>
+#>     <button class=&quot;tab-button&quot; @click=&quot;activeTab = 0&quot; x-bind:class=&quot;activeTab === 0 ? &amp;#39;tab-button active&amp;#39; : &amp;#39;tab-button&amp;#39;&quot;>Overview</button>
+#>     <button class=&quot;tab-button&quot; @click=&quot;activeTab = 1&quot; x-bind:class=&quot;activeTab === 1 ? &amp;#39;tab-button active&amp;#39; : &amp;#39;tab-button&amp;#39;&quot;>Details</button>
+#>     <button class=&quot;tab-button&quot; @click=&quot;activeTab = 2&quot; x-bind:class=&quot;activeTab === 2 ? &amp;#39;tab-button active&amp;#39; : &amp;#39;tab-button&amp;#39;&quot;>Contact</button>
+#>   </div>
+#>   <div class=&quot;tabs-content&quot;>
+#>     <div class=&quot;tab-panel&quot; x-show=&quot;activeTab === 0&quot;>This is the overview tab</div>
+#>     <div class=&quot;tab-panel&quot; x-show=&quot;activeTab === 1&quot;>Detailed information goes here</div>
+#>     <div class=&quot;tab-panel&quot; x-show=&quot;activeTab === 2&quot;>Contact us for more information</div>
+#>   </div>
+#> </div>
+</code></pre>
+<h3 id="sec:tabs-with-rich-content">Tabs with Rich Content</h3>
+<pre><code class="language-r"># Tabs with complex content
+alpine_tabs(
+  tabs = list(
+    list(
+      label = &quot;Home&quot;,
+      content = result <- alpine_tag(&quot;div&quot;,
+        alpine_tag(&quot;h3&quot;, &quot;Welcome&quot;),
+        alpine_tag(&quot;p&quot;, &quot;This is the home tab content.&quot;),
+        alpine_tag(&quot;button&quot;, &quot;Learn More&quot;,
+          alpine_attr(`@click` = &quot;alert('More info')&quot;)
+        )
+      )
+    ),
+    list(
+      label = &quot;Documentation&quot;,
+      content = alpine_tag(&quot;div&quot;,
+        alpine_tag(&quot;h3&quot;, &quot;Docs&quot;),
+        alpine_tag(&quot;p&quot;, &quot;Read the documentation here.&quot;),
+        alpine_tag(&quot;ul&quot;,
+          alpine_tag(&quot;li&quot;, &quot;Installation&quot;),
+          alpine_tag(&quot;li&quot;, &quot;Getting started&quot;),
+          alpine_tag(&quot;li&quot;, &quot;API reference&quot;)
+        )
+      )
+    ),
+    list(
+      label = &quot;Examples&quot;,
+      content = alpine_tag(&quot;div&quot;,
+        alpine_tag(&quot;h3&quot;, &quot;Code Examples&quot;),
+        alpine_tag(&quot;p&quot;, &quot;View working examples below.&quot;),
+        alpine_tag(&quot;pre&quot;,
+          alpine_tag(&quot;code&quot;, &quot;# Example R code\nalpine_tag(\&quot;div\&quot;) |> alpine_data(x = 1)&quot;)
+        )
+      )
+    )
+  ),
+  class = &quot;custom-tabs&quot;,
+  tab_class = &quot;custom-tab-button&quot;,
+  content_class = &quot;custom-tab-panel&quot;
+)
+#> <div class=&quot;tabs-container custom-tabs&quot; x-data=&quot;{&amp;quot;activeTab&amp;quot;:0}&quot;>
+#>   <div class=&quot;tabs-list&quot; style=&quot;display: flex; gap: 10px; border-bottom: 1px solid #ccc; margin-bottom: 15px;&quot;>
+#>     <button class=&quot;tab-button&quot; @click=&quot;activeTab = 0&quot; x-bind:class=&quot;activeTab === 0 ? &amp;#39;tab-button active&amp;#39; : &amp;#39;tab-button&amp;#39;&quot;>Home</button>
+#>     <button class=&quot;tab-button&quot; @click=&quot;activeTab = 1&quot; x-bind:class=&quot;activeTab === 1 ? &amp;#39;tab-button active&amp;#39; : &amp;#39;tab-button&amp;#39;&quot;>Documentation</button>
+#>     <button class=&quot;tab-button&quot; @click=&quot;activeTab = 2&quot; x-bind:class=&quot;activeTab === 2 ? &amp;#39;tab-button active&amp;#39; : &amp;#39;tab-button&amp;#39;&quot;>Examples</button>
+#>   </div>
+#>   <div class=&quot;tabs-content&quot;>
+#>     <div class=&quot;tab-panel custom-tab-panel&quot; x-show=&quot;activeTab === 0&quot;>
+#>       <div>
+#>         <h3>Welcome</h3>
+#>         <p>This is the home tab content.</p>
+#>         <button @click=&quot;alert(&amp;#39;More info&amp;#39;)&quot;>Learn More</button>
+#>       </div>
+#>     </div>
+#>     <div class=&quot;tab-panel custom-tab-panel&quot; x-show=&quot;activeTab === 1&quot;>
+#>       <div>
+#>         <h3>Docs</h3>
+#>         <p>Read the documentation here.</p>
+#>         <ul>
+#>           <li>Installation</li>
+#>           <li>Getting started</li>
+#>           <li>API reference</li>
+#>         </ul>
+#>       </div>
+#>     </div>
+#>     <div class=&quot;tab-panel custom-tab-panel&quot; x-show=&quot;activeTab === 2&quot;>
+#>       <div>
+#>         <h3>Code Examples</h3>
+#>         <p>View working examples below.</p>
+#>         <pre>
+#>           <code># Example R code
+#> alpine_tag(&quot;div&quot;) |&amp;gt; alpine_data(x = 1)</code>
+#>         </pre>
+#>       </div>
+#>     </div>
+#>   </div>
+#> </div>
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div>
+#>   <h3>Welcome</h3>
+#>   <p>This is the home tab content.</p>
+#>   <button @click=&quot;alert(&amp;#39;More info&amp;#39;)&quot;>Learn More</button>
+#> </div>
+#> ```
+</code></pre>
+<h3 id="sec:how-tabs-work">How Tabs Work</h3>
+<p>The tabs component uses:</p>
+<pre><code class="language-javascript">// Generated x-data state
+{
+  activeTab: 0  // 0-indexed active tab
+}
+</code></pre>
+<p>Each tab button has <code>@click=&quot;activeTab = index&quot;</code> and each content panel has <code>x-show=&quot;activeTab === index&quot;</code>.</p>
+<p>Tab buttons get dynamic class binding via <code>x-bind:class</code> to highlight the active tab.</p>
+<h2 id="sec:combining-components">Combining Components</h2>
+<p>Nest and combine components together:</p>
+<pre><code class="language-r"># Tabs containing accordions
+page <- result <- alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;h1&quot;, &quot;Documentation&quot;),
+  
+  alpine_tabs(
+    tabs = list(
+      list(
+        label = &quot;Getting Started&quot;,
+        content = alpine_accordion(
+          items = list(
+            list(title = &quot;Installation&quot;, content = &quot;Install alpinejs from GitHub...&quot;),
+            list(title = &quot;First Steps&quot;, content = &quot;Start by loading the library...&quot;)
+          )
+        )
+      ),
+      list(
+        label = &quot;API Reference&quot;,
+        content = alpine_accordion(
+          items = list(
+            list(title = &quot;alpine_data()&quot;, content = &quot;Initialize component state...&quot;),
+            list(title = &quot;alpine_on()&quot;, content = &quot;Attach event listeners...&quot;)
+          )
+        )
+      )
+    )
+  )
+)
+
+page
+#> <div>
+#>   <h1>Documentation</h1>
+#>   <div class=&quot;tabs-container&quot; x-data=&quot;{&amp;quot;activeTab&amp;quot;:0}&quot;>
+#>     <div class=&quot;tabs-list&quot; style=&quot;display: flex; gap: 10px; border-bottom: 1px solid #ccc; margin-bottom: 15px;&quot;>
+#>       <button class=&quot;tab-button&quot; @click=&quot;activeTab = 0&quot; x-bind:class=&quot;activeTab === 0 ? &amp;#39;tab-button active&amp;#39; : &amp;#39;tab-button&amp;#39;&quot;>Getting Started</button>
+#>       <button class=&quot;tab-button&quot; @click=&quot;activeTab = 1&quot; x-bind:class=&quot;activeTab === 1 ? &amp;#39;tab-button active&amp;#39; : &amp;#39;tab-button&amp;#39;&quot;>API Reference</button>
+#>     </div>
+#>     <div class=&quot;tabs-content&quot;>
+#>       <div class=&quot;tab-panel&quot; x-show=&quot;activeTab === 0&quot;>
+#>         <div x-data=&quot;{&amp;quot;collapsed&amp;quot;:[true,true],&amp;quot;togglePanel&amp;quot;:function(index) { this.$nextTick(() =&amp;gt; { this.collapsed[index] = !this.collapsed[index]; }); }}&quot;>
+#>           <div class=&quot;accordion-item&quot;>
+#>             <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(0)&quot;>Installation</button>
+#>             <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[0]&quot;>Install alpinejs from GitHub...</div>
+#>           </div>
+#>           <div class=&quot;accordion-item&quot;>
+#>             <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(1)&quot;>First Steps</button>
+#>             <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[1]&quot;>Start by loading the library...</div>
+#>           </div>
+#>         </div>
+#>       </div>
+#>       <div class=&quot;tab-panel&quot; x-show=&quot;activeTab === 1&quot;>
+#>         <div x-data=&quot;{&amp;quot;collapsed&amp;quot;:[true,true],&amp;quot;togglePanel&amp;quot;:function(index) { this.$nextTick(() =&amp;gt; { this.collapsed[index] = !this.collapsed[index]; }); }}&quot;>
+#>           <div class=&quot;accordion-item&quot;>
+#>             <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(0)&quot;>alpine_data()</button>
+#>             <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[0]&quot;>Initialize component state...</div>
+#>           </div>
+#>           <div class=&quot;accordion-item&quot;>
+#>             <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(1)&quot;>alpine_on()</button>
+#>             <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[1]&quot;>Attach event listeners...</div>
+#>           </div>
+#>         </div>
+#>       </div>
+#>     </div>
+#>   </div>
+#> </div>
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div>
+#>   <h1>Documentation</h1>
+#>   <div class=&quot;tabs-container&quot; x-data=&quot;{&amp;quot;activeTab&amp;quot;:0}&quot;>
+#>     <div class=&quot;tabs-list&quot; style=&quot;display: flex; gap: 10px; border-bottom: 1px solid #ccc; margin-bottom: 15px;&quot;>
+#>       <button class=&quot;tab-button&quot; @click=&quot;activeTab = 0&quot; x-bind:class=&quot;activeTab === 0 ? &amp;#39;tab-button active&amp;#39; : &amp;#39;tab-button&amp;#39;&quot;>Getting Started</button>
+#>       <button class=&quot;tab-button&quot; @click=&quot;activeTab = 1&quot; x-bind:class=&quot;activeTab === 1 ? &amp;#39;tab-button active&amp;#39; : &amp;#39;tab-button&amp;#39;&quot;>API Reference</button>
+#>     </div>
+#>     <div class=&quot;tabs-content&quot;>
+#>       <div class=&quot;tab-panel&quot; x-show=&quot;activeTab === 0&quot;>
+#>         <div x-data=&quot;{&amp;quot;collapsed&amp;quot;:[true,true],&amp;quot;togglePanel&amp;quot;:function(index) { this.$nextTick(() =&amp;gt; { this.collapsed[index] = !this.collapsed[index]; }); }}&quot;>
+#>           <div class=&quot;accordion-item&quot;>
+#>             <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(0)&quot;>Installation</button>
+#>             <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[0]&quot;>Install alpinejs from GitHub...</div>
+#>           </div>
+#>           <div class=&quot;accordion-item&quot;>
+#>             <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(1)&quot;>First Steps</button>
+#>             <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[1]&quot;>Start by loading the library...</div>
+#>           </div>
+#>         </div>
+#>       </div>
+#>       <div class=&quot;tab-panel&quot; x-show=&quot;activeTab === 1&quot;>
+#>         <div x-data=&quot;{&amp;quot;collapsed&amp;quot;:[true,true],&amp;quot;togglePanel&amp;quot;:function(index) { this.$nextTick(() =&amp;gt; { this.collapsed[index] = !this.collapsed[index]; }); }}&quot;>
+#>           <div class=&quot;accordion-item&quot;>
+#>             <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(0)&quot;>alpine_data()</button>
+#>             <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[0]&quot;>Initialize component state...</div>
+#>           </div>
+#>           <div class=&quot;accordion-item&quot;>
+#>             <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(1)&quot;>alpine_on()</button>
+#>             <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[1]&quot;>Attach event listeners...</div>
+#>           </div>
+#>         </div>
+#>       </div>
+#>     </div>
+#>   </div>
+#> </div>
+#> ```
+</code></pre>
+<h2 id="sec:component-composition-pattern">Component Composition Pattern</h2>
+<p>Create reusable component functions:</p>
+<pre><code class="language-r"># Reusable confirmation dialog
+confirm_dialog <- function(message, trigger_label = &quot;Confirm&quot;) {
+  alpine_modal(
+    trigger_label = trigger_label,
+    title = &quot;Confirmation&quot;,
+    content = message,
+    close_label = &quot;Cancel&quot;
+  )
+}
+
+# Use it multiple times with distinct button labels
+result <- alpine_tag(&quot;div&quot;,
+  confirm_dialog(&quot;Delete this item?&quot;, &quot;Delete&quot;),
+  confirm_dialog(&quot;Log out?&quot;, &quot;Log Out&quot;)
+)
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div>
+#>   <div x-data=&quot;{&amp;quot;modalOpen&amp;quot;:false}&quot;>
+#>     <button class=&quot;btn btn-primary&quot; @click=&quot;modalOpen = true&quot;>Delete</button>
+#>     <div class=&quot;modal-backdrop&quot; style=&quot;position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;&quot; x-show=&quot;modalOpen&quot; @click=&quot;modalOpen = false&quot;></div>
+#>     <div class=&quot;modal-dialog&quot; style=&quot;position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; z-index: 1000; min-width: 300px;&quot; x-show=&quot;modalOpen&quot;>
+#>       <div class=&quot;modal-header&quot;>
+#>         <h2 style=&quot;margin: 0 0 15px 0;&quot;>Confirmation</h2>
+#>         <button style=&quot;position: absolute; top: 10px; right: 10px; border: none; background: none; font-size: 24px; cursor: pointer;&quot; @click=&quot;modalOpen = false&quot;>x</button>
+#>       </div>
+#>       <div class=&quot;modal-body&quot; style=&quot;margin-bottom: 15px;&quot;>Delete this item?</div>
+#>       <div class=&quot;modal-footer&quot; style=&quot;display: flex; gap: 10px; justify-content: flex-end;&quot;>
+#>         <button class=&quot;btn btn-secondary&quot; @click=&quot;modalOpen = false&quot;>Cancel</button>
+#>       </div>
+#>     </div>
+#>   </div>
+#>   <div x-data=&quot;{&amp;quot;modalOpen&amp;quot;:false}&quot;>
+#>     <button class=&quot;btn btn-primary&quot; @click=&quot;modalOpen = true&quot;>Log Out</button>
+#>     <div class=&quot;modal-backdrop&quot; style=&quot;position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;&quot; x-show=&quot;modalOpen&quot; @click=&quot;modalOpen = false&quot;></div>
+#>     <div class=&quot;modal-dialog&quot; style=&quot;position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; z-index: 1000; min-width: 300px;&quot; x-show=&quot;modalOpen&quot;>
+#>       <div class=&quot;modal-header&quot;>
+#>         <h2 style=&quot;margin: 0 0 15px 0;&quot;>Confirmation</h2>
+#>         <button style=&quot;position: absolute; top: 10px; right: 10px; border: none; background: none; font-size: 24px; cursor: pointer;&quot; @click=&quot;modalOpen = false&quot;>x</button>
+#>       </div>
+#>       <div class=&quot;modal-body&quot; style=&quot;margin-bottom: 15px;&quot;>Log out?</div>
+#>       <div class=&quot;modal-footer&quot; style=&quot;display: flex; gap: 10px; justify-content: flex-end;&quot;>
+#>         <button class=&quot;btn btn-secondary&quot; @click=&quot;modalOpen = false&quot;>Cancel</button>
+#>       </div>
+#>     </div>
+#>   </div>
+#> </div>
+#> ```
+</code></pre>
+<h2 id="sec:advanced-data-driven-components">Advanced: Data-Driven Components</h2>
+<p>Create components from data:</p>
+<pre><code class="language-r"># Build an accordion from a data frame
+faq_data <- data.frame(
+  question = c(&quot;What is R?&quot;, &quot;What is Alpine.js?&quot;, &quot;What is alpinejs?&quot;),
+  answer = c(
+    &quot;R is a language for statistical computing...&quot;,
+    &quot;Alpine.js is a lightweight JavaScript framework...&quot;,
+    &quot;alpinejs brings Alpine.js to R...&quot;
+  ),
+  stringsAsFactors = FALSE
+)
+
+# Convert to list format expected by alpine_accordion
+items <- lapply(seq_len(nrow(faq_data)), function(i) {
+  list(
+    title = faq_data$question[i],
+    content = faq_data$answer[i]
+  )
+})
+
+alpine_accordion(items)
+#> <div x-data=&quot;{&amp;quot;collapsed&amp;quot;:[true,true,true],&amp;quot;togglePanel&amp;quot;:function(index) { this.$nextTick(() =&amp;gt; { this.collapsed[index] = !this.collapsed[index]; }); }}&quot;>
+#>   <div class=&quot;accordion-item&quot;>
+#>     <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(0)&quot;>What is R?</button>
+#>     <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[0]&quot;>R is a language for statistical computing...</div>
+#>   </div>
+#>   <div class=&quot;accordion-item&quot;>
+#>     <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(1)&quot;>What is Alpine.js?</button>
+#>     <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[1]&quot;>Alpine.js is a lightweight JavaScript framework...</div>
+#>   </div>
+#>   <div class=&quot;accordion-item&quot;>
+#>     <button class=&quot;accordion-header&quot; @click=&quot;togglePanel(2)&quot;>What is alpinejs?</button>
+#>     <div class=&quot;accordion-content&quot; x-show=&quot;!collapsed[2]&quot;>alpinejs brings Alpine.js to R...</div>
+#>   </div>
+#> </div>
+</code></pre>
+<h2 id="sec:styling-best-practices">Styling Best Practices</h2>
+<h3 id="sec:with-tailwind-css">With Tailwind CSS</h3>
+<pre><code class="language-r"># Accordion with Tailwind classes
+alpine_accordion(
+  items = list(
+    list(title = &quot;Item 1&quot;, content = &quot;Content 1&quot;),
+    list(title = &quot;Item 2&quot;, content = &quot;Content 2&quot;)
+  ),
+  class = &quot;divide-y divide-gray-200 border border-gray-200 rounded-lg&quot;,
+  title_class = &quot;px-4 py-3 font-semibold hover:bg-gray-50 cursor-pointer&quot;,
+  content_class = &quot;px-4 py-2 bg-gray-50&quot;
+)
+
+cat(&quot;```html\n&quot;, as.character(.), &quot;\n```&quot;, sep=&quot;&quot;)
+
+</code></pre>
+<h3 id="sec:with-bootstrap">With Bootstrap</h3>
+<pre><code class="language-r"># Modal with Bootstrap styling
+alpine_modal(
+  trigger_label = &quot;Open&quot;,
+  title = &quot;Bootstrap Modal&quot;,
+  content = &quot;Content styled with Bootstrap classes&quot;,
+  class = &quot;modal-lg&quot;
+)
+
+cat(&quot;```html\n&quot;, as.character(.), &quot;\n```&quot;, sep=&quot;&quot;)
+
+</code></pre>
+<h2 id="sec:performance-notes">Performance Notes</h2>
+<ul>
+<li><strong>Lightweight</strong>: All components are pure Alpine.js–no heavy dependencies</li>
+<li><strong>No Server Calls</strong>: Component state is managed client-side</li>
+<li><strong>Fast Rendering</strong>: HTML is generated once; only state changes are reactive</li>
+<li><strong>Suitable for</strong>: 100s to 1000s of items; for larger datasets, consider server-side pagination</li>
+</ul>
+<h2 id="sec:accessibility">Accessibility</h2>
+<p>alpinejs components use semantic HTML. For better accessibility:</p>
+<pre><code class="language-r"># Add ARIA labels
+alpine_accordion(
+  items = list(
+    list(title = &quot;Section 1&quot;, content = &quot;Content 1&quot;)
+  ),
+  alpine_attr(`x-bind:aria-expanded` = &quot;true&quot;)  # Make dynamic for each panel
+)
+
+cat(&quot;```html\n&quot;, as.character(.), &quot;\n```&quot;, sep=&quot;&quot;)
+
+</code></pre>
+<h2 id="sec:when-to-use-pre-built-components">When to Use Pre-built Components</h2>
+<p><strong>Good for:</strong></p>
+<ul>
+<li>Modals, dialogs, confirmations</li>
+<li>Tabbed interfaces</li>
+<li>Collapsible sections/FAQs</li>
+<li>Mobile menus/dropdowns</li>
+</ul>
+<p><strong>Consider alternatives for:</strong></p>
+<ul>
+<li>Large tables (use <code>DT</code> + Shiny)</li>
+<li>Real-time data (use WebSocket + other frameworks)</li>
+<li>Complex workflows (use Shiny app)</li>
+</ul>
+<h2 id="sec:next-steps">Next Steps</h2>
+<ul>
+<li>
+<p><strong>Reactivity and Global State</strong>: See the <a href="reactivity-and-globals.qmd">Reactivity and Globals Vignette</a> for <code>$watch</code>, <code>$dispatch</code>, and <code>Alpine.store()</code></p>
+</li>
+<li>
+<p><strong>Advanced Patterns</strong>: Learn about custom components and composition</p>
+</li>
+<li>
+<p><strong>Crosstalk Integration</strong>: Filter widgets with Alpine controls</p>
+</li>
+<li>
+<p><strong>Performance Optimization</strong>: Techniques for large-scale applications</p>
+</li>
+</ul>
+<hr />
+<p>For more examples, see the <code>inst/examples/</code> directory in the alpinejs package or run examples with <code>Rscript inst/examples/01-todo-list.R</code>.</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+<nav style="margin-bottom: 1.5rem; font-size: 0.9em;">
+      <a href="../index.html" style="color: #0000ff; text-decoration: underline;">Home</a> &gt;
+      <a href="../guides/index.html" style="color: #0000ff; text-decoration: underline;">Guides</a> &gt;
+      <span style="color: #666;">Components & Patterns</span>
+      </nav>
+  </main>
+
+  <footer>
+    <p>
+      alpinejs &mdash; R interface for Alpine.js<br>
+      <a href="https://github.com/brownag/alpinejs">View on GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

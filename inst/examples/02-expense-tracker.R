@@ -1,0 +1,215 @@
+#' Expense Tracker
+#'
+#' Track income and expenses with categories and running totals.
+#' Demonstrates form validation, modifiers, and dynamic calculations.
+#'
+#' Run: Rscript inst/examples/02-expense-tracker.R
+
+library(alpinejs)
+library(htmltools)
+
+save_output <- interactive()
+
+app <- alpine_tag("div",
+  class = "expense-container",
+  style = "max-width: 700px; margin: 40px auto; font-family: sans-serif;",
+
+  # Header
+  alpine_tag("h1","Expense Tracker", style = "color: #333; margin-bottom: 10px;"),
+  alpine_tag("p","Track income and expenses with categories", style = "color: #666; margin-bottom: 20px;"),
+
+  # Summary cards
+ 	alpine_tag("div",
+    style = "display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px;",
+    
+    alpine_stat_card(
+      label = "Income",
+      value_expr = "'$' + totalIncome().toFixed(2)",
+      bg_color = "#d4edda",
+      text_color = "#28a745"
+    ),
+
+    alpine_stat_card(
+      label = "Expenses",
+      value_expr = "'$' + totalExpense().toFixed(2)",
+      bg_color = "#f8d7da",
+      text_color = "#dc3545"
+    ),
+
+    alpine_stat_card(
+      label = "Balance",
+      value_expr = "'$' + balance().toFixed(2)",
+      bg_color = "#cfe2ff",
+      text_color = "#0d6efd"
+    )
+  ),
+
+  # Input form
+ 	alpine_tag("div",
+    style = "background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;",
+
+    alpine_tag("h3","Add Transaction", style = "margin-top: 0; color: #333;"),
+
+    # Type selection
+   	alpine_tag("div",
+      style = "display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;",
+      alpine_tag("label",
+        alpine_tag("input",type = "radio", value = "income") |>
+          alpine_model("transactionType"),
+        "Income",
+        style = "cursor: pointer;"
+      ),
+      alpine_tag("label",
+        alpine_tag("input",type = "radio", value = "expense") |>
+          alpine_model("transactionType"),
+        "Expense",
+        style = "cursor: pointer;"
+      )
+    ),
+
+    # Amount and category
+   	alpine_tag("div",
+      style = "display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;",
+
+      # Amount
+     	alpine_tag("div",
+        alpine_tag("label","Amount", style = "display: block; margin-bottom: 5px; color: #666; font-size: 14px;"),
+        alpine_tag("input",
+          type = "number",
+          placeholder = "0.00",
+          step = "0.01",
+          min = "0",
+          style = "width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+        ) |>
+          alpine_model("newAmount", .number = TRUE)
+      ),
+
+      # Category
+     	alpine_tag("div",
+        alpine_tag("label","Category", style = "display: block; margin-bottom: 5px; color: #666; font-size: 14px;"),
+        alpine_tag("select",
+          alpine_tag("option",value = "salary", "Salary"),
+          alpine_tag("option",value = "bonus", "Bonus"),
+          alpine_tag("option",value = "food", "Food", selected = NA),
+          alpine_tag("option",value = "transport", "Transport"),
+          alpine_tag("option",value = "utilities", "Utilities"),
+          alpine_tag("option",value = "entertainment", "Entertainment"),
+          alpine_tag("option",value = "other", "Other"),
+          style = "width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+        ) |>
+          alpine_model("newCategory")
+      )
+    ),
+
+    # Description
+   	alpine_tag("div",
+      style = "margin-bottom: 15px;",
+      alpine_tag("label","Description", style = "display: block; margin-bottom: 5px; color: #666; font-size: 14px;"),
+      alpine_tag("input",
+        type = "text",
+        placeholder = "Optional notes",
+        style = "width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+      ) |>
+        alpine_model("newDescription", .trim = TRUE)
+    ),
+
+    # Submit button
+    alpine_tag("button",
+      "Add Transaction",
+      style = "background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold;"
+    ) |>
+      alpine_on("click", "addTransaction()") |>
+      alpine_bind("disabled", "newAmount <= 0 || !newCategory")
+  ),
+
+  # Transaction list
+  alpine_tag("div",
+    alpine_tag("h3","Transactions", style = "color: #333; margin-bottom: 15px;"),
+    alpine_for(
+      alpine_tag("div",
+        style = "display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #eee; margin-bottom: 8px; border-radius: 4px; background: white;",
+
+        # Transaction details
+        alpine_tag("div",
+          style = "flex: 1;",
+          alpine_tag("div",style = "font-weight: 500; color: #333;") |>
+            alpine_text("transaction.description || transaction.category"),
+          alpine_tag("div",style = "font-size: 12px; color: #999;") |>
+            alpine_text("transaction.category")
+        ),
+
+        # Amount
+        alpine_tag("div",) |>
+          alpine_text("'$' + transaction.amount.toFixed(2)") |>
+          alpine_bind("style", "transaction.type === 'income' ? 'color: #28a745; font-weight: bold;' : 'color: #dc3545; font-weight: bold;'"),
+
+        # Delete
+        alpine_tag("button","×", style = "background: none; border: none; color: #dc3545; cursor: pointer; font-size: 20px; padding: 0;") |>
+          alpine_on("click", "deleteTransaction(idx)")
+      ),
+      "(transaction, idx) in transactions",
+      key = "idx"
+    )
+  )
+) |>
+  alpine_data(
+    transactionType = "expense",
+    newAmount = 0,
+    newCategory = "food",
+    newDescription = "",
+    transactions = alpine_array(),
+
+    # Computed properties
+    totalIncome = htmlwidgets::JS("
+      function() {
+        return this.transactions
+          .filter(t => t.type === 'income')
+          .reduce((sum, t) => sum + t.amount, 0);
+      }
+    "),
+
+    totalExpense = htmlwidgets::JS("
+      function() {
+        return this.transactions
+          .filter(t => t.type === 'expense')
+          .reduce((sum, t) => sum + t.amount, 0);
+      }
+    "),
+
+    balance = htmlwidgets::JS("
+      function() {
+        return this.totalIncome() - this.totalExpense();
+      }
+    "),
+
+    # Methods
+    addTransaction = htmlwidgets::JS("
+      function() {
+        if (this.newAmount <= 0 || !this.newCategory) return;
+        const transaction = {
+          type: this.transactionType,
+          amount: parseFloat(this.newAmount),
+          category: this.newCategory,
+          description: this.newDescription,
+          date: new Date().toLocaleDateString()
+        };
+        this.transactions.push(transaction);
+        this.newAmount = 0;
+        this.newCategory = 'food';
+        this.newDescription = '';
+      }
+    "),
+
+    deleteTransaction = htmlwidgets::JS("
+      function(idx) {
+        this.transactions.splice(idx, 1);
+      }
+    ")
+  ) |>
+  htmltools::browsable()
+
+# Save to file if running interactively
+if (save_output) {
+  htmltools::save_html(app, file = "02-expense-tracker.html")
+}
+cat("Saved to:", output_file, "\n")

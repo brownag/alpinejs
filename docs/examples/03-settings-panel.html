@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings Panel | alpinejs</title>
+  <!-- Load Crosstalk for cross-widget reactivity -->
+  <script src="https://cdn.jsdelivr.net/npm/crosstalk@1.2.0/dist/crosstalk.min.js"></script>
+  <!-- Load Alpine.js for interactive components -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+  <style>
+    /* 1990s Web 1.0 aesthetic - authentic retro feel */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Verdana, Geneva, sans-serif;
+      line-height: 1.6;
+      color: #000;
+      background: #c0c0c0;
+      font-size: 14px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: #dfdfdf;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #dfdfdf;
+      padding-top: 0.8rem;
+    }
+
+    nav a {
+      color: #0000ff;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    nav a:visited {
+      color: #800080;
+    }
+
+    nav a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Main content */
+    main {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      padding: 1rem;
+      background: #fff;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      min-height: calc(100vh - 250px);
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1.5rem 0 0.5rem;
+      font-weight: bold;
+      line-height: 1.3;
+    }
+
+    h1 { 
+      font-size: 2rem;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+      margin-top: 0;
+      color: #0000ff;
+    }
+
+    h2 { 
+      font-size: 1.4rem;
+      color: #0000cc;
+      border-bottom: 1px solid #000;
+    }
+
+    h3 { font-size: 1.1rem; color: #000080; }
+    h4 { font-size: 1rem; color: #000; font-weight: bold; }
+
+    /* Paragraphs & text */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #800080;
+    }
+
+    a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Inline code */
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+      color: #000;
+      border: 1px solid #ccc;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #f0f0f0;
+      border: 1px solid #999;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.4;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #000;
+      border: none;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid #999;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #333;
+      font-style: italic;
+      background: #f5f5f5;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #999;
+      margin: 1.5rem 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      border: 1px solid #999;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border: 1px solid #999;
+    }
+
+    th {
+      background: #c0c0c0;
+      font-weight: bold;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #999;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      color: #000;
+      font-size: 0.85rem;
+      margin: 2rem 1rem 0;
+      background: #dfdfdf;
+    }
+
+    footer a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    footer a:visited {
+      color: #800080;
+    }
+
+    /* Horizontal rule dividers */
+    .divider {
+      border: none;
+      height: 2px;
+      background: linear-gradient(to right, #dfdfdf 0%, #000 50%, #dfdfdf 100%);
+      margin: 1.5rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      main {
+        padding: 0.8rem;
+      }
+
+      header {
+        padding: 0.8rem;
+      }
+
+      nav {
+        gap: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html" style="color: #000; text-decoration: none;">alpinejs</a></h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../guides/">Guides</a>
+      <a href="../examples/">Examples</a>
+      <a href="../reference/">Reference</a>
+      <a href="https://github.com/brownag/alpinejs" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    
+<div class="frontmatter">
+<div class="title"><h1>Example: Settings Panel</h1></div>
+</div>
+<div class="body">
+<div class="settings-container" style="max-width: 800px; margin: 40px auto; font-family: sans-serif;" x-data="{&quot;activeTab&quot;:&quot;general&quot;,&quot;status&quot;:&quot;&quot;,&quot;general&quot;:{&quot;username&quot;:&quot;john_doe&quot;,&quot;email&quot;:&quot;john@example.com&quot;,&quot;theme&quot;:&quot;light&quot;},&quot;notifications&quot;:{&quot;emailOnComment&quot;:true,&quot;emailOnFollow&quot;:true,&quot;emailOnLike&quot;:false,&quot;digestFrequency&quot;:&quot;weekly&quot;},&quot;privacy&quot;:{&quot;profilePublic&quot;:true,&quot;allowMessages&quot;:true},&quot;saveSettings&quot;:function() { localStorage.setItem(&#39;userSettings&#39;, JSON.stringify({ general: this.general, notifications: this.notifications, privacy: this.privacy })); this.status = &#39;Settings saved successfully!&#39;; setTimeout(() => { this.status = &#39;&#39;; }, 3000); },&quot;resetSettings&quot;:function() { this.general = { username: &#39;john_doe&#39;, email: &#39;john@example.com&#39;, theme: &#39;light&#39; }; this.notifications = { emailOnComment: true, emailOnFollow: true, emailOnLike: false, digestFrequency: &#39;weekly&#39; }; this.privacy = { profilePublic: true, allowMessages: true }; localStorage.removeItem(&#39;userSettings&#39;); this.status = &#39;Settings reset to defaults&#39;; setTimeout(() => { this.status = &#39;&#39;; }, 3000); },&quot;loadSettings&quot;:function() { const saved = localStorage.getItem(&#39;userSettings&#39;); if (saved) { const data = JSON.parse(saved); this.general = data.general; this.notifications = data.notifications; this.privacy = data.privacy; } },&quot;init&quot;:function() { this.loadSettings(); },&quot;downloadData&quot;:function() { alert(&#39;Your data export will be sent to: &#39; + this.general.email); },&quot;deleteAccount&quot;:function() { if (confirm(&#39;Are you sure? This cannot be undone.&#39;)) { alert(&#39;Account deletion initiated&#39;); } }}" x-init="init()">
+  <h1 id="chp:settings" style="color: #333; margin-bottom: 20px;">Settings</h1>
+  <div style="display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #eee;">
+    <button style="background: none; border: none; padding: 15px 20px; cursor: pointer; border-bottom: 3px solid transparent; color: #666;" @click="activeTab = &#39;general&#39;" x-bind:style="activeTab === &#39;general&#39; ? &#39;border-bottom-color: #007bff; color: #007bff; font-weight: bold;&#39; : &#39;color: #666;&#39;">General</button>
+    <button style="background: none; border: none; padding: 15px 20px; cursor: pointer; border-bottom: 3px solid transparent; color: #666;" @click="activeTab = &#39;notifications&#39;" x-bind:style="activeTab === &#39;notifications&#39; ? &#39;border-bottom-color: #007bff; color: #007bff; font-weight: bold;&#39; : &#39;color: #666;&#39;">Notifications</button>
+    <button style="background: none; border: none; padding: 15px 20px; cursor: pointer; border-bottom: 3px solid transparent; color: #666;" @click="activeTab = &#39;privacy&#39;" x-bind:style="activeTab === &#39;privacy&#39; ? &#39;border-bottom-color: #007bff; color: #007bff; font-weight: bold;&#39; : &#39;color: #666;&#39;">Privacy</button>
+  </div>
+  <div style="padding: 20px; background: #f9f9f9; border-radius: 8px;" x-show="activeTab === &#39;general&#39;">
+    <h3 id="sec:profile" style="margin-top: 0; color: #333;">Profile</h3>
+    <div style="margin-bottom: 20px;">
+      <label style="display: block; margin-bottom: 5px; color: #666;">Username</label>
+      <input type="text" style="width: 100%; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" x-model="general.username"/>
+    </div>
+    <div style="margin-bottom: 20px;">
+      <label style="display: block; margin-bottom: 5px; color: #666;">Email</label>
+      <input type="email" style="width: 100%; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" x-model="general.email"/>
+    </div>
+    <h3 id="sec:theme" style="margin-top: 30px; color: #333;">Theme</h3>
+    <div style="display: flex; gap: 20px;">
+      <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+        <input type="radio" value="light" x-model="general.theme"/>
+        Light
+      </label>
+      <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+        <input type="radio" value="dark" x-model="general.theme"/>
+        Dark
+      </label>
+    </div>
+  </div>
+  <div style="padding: 20px; background: #f9f9f9; border-radius: 8px;" x-show="activeTab === &#39;notifications&#39;">
+    <h3 id="sec:email-notifications" style="margin-top: 0; color: #333;">Email Notifications</h3>
+    <div style="margin-bottom: 15px;">
+      <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" x-model="notifications.emailOnComment"/>
+         Notify on comments
+      </label>
+      <p style="margin: 5px 0 0 28px; color: #999; font-size: 14px;">Receive an email when someone comments on your posts</p>
+    </div>
+    <div style="margin-bottom: 15px;">
+      <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" x-model="notifications.emailOnFollow"/>
+         Notify on new followers
+      </label>
+      <p style="margin: 5px 0 0 28px; color: #999; font-size: 14px;">Receive an email when someone follows you</p>
+    </div>
+    <div style="margin-bottom: 15px;">
+      <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" x-model="notifications.emailOnLike"/>
+         Notify on likes
+      </label>
+      <p style="margin: 5px 0 0 28px; color: #999; font-size: 14px;">Receive an email when someone likes your content</p>
+    </div>
+    <h3 id="sec:frequency" style="margin-top: 30px; color: #333;">Frequency</h3>
+    <div>
+      <label style="display: block; margin-bottom: 8px; color: #666;">Digest frequency</label>
+      <select style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;" x-model="notifications.digestFrequency">
+        <option value="daily">Daily digest</option>
+        <option value="weekly">Weekly digest</option>
+        <option value="never">Never</option>
+      </select>
+    </div>
+  </div>
+  <div style="padding: 20px; background: #f9f9f9; border-radius: 8px;" x-show="activeTab === &#39;privacy&#39;">
+    <h3 id="sec:profile-visibility" style="margin-top: 0; color: #333;">Profile Visibility</h3>
+    <div style="margin-bottom: 20px;">
+      <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" x-model="privacy.profilePublic"/>
+         Make profile public
+      </label>
+    </div>
+    <div style="margin-bottom: 20px;">
+      <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" x-model="privacy.allowMessages"/>
+         Allow direct messages
+      </label>
+    </div>
+    <h3 id="sec:data" style="margin-top: 30px; color: #333;">Data</h3>
+    <button style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;" @click="downloadData()">Download My Data</button>
+    <div style="margin-top: 20px;">
+      <button style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;" @click="deleteAccount()">Delete Account</button>
+    </div>
+  </div>
+  <div style="margin-top: 30px; display: flex; gap: 10px;">
+    <button style="background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-weight: bold;" @click="saveSettings()">Save Changes</button>
+    <button style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer;" @click="resetSettings()">Cancel</button>
+  </div>
+  <div style="margin-top: 15px; padding: 12px; background: #d4edda; color: #155724; border-radius: 4px;" x-show="status" x-text="status"></div>
+</div>
+</div>
+<nav style="margin-bottom: 1.5rem; font-size: 0.9em;">
+      <a href="../index.html" style="color: #0000ff; text-decoration: underline;">Home</a> &gt;
+      <a href="../examples/index.html" style="color: #0000ff; text-decoration: underline;">Examples</a> &gt;
+      <span style="color: #666;">Settings Panel</span>
+      </nav>
+  </main>
+
+  <footer>
+    <p>
+      alpinejs &mdash; R interface for Alpine.js<br>
+      <a href="https://github.com/brownag/alpinejs">View on GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

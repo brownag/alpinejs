@@ -1,0 +1,408 @@
+---
+title: Reactivity and Global State
+---
+
+```{r setup, include=FALSE}
+litedown::reactor(echo = TRUE)
+RUN_EXAMPLES <- nzchar(Sys.getenv("R_ALPINEJS_RUN_EXAMPLES"))
+library(alpinejs)
+library(htmltools)
+```
+
+```{r test_magics_globals, eval=TRUE, echo=FALSE}
+# Verify new functions are available
+fns <- c("alpine_watch", "alpine_dispatch", "alpine_next_tick",
+         "alpine_refs", "alpine_store_js", "alpine_el",
+         "alpine_global_data", "alpine_global_store",
+         "alpine_effect", "alpine_ref", "alpine_if",
+         "alpine_cloak", "alpine_ignore", "alpine_modelable",
+         "alpine_transition", "alpine_teleport", "alpine_id")
+missing <- fns[!vapply(fns, existsMethod, logical(1), signature = character(0))]
+missing <- fns[!vapply(fns, function(f) exists(f, mode = "function"), logical(1))]
+cat("All new functions available:", length(missing) == 0, "\n")
+```
+
+# Reactivity and Global State
+
+This vignette covers Alpine.js magic properties and global methods -- the tools
+for advanced reactivity: watching data, dispatching events between components,
+and sharing state across a page.
+
+- **Magic properties** (`$watch`, `$dispatch`, `$nextTick`, `$refs`, `$store`, `$el`)
+  are available inside any Alpine expression.
+- **Global methods** (`Alpine.data()`, `Alpine.store()`) register reusable components
+  and cross-component shared state before Alpine initializes.
+
+---
+
+## Magic Properties
+
+Magic properties are special variables prefixed with `$` that are available inside
+Alpine.js expressions. The alpinejs package provides helper functions that generate
+the corresponding JavaScript expression strings.
+
+These helpers return `htmlwidgets::JS()` objects, so they can be used anywhere an
+expression string is accepted: in `alpine_init()`, `alpine_on()`, `alpine_bind()`,
+and other directives.
+
+### $watch -- React to Property Changes
+
+`alpine_watch("property", callback)` generates a `$watch('property', callback)`
+expression that runs the callback whenever the named property changes. Use it
+inside `alpine_init()` to set up watchers when the component first loads.
+
+```{r}
+# Log every change to the search query
+tagList(
+  tags$div(
+    tags$input(type = "text", placeholder = "Search...") |>
+      alpine_model("query"),
+    tags$p() |>
+      alpine_text("'Searching for: ' + query")
+  ) |>
+    alpine_init(alpine_watch("query", "value => console.log('Query:', value)")) |>
+    alpine_data(query = "")
+)
+```
+
+You can watch deeply nested properties using dot notation, and receive the old
+value as the second callback argument:
+
+```{r}
+# Watch a nested property (console only -- no visible output)
+tags$div() |>
+  alpine_init(
+    alpine_watch("user.name", "(newVal, oldVal) => console.log(newVal, oldVal)")
+  ) |>
+  alpine_data_js("{ user: { name: 'Alice' } }")
+```
+
+### $dispatch -- Send Events Between Components
+
+`alpine_dispatch("event-name", detail)` generates a `$dispatch('event', detail)`
+expression that emits a custom DOM event. Other elements can listen for it with
+`alpine_on("event-name.window", ...)` (the `.window` modifier is needed for
+cross-component communication since events bubble to the window).
+
+```{r}
+# Component 1: dispatch an event when the button is clicked
+emitter <- tags$div(
+  style = "padding: 10px; border: 1px solid #ccc;",
+  tags$p("Component 1 -- Emitter"),
+  tags$button("Notify Other Component") |>
+    alpine_on("click", alpine_dispatch("notify", list(message = "Hello!")))
+) |>
+  alpine_data(x = 0)
+
+# Component 2: listen for the event from Component 1
+listener <- tags$div(
+  style = "padding: 10px; border: 1px solid #ccc; margin-top: 8px;",
+  tags$p("Component 2 -- Listener"),
+  tags$p() |>
+    alpine_text("lastMessage || 'No messages yet'")
+) |>
+  alpine_init(
+    "$nextTick(() => {})"  # placeholder init
+  ) |>
+  alpine_on("notify.window", "lastMessage = $event.detail.message") |>
+  alpine_data(lastMessage = "")
+
+tagList(emitter, listener)
+```
+
+### $nextTick -- Act After DOM Updates
+
+`alpine_next_tick(callback)` generates a `$nextTick(callback)` expression that
+defers the callback until after Alpine has finished processing the current reactive
+update and updated the DOM. Use it when you need to measure or interact with the
+DOM after a state change.
+
+```{r}
+# Focus an input after toggling it visible
+tags$div(
+  tags$button("Show and focus input") |>
+    alpine_on("click", paste0(
+      "show = true; ",
+      alpine_next_tick("() => $refs.myInput.focus()")
+    )),
+  tags$input(type = "text", placeholder = "Now focused") |>
+    alpine_ref("myInput") |>
+    alpine_show("show")
+) |>
+  alpine_data(show = FALSE)
+```
+
+### $refs -- Access DOM Elements
+
+`alpine_refs("name")` generates a `$refs.name` expression for the element labeled
+with `alpine_ref()`. Use it to read values, call DOM methods, or pass elements
+to other functions.
+
+```{r}
+# Copy input value to clipboard
+tags$div(
+  tags$input(type = "text", value = "Copy me!") |>
+    alpine_ref("copyTarget"),
+  tags$button("Copy to Clipboard") |>
+    alpine_on("click", paste0(
+      "navigator.clipboard.writeText(",
+      alpine_refs("copyTarget"),
+      ".value)"
+    )),
+  tags$span() |>
+    alpine_text("copied ? 'Copied!' : ''")
+) |>
+  alpine_on("click", "copied = true; setTimeout(() => copied = false, 2000)",
+            .cssSelector = "button") |>
+  alpine_data(copied = FALSE)
+```
+
+You can also just write `$refs.name` inline -- the helper is provided for
+programmatic expression building when the ref name is an R variable.
+
+### $store -- Access Global Stores
+
+`alpine_store_js("store_name", "property")` generates a `$store.name.property`
+expression for reading from or modifying a global Alpine store. See the
+[Global Methods](#global-methods) section below for registering stores.
+
+```{r, eval=FALSE}
+# Read from a store
+alpine_store_js("theme")            # -> $store.theme
+alpine_store_js("theme", "mode")    # -> $store.theme.mode
+```
+
+### $el -- Reference the Root Element
+
+`alpine_el()` generates `$el`, which refers to the root DOM element of the
+current Alpine component. Useful for passing the element to third-party libraries
+or reading its dimensions.
+
+```{r, eval=FALSE}
+# Scroll the component into view
+tags$button("Scroll here") |>
+  alpine_on("click", paste0(alpine_el(), ".scrollIntoView({ behavior: 'smooth' })"))
+```
+
+---
+
+## x-effect: Reactive Side Effects
+
+`alpine_effect()` wraps an expression that Alpine.js re-evaluates automatically
+whenever any reactive data it references changes. Unlike `$watch`, you do not
+specify which property to watch -- Alpine tracks all reactive data accessed.
+
+```{r}
+# Log query to console on every change (side effect)
+tags$div(
+  tags$input(type = "text", placeholder = "Type to search...") |>
+    alpine_model("query"),
+  tags$p(style = "color: gray; font-size: 0.9em;",
+    "Open browser console to see reactive logging."
+  )
+) |>
+  alpine_effect("console.log('[effect] query is now:', query)") |>
+  alpine_data(query = "")
+```
+
+---
+
+## Global Methods
+
+### Alpine.data() -- Reusable Components
+
+`alpine_global_data(name, js_definition)` registers a named, reusable Alpine
+component that can be used by name in any `x-data` attribute. This avoids
+repeating the same component definition when using it multiple times on a page.
+
+```{r}
+# Register a reusable counter component
+counter_registration <- alpine_global_data(
+  "counter",
+  "() => ({
+    count: 0,
+    increment() { this.count++ },
+    decrement() { if (this.count > 0) this.count-- },
+    reset()     { this.count = 0 }
+  })"
+)
+
+# Use it twice -- each instance has its own state
+counter1 <- tags$div(
+  style = "display: flex; gap: 8px; align-items: center;",
+  tags$span("Counter A:"),
+  tags$button("-") |> alpine_on("click", "decrement()"),
+  tags$span() |> alpine_text("count"),
+  tags$button("+") |> alpine_on("click", "increment()"),
+  tags$button("Reset") |> alpine_on("click", "reset()")
+) |> alpine_data_js("counter")
+
+counter2 <- tags$div(
+  style = "display: flex; gap: 8px; align-items: center; margin-top: 8px;",
+  tags$span("Counter B:"),
+  tags$button("-") |> alpine_on("click", "decrement()"),
+  tags$span() |> alpine_text("count"),
+  tags$button("+") |> alpine_on("click", "increment()"),
+  tags$button("Reset") |> alpine_on("click", "reset()")
+) |> alpine_data_js("counter")
+
+tagList(counter_registration, counter1, counter2)
+```
+
+Each counter has completely independent state -- changing counter A does not
+affect counter B.
+
+### Alpine.store() -- Global Shared State
+
+`alpine_global_store(name, ...)` registers a global store accessible from any
+Alpine component on the page via `$store.name`. When any component writes to the
+store, all other components that read from it update reactively.
+
+#### Example: Shared Theme Toggle
+
+```{r}
+# Register a dark mode store with a toggle method (raw JS)
+theme_store <- alpine_global_store(
+  "theme",
+  htmlwidgets::JS("{ dark: false, toggle() { this.dark = !this.dark } }")
+)
+
+# Component A: the toggle button
+toggle_btn <- tags$div(
+  tags$button() |>
+    alpine_text("$store.theme.dark ? 'Switch to Light' : 'Switch to Dark'") |>
+    alpine_on("click", "$store.theme.toggle()") |>
+    alpine_bind("style", "$store.theme.dark ? 'background:#222;color:#fff' : ''")
+) |>
+  alpine_data_js("{}")
+
+# Component B: themed content panel (completely separate component)
+themed_panel <- tags$div(
+  tags$p() |>
+    alpine_text("'Current mode: ' + ($store.theme.dark ? 'Dark' : 'Light')"),
+  style = "padding: 10px; margin-top: 8px; border: 1px solid #ccc;"
+) |>
+  alpine_bind("style", "$store.theme.dark ? 'background:#1a1a1a;color:#fff' : ''") |>
+  alpine_data_js("{}")
+
+tagList(theme_store, toggle_btn, themed_panel)
+```
+
+Clicking the toggle button in Component A instantly updates Component B, even
+though they share no parent `x-data` component -- the store is the shared channel.
+
+#### Example: Notification Queue (R data)
+
+Stores can also be initialized from R data:
+
+```{r}
+notif_store <- alpine_global_store(
+  "notifications",
+  count   = 0L,
+  visible = FALSE
+)
+
+notif_ui <- tags$div(
+  tags$button("Trigger Notification") |>
+    alpine_on("click",
+      "$store.notifications.count++; $store.notifications.visible = true;
+       setTimeout(() => $store.notifications.visible = false, 3000)"
+    ),
+  tags$div(
+    style = "background: #28a745; color: white; padding: 8px 12px; 
+             margin-top: 8px; border-radius: 4px;",
+    "Notification sent! Total: ",
+    tags$span() |> alpine_text("$store.notifications.count")
+  ) |>
+    alpine_show("$store.notifications.visible") |>
+    alpine_transition(.opacity = TRUE, .duration = 300)
+) |>
+  alpine_data_js("{}")
+
+tagList(notif_store, notif_ui)
+```
+
+---
+
+## Complete Example: Search with Effects and Refs
+
+This example combines several features: `$watch` via `x-effect`, `x-ref`, and
+`alpine_if` for conditional rendering of results.
+
+```{r}
+search_demo <- tags$div(
+  style = "font-family: sans-serif; max-width: 400px;",
+
+  # Search input with ref for auto-focus
+  tags$input(
+    type = "text",
+    placeholder = "Search items...",
+    style = "width: 100%; padding: 6px; box-sizing: border-box;"
+  ) |>
+    alpine_model("query", .debounce = 200) |>
+    alpine_ref("searchInput"),
+
+  # Count display
+  tags$p(style = "color: gray; font-size: 0.85em;") |>
+    alpine_text("filteredItems.length + ' results'"),
+
+  # Results list
+  alpine_for(
+    tags$div(
+      style = "padding: 4px 0; border-bottom: 1px solid #eee;",
+      tags$span() |> alpine_text("item")
+    ),
+    "item in filteredItems",
+    key = "item"
+  ),
+
+  # Empty state
+  alpine_if(
+    tags$p(style = "color: #999;", "No items matched."),
+    "filteredItems.length === 0 && query.length > 0"
+  )
+) |>
+  alpine_init(alpine_next_tick("() => $refs.searchInput.focus()")) |>
+  alpine_effect("console.log('[effect] Visible results:', filteredItems.length)") |>
+  alpine_data_js("{
+    query: '',
+    items: ['apples', 'bananas', 'cherries', 'dates', 'elderberries', 'figs'],
+    get filteredItems() {
+      if (!this.query) return this.items;
+      return this.items.filter(i => i.startsWith(this.query.toLowerCase()));
+    }
+  }")
+
+search_demo
+```
+
+---
+
+## Reference: Magic Property Helpers
+
+| Function                        | Generated Expression     | Purpose                               |
+|:--------------------------------|:-------------------------|:--------------------------------------|
+| `alpine_watch("p", "cb")`       | `$watch('p', cb)`        | Watch a property for changes          |
+| `alpine_dispatch("ev", detail)` | `$dispatch('ev', {...})` | Dispatch a custom DOM event           |
+| `alpine_next_tick("cb")`        | `$nextTick(cb)`          | Run code after DOM update             |
+| `alpine_refs("name")`           | `$refs.name`             | Access a labeled DOM element          |
+| `alpine_store_js("n", "p")`    | `$store.n.p`             | Read/write a global store property    |
+| `alpine_el()`                   | `$el`                    | Access the component root element     |
+
+## Reference: Global Method Functions
+
+| Function                             | Alpine.js Equivalent   | Purpose                             |
+|:-------------------------------------|:-----------------------|:------------------------------------|
+| `alpine_global_data("name", jsDef)` | `Alpine.data('name', factory)` | Register a reusable component |
+| `alpine_global_store("name", ...)`  | `Alpine.store('name', data)`  | Register global shared state  |
+
+Both functions return `htmltools::tagList` containing a `<script>` tag and the
+Alpine.js dependency. Include the result anywhere in your page HTML.
+
+---
+
+## Next Steps
+
+- **Input Modifiers**: See the [Input Modifiers Vignette](input-modifiers.qmd) for `.lazy`, `.debounce`, `.number`, and `.trim`
+- **Plugin Ecosystem**: See the [Plugin Ecosystem Vignette](plugin-ecosystem.qmd) for Persist, Mask, and Sort plugins
+- **Crosstalk Integration**: See the [Crosstalk Integration Vignette](crosstalk-integration.qmd) for cross-widget reactivity

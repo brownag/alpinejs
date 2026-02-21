@@ -1,0 +1,15 @@
+^doc$
+^Meta$
+^scratch$
+^\.claude$
+^vignettes$
+^LICENSE\.md$
+^docs$
+^\.github$
+^Makefile$
+^build_docs\.R$
+^_reference_config\.R$
+^_site_config\.R$
+^_site_template\.html$
+^\.docs_build_cache$
+^README\.Rmd$

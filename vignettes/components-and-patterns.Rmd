@@ -1,0 +1,516 @@
+---
+title: Pre-built Components and Patterns
+---
+
+
+
+```{r, include = FALSE}
+litedown::reactor(
+  collapse = TRUE,
+  comment = "#> "
+)
+RUN_EXAMPLES <- nzchar(Sys.getenv("R_ALPINEJS_RUN_EXAMPLES"))
+```
+
+```{r setup, eval=TRUE, echo=TRUE}
+library(alpinejs)
+```
+
+```{r test_components, eval=RUN_EXAMPLES, echo=FALSE}
+# Verify components exist and return proper structure
+cat("Testing built-in components...\n")
+acc <- alpine_accordion(items = list(list(title = "Test", content = "Content")))
+cat("Accordion created:", class(acc), "\n")
+if (exists("alpine_modal")) {
+  cat("Modal component available\n")
+}
+if (exists("alpine_tabs")) {
+  cat("Tabs component available\n")
+}
+```
+
+# Pre-built Components and Patterns
+
+This vignette covers alpinejs's pre-built interactive components: accordions, modals, and tabs. These are ready-to-use patterns built on top of Alpine.js.
+
+## Accordion Component
+
+An accordion displays collapsible panels where one or more can be open at a time.
+
+### Basic Accordion
+
+```{r}
+alpine_accordion(
+  items = list(
+    list(title = "What is Alpine.js?", content = "Alpine.js is a lightweight, rugged JavaScript framework."),
+    list(title = "Why use alpinejs?", content = "Write interactive UIs in pure R without JavaScript."),
+    list(title = "Is it production-ready?", content = "Yes! Alpine.js is stable and widely used.")
+  ),
+  class = "faq-accordion"
+)
+```
+
+### Accordion with Custom Styling
+
+```{r}
+# Styled accordion (uses inline CSS for demo)
+alpine_accordion(
+  items = list(
+    list(
+      title = "Section 1",
+      content = result <- alpine_tag("div",
+        style = "padding: 15px; background-color: #f5f5f5;",
+        alpine_tag("p", "Content for section 1"),
+        alpine_tag("ul",
+          alpine_tag("li", "Point A"),
+          alpine_tag("li", "Point B"),
+          alpine_tag("li", "Point C")
+        )
+      )
+    ),
+    list(
+      title = "Section 2",
+      content = alpine_tag("div",
+        style = "padding: 15px; background-color: #f5f5f5;",
+        alpine_tag("p", "Content for section 2"),
+        alpine_tag("code", "Some code goes here")
+      )
+    )
+  ),
+  class = "accordion",
+  title_class = "accordion-title",
+  content_class = "accordion-body"
+)
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+### How It Works
+
+The accordion uses Alpine.js internally:
+
+```javascript
+// Generated x-data state
+{
+  collapsed: [false, true, true],  // which panels are open
+  togglePanel(index) { 
+    this.collapsed[index] = !this.collapsed[index];
+  }
+}
+```
+
+Each panel header has `@click="togglePanel(index)"` and each body has `x-show="!collapsed[index]"`.
+
+## Modal Component
+
+A modal dialog overlays the page and captures user attention.
+
+### Basic Modal
+
+```{r}
+alpine_modal(
+  trigger_label = "Open Dialog",
+  title = "Confirm Action",
+  content = "Are you sure you want to proceed?"
+)
+```
+
+### Modal with Rich Content
+
+```{r}
+# Modal with complex content
+alpine_modal(
+  trigger_label = "Learn More",
+  title = "About Our Product",
+  content = result <- alpine_tag("div",
+    style = "line-height: 1.6;",
+    alpine_tag("p", "Combines R and web technologies."),
+    alpine_tag("h3", "Features:"),
+    alpine_tag("ul",
+      alpine_tag("li", "R interface to Alpine.js"),
+      alpine_tag("li", "Type conversion"),
+      alpine_tag("li", "Reactive bindings")
+    ),
+    alpine_tag("p",
+      "Built with ",
+      alpine_tag("a", "Alpine.js", href = "https://alpinejs.dev/", target = "_blank"),
+      " and ",
+      alpine_tag("a", "htmltools", href = "https://rstudio.github.io/htmltools/", target = "_blank")
+    )
+  ),
+  close_label = "Got it!"
+)
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+### Modal Without Trigger Button
+
+For programmatic control (e.g., triggered after a server action):
+
+```{r}
+# Modal without automatic trigger
+modal_component <- alpine_modal(
+  trigger_label = NULL,  # No button
+  title = "Processing...",
+  content = "Your request is being processed. Please wait.",
+  backdrop = FALSE  # No backdrop for a lighter feel
+)
+
+# Would be shown via JavaScript:
+# modalOpen = true;
+```
+
+### Customizing Modal Appearance
+
+The modal renders with basic inline styles. To customize, add CSS:
+
+```css
+/* Minimal custom modal styling */
+.modal-dialog {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.modal-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 10px;
+}
+
+.modal-footer {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 15px;
+}
+```
+
+## Transitions (x-transition)
+
+`alpine_transition()` adds enter/leave animations to any element controlled by
+`alpine_show()`. Two modes are available: a built-in transition helper (fade + scale)
+and CSS class mode for full control with utility frameworks like Tailwind.
+
+### Built-in Transition Helper
+
+```{r}
+# Default fade + scale transition
+alpine_tag("div",
+  alpine_tag("button", "Toggle",
+    alpine_attr(`@click` = "open = !open")
+  ),
+  alpine_tag("div",
+    style = "padding: 10px; background: #e8f4fd; margin-top: 8px;",
+    "This content fades in and out."
+  ) |>
+    alpine_show("open") |>
+    alpine_transition()
+) |>
+  alpine_data(open = FALSE)
+```
+
+### Custom Duration and Opacity Only
+
+```{r}
+# Opacity-only fade, 400ms
+alpine_tag("div",
+  alpine_tag("button", "Fade",
+    alpine_attr(`@click` = "visible = !visible")
+  ),
+  alpine_tag("p", "Fades smoothly with no scale effect.") |>
+    alpine_show("visible") |>
+    alpine_transition(.opacity = TRUE, .duration = 400)
+) |>
+  alpine_data(visible = TRUE)
+```
+
+### Scale Transition with Custom Origin
+
+```{r}
+# Scale from top, 300ms
+alpine_tag("div",
+  alpine_tag("button", "Open Dropdown",
+    alpine_attr(`@click` = "open = !open")
+  ),
+  alpine_tag("ul",
+    style = "border: 1px solid #ccc; padding: 8px;",
+    alpine_tag("li", "Option A"),
+    alpine_tag("li", "Option B"),
+    alpine_tag("li", "Option C")
+  ) |>
+    alpine_show("open") |>
+    alpine_transition(.scale = TRUE, .scale_value = 90, .origin = "top", .duration = 200)
+) |>
+  alpine_data(open = FALSE)
+```
+
+### CSS Class Mode (Tailwind-style)
+
+For full control over transition phases, provide CSS class strings for each phase.
+This matches how Tailwind CSS transitions are structured:
+
+```{r, eval=FALSE}
+# CSS class mode -- attach separate x-transition:phase="classes" attributes
+alpine_tag("div", "Slides in") |>
+  alpine_show("open") |>
+  alpine_transition(
+    .enter       = "transition ease-out duration-300",
+    .enter_start = "opacity-0 translate-x-4",
+    .enter_end   = "opacity-100 translate-x-0",
+    .leave       = "transition ease-in duration-200",
+    .leave_start = "opacity-100 translate-x-0",
+    .leave_end   = "opacity-0 translate-x-4"
+  )
+```
+
+Note: CSS class mode requires the CSS classes to be defined in your stylesheet
+(e.g., via Tailwind CSS or custom classes). The helper mode works with no extra CSS.
+
+## Tabs Component
+
+### Basic Tabs
+
+```{r}
+alpine_tabs(
+  tabs = list(
+    list(label = "Overview", content = "This is the overview tab"),
+    list(label = "Details", content = "Detailed information goes here"),
+    list(label = "Contact", content = "Contact us for more information")
+  )
+)
+```
+
+### Tabs with Rich Content
+
+```{r}
+# Tabs with complex content
+alpine_tabs(
+  tabs = list(
+    list(
+      label = "Home",
+      content = result <- alpine_tag("div",
+        alpine_tag("h3", "Welcome"),
+        alpine_tag("p", "This is the home tab content."),
+        alpine_tag("button", "Learn More",
+          alpine_attr(`@click` = "alert('More info')")
+        )
+      )
+    ),
+    list(
+      label = "Documentation",
+      content = alpine_tag("div",
+        alpine_tag("h3", "Docs"),
+        alpine_tag("p", "Read the documentation here."),
+        alpine_tag("ul",
+          alpine_tag("li", "Installation"),
+          alpine_tag("li", "Getting started"),
+          alpine_tag("li", "API reference")
+        )
+      )
+    ),
+    list(
+      label = "Examples",
+      content = alpine_tag("div",
+        alpine_tag("h3", "Code Examples"),
+        alpine_tag("p", "View working examples below."),
+        alpine_tag("pre",
+          alpine_tag("code", "# Example R code\nalpine_tag(\"div\") |> alpine_data(x = 1)")
+        )
+      )
+    )
+  ),
+  class = "custom-tabs",
+  tab_class = "custom-tab-button",
+  content_class = "custom-tab-panel"
+)
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+### How Tabs Work
+
+The tabs component uses:
+
+```javascript
+// Generated x-data state
+{
+  activeTab: 0  // 0-indexed active tab
+}
+```
+
+Each tab button has `@click="activeTab = index"` and each content panel has `x-show="activeTab === index"`.
+
+Tab buttons get dynamic class binding via `x-bind:class` to highlight the active tab.
+
+## Combining Components
+
+Nest and combine components together:
+
+```{r}
+# Tabs containing accordions
+page <- result <- alpine_tag("div",
+  alpine_tag("h1", "Documentation"),
+  
+  alpine_tabs(
+    tabs = list(
+      list(
+        label = "Getting Started",
+        content = alpine_accordion(
+          items = list(
+            list(title = "Installation", content = "Install alpinejs from GitHub..."),
+            list(title = "First Steps", content = "Start by loading the library...")
+          )
+        )
+      ),
+      list(
+        label = "API Reference",
+        content = alpine_accordion(
+          items = list(
+            list(title = "alpine_data()", content = "Initialize component state..."),
+            list(title = "alpine_on()", content = "Attach event listeners...")
+          )
+        )
+      )
+    )
+  )
+)
+
+page
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+## Component Composition Pattern
+
+Create reusable component functions:
+
+```{r}
+# Reusable confirmation dialog
+confirm_dialog <- function(message, trigger_label = "Confirm") {
+  alpine_modal(
+    trigger_label = trigger_label,
+    title = "Confirmation",
+    content = message,
+    close_label = "Cancel"
+  )
+}
+
+# Use it multiple times with distinct button labels
+result <- alpine_tag("div",
+  confirm_dialog("Delete this item?", "Delete"),
+  confirm_dialog("Log out?", "Log Out")
+)
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+## Advanced: Data-Driven Components
+
+Create components from data:
+
+```{r}
+# Build an accordion from a data frame
+faq_data <- data.frame(
+  question = c("What is R?", "What is Alpine.js?", "What is alpinejs?"),
+  answer = c(
+    "R is a language for statistical computing...",
+    "Alpine.js is a lightweight JavaScript framework...",
+    "alpinejs brings Alpine.js to R..."
+  ),
+  stringsAsFactors = FALSE
+)
+
+# Convert to list format expected by alpine_accordion
+items <- lapply(seq_len(nrow(faq_data)), function(i) {
+  list(
+    title = faq_data$question[i],
+    content = faq_data$answer[i]
+  )
+})
+
+alpine_accordion(items)
+```
+
+## Styling Best Practices
+
+### With Tailwind CSS
+
+```r
+# Accordion with Tailwind classes
+alpine_accordion(
+  items = list(
+    list(title = "Item 1", content = "Content 1"),
+    list(title = "Item 2", content = "Content 2")
+  ),
+  class = "divide-y divide-gray-200 border border-gray-200 rounded-lg",
+  title_class = "px-4 py-3 font-semibold hover:bg-gray-50 cursor-pointer",
+  content_class = "px-4 py-2 bg-gray-50"
+)
+
+cat("```html\n", as.character(.), "\n```", sep="")
+
+```
+
+### With Bootstrap
+
+```r
+# Modal with Bootstrap styling
+alpine_modal(
+  trigger_label = "Open",
+  title = "Bootstrap Modal",
+  content = "Content styled with Bootstrap classes",
+  class = "modal-lg"
+)
+
+cat("```html\n", as.character(.), "\n```", sep="")
+
+```
+
+## Performance Notes
+
+- **Lightweight**: All components are pure Alpine.js--no heavy dependencies
+- **No Server Calls**: Component state is managed client-side
+- **Fast Rendering**: HTML is generated once; only state changes are reactive
+- **Suitable for**: 100s to 1000s of items; for larger datasets, consider server-side pagination
+
+## Accessibility
+
+alpinejs components use semantic HTML. For better accessibility:
+
+```r
+# Add ARIA labels
+alpine_accordion(
+  items = list(
+    list(title = "Section 1", content = "Content 1")
+  ),
+  alpine_attr(`x-bind:aria-expanded` = "true")  # Make dynamic for each panel
+)
+
+cat("```html\n", as.character(.), "\n```", sep="")
+
+```
+
+## When to Use Pre-built Components
+
+**Good for:**
+
+- Modals, dialogs, confirmations
+- Tabbed interfaces
+- Collapsible sections/FAQs
+- Mobile menus/dropdowns
+
+**Consider alternatives for:**
+
+- Large tables (use `DT` + Shiny)
+- Real-time data (use WebSocket + other frameworks)
+- Complex workflows (use Shiny app)
+
+## Next Steps
+
+- **Reactivity and Global State**: See the [Reactivity and Globals Vignette](reactivity-and-globals.qmd) for `$watch`, `$dispatch`, and `Alpine.store()`
+- **Advanced Patterns**: Learn about custom components and composition
+- **Crosstalk Integration**: Filter widgets with Alpine controls
+
+- **Performance Optimization**: Techniques for large-scale applications
+
+---
+
+For more examples, see the `inst/examples/` directory in the alpinejs package or run examples with `Rscript inst/examples/01-todo-list.R`.

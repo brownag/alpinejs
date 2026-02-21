@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crosstalk Integration | alpinejs</title>
+  <!-- Load Crosstalk for cross-widget reactivity -->
+  <script src="https://cdn.jsdelivr.net/npm/crosstalk@1.2.0/dist/crosstalk.min.js"></script>
+  <!-- Load Alpine.js for interactive components -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+  <style>
+    /* 1990s Web 1.0 aesthetic - authentic retro feel */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Verdana, Geneva, sans-serif;
+      line-height: 1.6;
+      color: #000;
+      background: #c0c0c0;
+      font-size: 14px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: #dfdfdf;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #dfdfdf;
+      padding-top: 0.8rem;
+    }
+
+    nav a {
+      color: #0000ff;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    nav a:visited {
+      color: #800080;
+    }
+
+    nav a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Main content */
+    main {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      padding: 1rem;
+      background: #fff;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      min-height: calc(100vh - 250px);
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1.5rem 0 0.5rem;
+      font-weight: bold;
+      line-height: 1.3;
+    }
+
+    h1 { 
+      font-size: 2rem;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+      margin-top: 0;
+      color: #0000ff;
+    }
+
+    h2 { 
+      font-size: 1.4rem;
+      color: #0000cc;
+      border-bottom: 1px solid #000;
+    }
+
+    h3 { font-size: 1.1rem; color: #000080; }
+    h4 { font-size: 1rem; color: #000; font-weight: bold; }
+
+    /* Paragraphs & text */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #800080;
+    }
+
+    a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Inline code */
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+      color: #000;
+      border: 1px solid #ccc;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #f0f0f0;
+      border: 1px solid #999;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.4;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #000;
+      border: none;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid #999;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #333;
+      font-style: italic;
+      background: #f5f5f5;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #999;
+      margin: 1.5rem 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      border: 1px solid #999;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border: 1px solid #999;
+    }
+
+    th {
+      background: #c0c0c0;
+      font-weight: bold;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #999;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      color: #000;
+      font-size: 0.85rem;
+      margin: 2rem 1rem 0;
+      background: #dfdfdf;
+    }
+
+    footer a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    footer a:visited {
+      color: #800080;
+    }
+
+    /* Horizontal rule dividers */
+    .divider {
+      border: none;
+      height: 2px;
+      background: linear-gradient(to right, #dfdfdf 0%, #000 50%, #dfdfdf 100%);
+      margin: 1.5rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      main {
+        padding: 0.8rem;
+      }
+
+      header {
+        padding: 0.8rem;
+      }
+
+      nav {
+        gap: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html" style="color: #000; text-decoration: none;">alpinejs</a></h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../guides/">Guides</a>
+      <a href="../examples/">Examples</a>
+      <a href="../reference/">Reference</a>
+      <a href="https://github.com/brownag/alpinejs" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    
+<div class="frontmatter">
+<div class="title"><h1>Crosstalk Integration: Cross-Widget Reactivity</h1></div>
+</div>
+<div class="body">
+<h2 id="sec:overview">Overview</h2>
+<p><strong>Crosstalk</strong> is an R package that enables communication between widgets in HTML dashboards. When multiple widgets share the same Crosstalk group, user interactions in one widget (like clicking to select rows) update other widgets without server-side code.</p>
+<p>The <code>alpinejs</code> package integrates with Crosstalk to create Alpine.js components that:</p>
+<ul>
+<li>Respond to selection and filtering events from other widgets</li>
+<li>Automatically sync highlighted rows, filtered lists, and reactive data</li>
+<li>Work in static R Markdown documents, Shiny apps, and standalone HTML pages</li>
+<li>Complement Plotly, Leaflet, and other Crosstalk-aware packages</li>
+</ul>
+<h2 id="sec:prerequisites">Prerequisites</h2>
+<p>To use Crosstalk with alpinejs, install the <code>crosstalk</code> package:</p>
+<pre><code class="language-r">install.packages(&quot;crosstalk&quot;)
+library(crosstalk)
+</code></pre>
+<p>Check availability in your code:</p>
+<pre><code class="language-r">if (alpinejs::alpine_has_crosstalk()) {
+  # Use Crosstalk features
+}
+</code></pre>
+<h2 id="sec:core-functions">Core Functions</h2>
+<h3 id="sec:1-prepare-crosstalk-data">1. <code>prepare_crosstalk_data()</code></h3>
+<p>Prepares a data.frame for Crosstalk integration by extracting row identifiers (keys):</p>
+<pre><code class="language-r"># Use a column as row key
+prepared <- prepare_crosstalk_data(
+  iris,
+  key_column = &quot;Species&quot;,  # Keys for row identification
+  group = &quot;iris_demo&quot;       # Group name for Crosstalk
+)
+
+# Or use row numbers as keys
+prepared <- prepare_crosstalk_data(
+  mtcars,
+  key_column = NULL,         # Defaults to row numbers
+  group = &quot;cars_data&quot;
+)
+</code></pre>
+<p><strong>Returns a list with:</strong></p>
+<ul>
+<li><code>keys</code>: Character vector of row identifiers</li>
+<li><code>data</code>: Original data.frame</li>
+<li><code>group</code>: Crosstalk group name</li>
+<li><code>key_column</code>: The column name used for keys</li>
+</ul>
+<h3 id="sec:2-alpine-crosstalk-table">2. <code>alpine_crosstalk_table()</code></h3>
+<p>Creates an interactive table that responds to Crosstalk selection/filter events:</p>
+<pre><code class="language-r"># With SharedData
+shared_iris <- crosstalk::SharedData$new(iris, group = &quot;iris_data&quot;)
+
+alpine_crosstalk_table(
+  shared_iris,
+  columns = c(&quot;Species&quot;, &quot;Sepal.Length&quot;, &quot;Petal.Width&quot;),
+  key_column = &quot;Species&quot;,
+  selectable = TRUE,          # Allow row selection
+  height = &quot;400px&quot;            # Scrollable height
+)
+
+# With a plain data.frame (auto-wrapped)
+alpine_crosstalk_table(
+  iris,
+  height = &quot;500px&quot;
+)
+</code></pre>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>shared_data</code></td>
+<td>SharedData or data.frame</td>
+<td>required</td>
+<td>Data source (must non-empty)</td>
+</tr>
+<tr>
+<td><code>columns</code></td>
+<td>character vector</td>
+<td>all</td>
+<td>Columns to display</td>
+</tr>
+<tr>
+<td><code>key_column</code></td>
+<td>character</td>
+<td>1st column</td>
+<td>Column with row IDs</td>
+</tr>
+<tr>
+<td><code>selectable</code></td>
+<td>logical</td>
+<td>TRUE</td>
+<td>Allow row selection</td>
+</tr>
+<tr>
+<td><code>height</code></td>
+<td>character</td>
+<td>“400px”</td>
+<td>Table scroll height</td>
+</tr>
+<tr>
+<td><code>striped</code></td>
+<td>logical</td>
+<td>TRUE</td>
+<td>Alternate row colors</td>
+</tr>
+<tr>
+<td><code>responsive</code></td>
+<td>logical</td>
+<td>TRUE</td>
+<td>Mobile-responsive styling</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sec:3-add-crosstalk-listener">3. <code>add_crosstalk_listener()</code></h3>
+<p>Injects a Crosstalk event listener into an Alpine component (advanced use):</p>
+<pre><code class="language-r">tag <- alpine_tag(&quot;div&quot;)
+
+tag_with_listener <- add_crosstalk_listener(
+  tag,
+  group = &quot;my_group&quot;,
+  handle_type = &quot;selection&quot;  # &quot;selection&quot;, &quot;filter&quot;, or &quot;both&quot;
+)
+</code></pre>
+<h2 id="sec:example-1-simple-selection-table">Example 1: Simple Selection Table</h2>
+<p><strong>Scenario:</strong> Users click rows in an Alpine table to select them. Selection state updates in real-time.</p>
+<pre><code class="language-r">library(alpinejs)
+library(crosstalk)
+library(htmltools)
+
+# Create shared data
+shared_data <- SharedData$new(
+  data.frame(
+    id = 1:10,
+    name = paste0(&quot;Item_&quot;, 1:10),
+    value = round(runif(10, 10, 100), 2)
+  ),
+  group = &quot;items_demo&quot;
+)
+
+# Create table
+alpine_crosstalk_table(
+  shared_data,
+  key_column = &quot;id&quot;,
+  selectable = TRUE,
+  columns = c(&quot;id&quot;, &quot;name&quot;, &quot;value&quot;),
+  height = &quot;300px&quot;
+) |>
+  htmltools::browsable()
+
+# Users can click rows to select them
+# Selection persists and can trigger other Crosstalk widgets
+</code></pre>
+<h2 id="sec:example-2-multi-filter-dashboard">Example 2: Multi-Filter Dashboard</h2>
+<p><strong>Scenario:</strong> Users filter data with dropdowns and range sliders. The table updates to show only matching rows. Summary statistics update as data changes.</p>
+<pre><code class="language-r">library(alpinejs)
+library(crosstalk)
+library(htmltools)
+
+# Create sample data
+data <- data.frame(
+  id = seq_len(100),
+  category = sample(c(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;), 100, replace = TRUE),
+  region = sample(c(&quot;North&quot;, &quot;South&quot;, &quot;East&quot;, &quot;West&quot;), 100, replace = TRUE),
+  value = rnorm(100, mean = 50, sd = 15)
+)
+
+shared_data <- crosstalk::SharedData$new(data, group = &quot;dashboard_demo&quot;)
+
+# Create dashboard
+alpine_tag(&quot;div&quot;,
+  style = &quot;padding: 20px;&quot;,
+
+  alpine_tag(&quot;h1&quot;, &quot;Data Dashboard&quot;),
+
+  # Filter controls
+  alpine_tag(&quot;div&quot;,
+    style = &quot;display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;&quot;,
+
+    # Category filter
+    alpine_tag(&quot;div&quot;,
+      alpine_tag(&quot;label&quot;, &quot;Category:&quot;),
+      alpine_tag(&quot;select&quot;,
+        alpine_tag(&quot;option&quot;, value = &quot;&quot;, &quot;All&quot;),
+        alpine_tag(&quot;option&quot;, value = &quot;A&quot;, &quot;Category A&quot;),
+        alpine_tag(&quot;option&quot;, value = &quot;B&quot;, &quot;Category B&quot;),
+        alpine_tag(&quot;option&quot;, value = &quot;C&quot;, &quot;Category C&quot;)
+      ) |>
+        alpine_model(&quot;selectedCategory&quot;)
+    ),
+
+    # Region filter
+    alpine_tag(&quot;div&quot;,
+      alpine_tag(&quot;label&quot;, &quot;Region:&quot;),
+      alpine_tag(&quot;select&quot;,
+        alpine_tag(&quot;option&quot;, value = &quot;&quot;, &quot;All&quot;),
+        alpine_tag(&quot;option&quot;, value = &quot;North&quot;, &quot;North&quot;),
+        alpine_tag(&quot;option&quot;, value = &quot;South&quot;, &quot;South&quot;),
+        alpine_tag(&quot;option&quot;, value = &quot;East&quot;, &quot;East&quot;),
+        alpine_tag(&quot;option&quot;, value = &quot;West&quot;, &quot;West&quot;)
+      ) |>
+        alpine_model(&quot;selectedRegion&quot;)
+    )
+  ),
+
+  # Summary stats
+  alpine_tag(&quot;div&quot;,
+    style = &quot;display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;&quot;,
+
+    alpine_tag(&quot;div&quot;,
+      style = &quot;background: #e3f2fd; padding: 15px; border-radius: 4px;&quot;,
+      alpine_tag(&quot;strong&quot;, &quot;Total Records: &quot;),
+      alpine_tag(&quot;span&quot;, &quot;{{ filteredData.length }}&quot;)
+    ),
+
+    alpine_tag(&quot;div&quot;,
+      style = &quot;background: #f3e5f5; padding: 15px; border-radius: 4px;&quot;,
+      alpine_tag(&quot;strong&quot;, &quot;Selected: &quot;),
+      alpine_tag(&quot;span&quot;, &quot;{{ selectedKeys.length }}&quot;)
+    )
+  ),
+
+  # Data table
+  alpine_crosstalk_table(
+    shared_data,
+    columns = c(&quot;id&quot;, &quot;category&quot;, &quot;region&quot;, &quot;value&quot;),
+    selectable = TRUE,
+    height = &quot;400px&quot;
+  )
+) |>
+  alpine_data(
+    selectedCategory = &quot;&quot;,
+    selectedRegion = &quot;&quot;,
+    selectedKeys = htmlwidgets::JS(&quot;[]&quot;),
+    filteredData = htmlwidgets::JS(&quot;data&quot;)
+  ) |>
+  htmltools::browsable()
+</code></pre>
+<h2 id="sec:example-3-alpine-plotly-sync">Example 3: Alpine + Plotly Sync</h2>
+<p><strong>Scenario:</strong> Users click points in a Plotly scatter plot to select rows. The Alpine table highlights corresponding rows and vice versa.</p>
+<pre><code class="language-r">library(alpinejs)
+library(crosstalk)
+library(plotly)
+library(htmltools)
+
+# Create shared data
+shared_iris <- crosstalk::SharedData$new(iris, group = &quot;iris_demo&quot;)
+
+# Create layout
+alpine_tag(&quot;div&quot;,
+  style = &quot;display: flex; gap: 20px; padding: 20px;&quot;,
+
+  # Plotly chart
+  alpine_tag(&quot;div&quot;,
+    style = &quot;flex: 1;&quot;,
+    alpine_tag(&quot;h3&quot;, &quot;Plotly Scatter (Click to select)&quot;),
+    # Use bscols() for Crosstalk-Plotly integration
+    crosstalk::bscols(
+      plotly::plot_ly(shared_iris, x = ~Sepal.Length, y = ~Petal.Length,
+                      mode = &quot;markers&quot;, color = ~Species)
+    )
+  ),
+
+  # Alpine table
+  alpine_tag(&quot;div&quot;,
+    style = &quot;flex: 1;&quot;,
+    alpine_tag(&quot;h3&quot;, &quot;Alpine Table&quot;),
+    alpine_crosstalk_table(
+      shared_iris,
+      columns = c(&quot;Species&quot;, &quot;Sepal.Length&quot;, &quot;Petal.Length&quot;),
+      selectable = TRUE,
+      height = &quot;400px&quot;
+    )
+  )
+) |>
+  htmltools::browsable()
+</code></pre>
+<p>When users click points in the Plotly chart, rows are selected. The Alpine table automatically highlights matching rows thanks to Crosstalk.</p>
+<h2 id="sec:data-flow-amp-architecture">Data Flow &amp; Architecture</h2>
+<h3 id="sec:how-selection-works">How Selection Works</h3>
+<pre><code>User clicks row in Alpine table
+         ↓
+Alpine updates selectedKeys in x-data
+         ↓
+JavaScript sends Crosstalk SelectionHandle event
+         ↓
+Other Crosstalk widgets receive selection event
+         ↓
+Plotly, Leaflet, other tables update
+</code></pre>
+<h3 id="sec:preventing-circular-updates">Preventing Circular Updates</h3>
+<p>When both widgets respond to Crosstalk events, we must prevent infinite loops:</p>
+<pre><code>Alpine -> Crosstalk -> Plotly -> Crosstalk -> Alpine (LOOP!)
+</code></pre>
+<p>The <code>alpine_crosstalk_table()</code> function handles this automatically by checking event senders and skipping self-triggered updates.</p>
+<h2 id="sec:advanced-custom-listeners">Advanced: Custom Listeners</h2>
+<p>For complex scenarios, inject listeners into custom components:</p>
+<pre><code class="language-r">custom_div <- alpine_tag(&quot;div&quot;,
+  &quot;Custom Alpine component here&quot;
+) |>
+  alpine_data(selectedKeys = htmlwidgets::JS(&quot;[]&quot;))
+
+# Add Crosstalk listener
+custom_div_with_listener <- add_crosstalk_listener(
+  custom_div,
+  group = &quot;my_group&quot;,
+  handle_type = &quot;selection&quot;,
+  key_column = &quot;id&quot;
+)
+</code></pre>
+<h2 id="sec:performance-considerations">Performance Considerations</h2>
+<ul>
+<li><strong>Recommended dataset size:</strong> Up to ~25,000 rows</li>
+<li><strong>Very large datasets (>25K rows):</strong> Consider pagination or server-side filtering</li>
+<li><strong>Network:</strong> Crosstalk works entirely in-browser; no server calls needed</li>
+<li><strong>Browser compatibility:</strong> Works in all modern browsers (Chrome, Firefox, Safari, Edge)</li>
+</ul>
+<h2 id="sec:common-patterns">Common Patterns</h2>
+<h3 id="sec:pattern-1-filter-gt-display">Pattern 1: Filter -> Display</h3>
+<pre><code class="language-r"># Users filter with Crosstalk filters, Alpine table shows results
+alpine_crosstalk_table(shared_data, height = &quot;500px&quot;)
+</code></pre>
+<h3 id="sec:pattern-2-select-gt-chart">Pattern 2: Select -> Chart</h3>
+<pre><code class="language-r"># Users select rows in Alpine, Plotly chart updates to highlight selection
+plotly::plot_ly(shared_data) %>%
+  crosstalk::bscols(
+    alpine_crosstalk_table(shared_data, selectable = TRUE)
+  )
+</code></pre>
+<h3 id="sec:pattern-3-multi-widget-dashboard">Pattern 3: Multi-Widget Dashboard</h3>
+<pre><code class="language-r"># Users interact with multiple Alpine and Crosstalk widgets simultaneously
+# All synchronized without server code
+alpine_tag(&quot;div&quot;,
+  alpine_crosstalk_table(shared_data1),
+  alpine_crosstalk_table(shared_data2),  # Same group
+  plotly::plot_ly(shared_data1)          # Same group
+)
+</code></pre>
+<h2 id="sec:troubleshooting">Troubleshooting</h2>
+<p><strong>Q: Table shows “No data to display”</strong>
+A: Check that your data.frame is not empty and that you’re using a non-empty SharedData object.</p>
+<p><strong>Q: Selections don’t sync with other widgets</strong>
+A: Verify all widgets use the same Crosstalk group name. Check browser console for JavaScript errors.</p>
+<p><strong>Q: Performance is slow with large datasets</strong>
+A: Consider pagination or filtering large datasets server-side before passing to <code>alpine_crosstalk_table()</code>.</p>
+<p><strong>Q: Crosstalk errors</strong>
+A: Ensure <code>crosstalk</code> package is installed. Use <code>alpinejs::alpine_has_crosstalk()</code> to check availability.</p>
+<h2 id="sec:see-also">See Also</h2>
+<ul>
+<li><a href="https://rstudio.github.io/crosstalk/">Crosstalk documentation</a></li>
+<li><a href="getting-started.qmd">Alpine.js modifiers</a> - Learn <code>alpine_model()</code>, <code>alpine_on()</code>, etc.</li>
+<li><a href="components-and-patterns.qmd">Components and patterns</a> - Build custom components</li>
+</ul>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+<nav style="margin-bottom: 1.5rem; font-size: 0.9em;">
+      <a href="../index.html" style="color: #0000ff; text-decoration: underline;">Home</a> &gt;
+      <a href="../guides/index.html" style="color: #0000ff; text-decoration: underline;">Guides</a> &gt;
+      <span style="color: #666;">Crosstalk Integration</span>
+      </nav>
+  </main>
+
+  <footer>
+    <p>
+      alpinejs &mdash; R interface for Alpine.js<br>
+      <a href="https://github.com/brownag/alpinejs">View on GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

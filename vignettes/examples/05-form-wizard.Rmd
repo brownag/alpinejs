@@ -1,0 +1,372 @@
+---
+title: "Example: Multi-Step Form Wizard"
+---
+
+
+
+```{r, eval=TRUE, echo=FALSE, results='asis'}
+library(alpinejs)
+library(htmltools)
+
+# Create the global form object with validation logic
+form_script <- tags$script(htmltools::HTML("
+  window.wizardApp = {
+    step: 1,
+    submitted: false,
+    form: {
+      firstName: '',
+      lastName: '',
+      dateOfBirth: '',
+      email: '',
+      phone: '',
+      address: '',
+      agreeToTerms: false
+    },
+    errors: {
+      firstName: '',
+      lastName: '',
+      dateOfBirth: '',
+      email: '',
+      phone: '',
+      address: ''
+    },
+
+    // Validation methods
+    validateEmail: function(email) {
+      const re = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+      return re.test(email);
+    },
+
+    validatePhone: function(phone) {
+      const re = /^[\\d\\s()+-]*\\d[\\d\\s()+-]*$/;
+      return phone.length >= 10 && re.test(phone);
+    },
+
+    validateAddress: function(address) {
+      return address.length >= 10;
+    },
+
+    validateStep1: function() {
+      let isValid = true;
+      this.errors.firstName = !this.form.firstName ? 'First name is required' : '';
+      this.errors.lastName = !this.form.lastName ? 'Last name is required' : '';
+      this.errors.dateOfBirth = !this.form.dateOfBirth ? 'Date of birth is required' : '';
+      return !this.errors.firstName && !this.errors.lastName && !this.errors.dateOfBirth;
+    },
+
+    validateStep2: function() {
+      this.errors.email = !this.form.email ? 'Email is required' :
+                          !this.validateEmail(this.form.email) ? 'Invalid email format' : '';
+      this.errors.phone = !this.form.phone ? 'Phone is required' :
+                          !this.validatePhone(this.form.phone) ? 'Invalid phone format (at least 10 digits)' : '';
+      this.errors.address = !this.form.address ? 'Address is required' :
+                           !this.validateAddress(this.form.address) ? 'Address must be at least 10 characters' : '';
+      return !this.errors.email && !this.errors.phone && !this.errors.address;
+    },
+
+    nextFromStep1: function() {
+      if (this.validateStep1()) {
+        this.step = 2;
+      }
+    },
+
+    nextFromStep2: function() {
+      if (this.validateStep2()) {
+        this.step = 3;
+      }
+    },
+
+    submitForm: function() {
+      const formData = JSON.stringify(this.form);
+      console.log('Submitted form:', formData);
+      this.submitted = true;
+      setTimeout(() => {
+        this.step = 1;
+        this.submitted = false;
+        this.form = {
+          firstName: '',
+          lastName: '',
+          dateOfBirth: '',
+          email: '',
+          phone: '',
+          address: '',
+          agreeToTerms: false
+        };
+        this.errors = {
+          firstName: '',
+          lastName: '',
+          dateOfBirth: '',
+          email: '',
+          phone: '',
+          address: ''
+        };
+      }, 2000);
+    }
+  };
+"))
+
+# Build form wizard with alpine_data_js() for global object
+app <- htmltools::tagList(
+  form_script,
+  alpine_tag("div",
+  class = "form-wizard",
+  style = "max-width: 600px; margin: 40px auto; font-family: sans-serif;",
+
+  # Header
+  alpine_tag("h1","Account Setup Wizard", style = "color: #333; margin-bottom: 30px; text-align: center;"),
+
+    # Progress bar
+    alpine_tag("div",
+      style = "margin-bottom: 30px;",
+      alpine_tag("div",
+        style = "display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;",
+
+        # Step 1
+        alpine_tag("div",
+          style = "padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s;"
+        ) |>
+          alpine_bind("style", "step >= 1 ? 'background: #007bff; color: white;' : 'background: #f0f0f0; color: #999;'") |>
+          alpine_bind("class", "step === 1 ? 'font-weight-bold' : ''") |>
+          alpine_on("click", "step = 1") |>
+          htmltools::tagSetChildren(htmltools::HTML("Personal Info")),
+
+        # Step 2
+        alpine_tag("div",
+          style = "padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s;"
+        ) |>
+          alpine_bind("style", "step >= 2 ? 'background: #007bff; color: white;' : 'background: #f0f0f0; color: #999;'") |>
+          alpine_bind("class", "step === 2 ? 'font-weight-bold' : ''") |>
+          alpine_on("click", "step = 2") |>
+          htmltools::tagSetChildren(htmltools::HTML("Contact Info")),
+
+        # Step 3
+        alpine_tag("div",
+          style = "padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s;"
+        ) |>
+          alpine_bind("style", "step >= 3 ? 'background: #007bff; color: white;' : 'background: #f0f0f0; color: #999;'") |>
+          alpine_bind("class", "step === 3 ? 'font-weight-bold' : ''") |>
+          alpine_on("click", "step = 3") |>
+          htmltools::tagSetChildren(htmltools::HTML("Confirmation"))
+      ),
+
+      # Progress bar visual
+      alpine_tag("div",
+        style = "height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden;",
+        alpine_tag("div",
+          style = "height: 100%; background: #007bff; border-radius: 3px; transition: width 0.3s;"
+        ) |>
+          alpine_bind("style", "{ width: ((step / 3) * 100) + '%' }")
+      )
+    ),
+
+    # Step 1: Personal Information
+    alpine_tag("div",
+      style = "background: white; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;",
+
+      alpine_tag("h3","Step 1: Personal Information", style = "margin-bottom: 20px; color: #333;"),
+
+      alpine_field(
+        label = "First Name",
+        input_tag = alpine_tag("input",
+          type = "text",
+          placeholder = "John",
+          style = "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
+        ),
+        model_var = "form.firstName",
+        error_var = "errors.firstName",
+        .trim = TRUE
+      ),
+
+      alpine_field(
+        label = "Last Name",
+        input_tag = alpine_tag("input",
+          type = "text",
+          placeholder = "Doe",
+          style = "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
+        ),
+        model_var = "form.lastName",
+        error_var = "errors.lastName",
+        .trim = TRUE
+      ),
+
+      alpine_field(
+        label = "Date of Birth",
+        input_tag = alpine_tag("input",
+          type = "date",
+          style = "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
+        ),
+        model_var = "form.dateOfBirth",
+        error_var = "errors.dateOfBirth"
+      ),
+
+      # Next button
+      alpine_tag("button",
+        "Next",
+        style = "background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px;"
+      ) |>
+        alpine_on("click", "nextFromStep1()")
+    ) |>
+      alpine_show("step === 1"),
+
+    # Step 2: Contact Information
+    alpine_tag("div",
+      style = "background: white; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;",
+
+      alpine_tag("h3","Step 2: Contact Information", style = "margin-bottom: 20px; color: #333;"),
+
+      alpine_field(
+        label = "Email",
+        input_tag = alpine_tag("input",
+          type = "email",
+          placeholder = "john@example.com",
+          style = "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
+        ),
+        model_var = "form.email",
+        error_var = "errors.email",
+        .trim = TRUE
+      ),
+
+      alpine_field(
+        label = "Phone",
+        input_tag = alpine_tag("input",
+          type = "tel",
+          placeholder = "(555) 123-4567",
+          style = "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
+        ),
+        model_var = "form.phone",
+        error_var = "errors.phone",
+        .trim = TRUE
+      ),
+
+      alpine_field(
+        label = "Address",
+        input_tag = alpine_tag("textarea",
+          placeholder = "123 Main St, City, State 12345",
+          style = "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; min-height: 80px;"
+        ),
+        model_var = "form.address",
+        error_var = "errors.address",
+        .trim = TRUE
+      ),
+
+      # Navigation buttons
+      alpine_tag("div",
+        style = "display: grid; grid-template-columns: 1fr 1fr; gap: 10px;",
+
+        alpine_tag("button",
+          "Back",
+          style = "background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px;"
+        ) |>
+          alpine_on("click", "step = 1"),
+
+        alpine_tag("button",
+          "Next",
+          style = "background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px;"
+        ) |>
+          alpine_on("click", "nextFromStep2()")
+      )
+    ) |>
+      alpine_show("step === 2"),
+
+    # Step 3: Confirmation
+    alpine_tag("div",
+      style = "background: white; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;",
+
+      alpine_tag("h3","Step 3: Review & Confirm", style = "margin-bottom: 20px; color: #333;"),
+
+      # Summary
+      alpine_tag("div",
+        style = "",
+
+        # Personal Info Section
+        alpine_tag("div",
+          style = "margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee;",
+          alpine_tag("h4","Personal Information", style = "margin-top: 0; color: #666;"),
+          alpine_tag("div",style = "display: grid; grid-template-columns: 1fr 1fr; gap: 15px;",
+            alpine_tag("div",
+              alpine_tag("div","Full Name", style = "color: #999; font-size: 12px;"),
+              alpine_tag("div",style = "font-weight: bold; color: #333;") |>
+                alpine_text("form.firstName + ' ' + form.lastName")
+            ),
+            alpine_tag("div",
+              alpine_tag("div","Date of Birth", style = "color: #999; font-size: 12px;"),
+              alpine_tag("div",style = "font-weight: bold; color: #333;") |>
+                alpine_text("form.dateOfBirth")
+            )
+          )
+        ),
+
+        # Contact Info Section
+        alpine_tag("div",
+          style = "margin-bottom: 20px;",
+          alpine_tag("h4","Contact Information", style = "margin-top: 0; color: #666;"),
+          alpine_tag("div",style = "display: grid; grid-template-columns: 1fr 1fr; gap: 15px;",
+            alpine_tag("div",
+              alpine_tag("div","Email", style = "color: #999; font-size: 12px;"),
+              alpine_tag("div",style = "font-weight: bold; color: #333;") |>
+                alpine_text("form.email")
+            ),
+            alpine_tag("div",
+              alpine_tag("div","Phone", style = "color: #999; font-size: 12px;"),
+              alpine_tag("div",style = "font-weight: bold; color: #333;") |>
+                alpine_text("form.phone")
+            )
+          ),
+          alpine_tag("div",
+            style = "margin-top: 10px;",
+            alpine_tag("div","Address", style = "color: #999; font-size: 12px;"),
+            alpine_tag("div",
+              style = "font-weight: bold; color: #333;"
+            ) |>
+              alpine_text("form.address")
+          )
+        )
+      ),
+
+      # Consent checkbox
+      alpine_tag("div",
+        style = "margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 4px;",
+        alpine_tag("label",
+          style = "display: flex; align-items: center; cursor: pointer;",
+          alpine_tag("input",
+            type = "checkbox",
+            style = "margin-right: 10px; cursor: pointer;"
+          ) |>
+            alpine_model("form.agreeToTerms"),
+          alpine_tag("span","I agree to the Terms and Conditions", style = "color: #333;")
+        )
+      ),
+
+      # Status message
+      alpine_tag("div",
+        style = "margin-bottom: 20px; padding: 15px; background: #d4edda; color: #155724; border-radius: 4px;"
+      ) |>
+        alpine_show("submitted") |>
+        alpine_text("'Account created successfully!'"),
+
+      # Navigation buttons
+      alpine_tag("div",
+        style = "display: grid; grid-template-columns: 1fr auto; gap: 10px;",
+
+        alpine_tag("button",
+          "Back",
+          style = "background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px;"
+        ) |>
+          alpine_on("click", "step = 2"),
+
+        alpine_tag("button",
+          style = "background: #28a745; color: white; border: none; padding: 10px 30px; border-radius: 4px; cursor: pointer; font-size: 16px;"
+        ) |>
+          alpine_text("submitted ? 'Done' : 'Create Account'") |>
+          alpine_bind("disabled", "!form.agreeToTerms || submitted") |>
+          alpine_on("click", "submitForm()")
+      )
+    ) |>
+      alpine_show("step === 3")
+  ) |>
+    alpine_data_js("window.wizardApp")
+)
+
+# Output the app
+app
+```

@@ -1,0 +1,416 @@
+---
+title: Crosstalk Integration: Cross-Widget Reactivity
+---
+
+
+
+```{r setup, include=FALSE}
+litedown::reactor(echo = TRUE)
+RUN_EXAMPLES <- nzchar(Sys.getenv("R_ALPINEJS_RUN_EXAMPLES"))
+library(alpinejs)
+library(htmltools)
+```
+
+```{r test_crosstalk, eval=RUN_EXAMPLES, echo=FALSE}
+# Verify crosstalk functions work
+data <- data.frame(id = 1:3, name = c("Alice", "Bob", "Charlie"))
+if (alpinejs::alpine_has_crosstalk()) {
+  cat("Crosstalk available - prepare_crosstalk_data can work\n")
+} else {
+  cat("Crosstalk not installed - showing structure\n")
+}
+cat("Data prepared for demo\n")
+```
+
+## Overview
+
+**Crosstalk** is an R package that enables communication between widgets in HTML dashboards. When multiple widgets share the same Crosstalk group, user interactions in one widget (like clicking to select rows) update other widgets without server-side code.
+
+The `alpinejs` package integrates with Crosstalk to create Alpine.js components that:
+
+- Respond to selection and filtering events from other widgets
+- Automatically sync highlighted rows, filtered lists, and reactive data
+- Work in static R Markdown documents, Shiny apps, and standalone HTML pages
+- Complement Plotly, Leaflet, and other Crosstalk-aware packages
+
+## Prerequisites
+
+To use Crosstalk with alpinejs, install the `crosstalk` package:
+
+```r
+install.packages("crosstalk")
+library(crosstalk)
+```
+
+Check availability in your code:
+
+```r
+if (alpinejs::alpine_has_crosstalk()) {
+  # Use Crosstalk features
+}
+```
+
+```{r test_crosstalk_functions, eval=RUN_EXAMPLES, echo=FALSE}
+# Test core crosstalk functions work
+cat("Testing Crosstalk functions...\n")
+
+# Test data preparation
+result <- alpine_prepare_crosstalk_data(
+  data.frame(id = 1:3, name = c("A", "B", "C")),
+  key_column = "id",
+  group = "test_group"
+)
+
+cat("prepare_crosstalk_data() called\n")
+
+# Test availability check
+cat("Crosstalk available:", alpinejs::alpine_has_crosstalk(), "\n")
+```
+
+## Core Functions
+
+### 1. `prepare_crosstalk_data()`
+
+Prepares a data.frame for Crosstalk integration by extracting row identifiers (keys):
+
+```r
+# Use a column as row key
+prepared <- prepare_crosstalk_data(
+  iris,
+  key_column = "Species",  # Keys for row identification
+  group = "iris_demo"       # Group name for Crosstalk
+)
+
+# Or use row numbers as keys
+prepared <- prepare_crosstalk_data(
+  mtcars,
+  key_column = NULL,         # Defaults to row numbers
+  group = "cars_data"
+)
+```
+
+**Returns a list with:**
+
+- `keys`: Character vector of row identifiers
+- `data`: Original data.frame
+- `group`: Crosstalk group name
+- `key_column`: The column name used for keys
+
+### 2. `alpine_crosstalk_table()`
+
+Creates an interactive table that responds to Crosstalk selection/filter events:
+
+```r
+# With SharedData
+shared_iris <- crosstalk::SharedData$new(iris, group = "iris_data")
+
+alpine_crosstalk_table(
+  shared_iris,
+  columns = c("Species", "Sepal.Length", "Petal.Width"),
+  key_column = "Species",
+  selectable = TRUE,          # Allow row selection
+  height = "400px"            # Scrollable height
+)
+
+# With a plain data.frame (auto-wrapped)
+alpine_crosstalk_table(
+  iris,
+  height = "500px"
+)
+```
+
+**Parameters:**
+
+| Parameter | Type | Default | Purpose |
+|-----------|------|---------|---------|
+| `shared_data` | SharedData or data.frame | required | Data source (must non-empty) |
+| `columns` | character vector | all | Columns to display |
+| `key_column` | character | 1st column | Column with row IDs |
+| `selectable` | logical | TRUE | Allow row selection |
+| `height` | character | "400px" | Table scroll height |
+| `striped` | logical | TRUE | Alternate row colors |
+| `responsive` | logical | TRUE | Mobile-responsive styling |
+
+### 3. `add_crosstalk_listener()`
+
+Injects a Crosstalk event listener into an Alpine component (advanced use):
+
+```r
+tag <- alpine_tag("div")
+
+tag_with_listener <- add_crosstalk_listener(
+  tag,
+  group = "my_group",
+  handle_type = "selection"  # "selection", "filter", or "both"
+)
+```
+
+## Example 1: Simple Selection Table
+
+**Scenario:** Users click rows in an Alpine table to select them. Selection state updates in real-time.
+
+```r
+library(alpinejs)
+library(crosstalk)
+library(htmltools)
+
+# Create shared data
+shared_data <- SharedData$new(
+  data.frame(
+    id = 1:10,
+    name = paste0("Item_", 1:10),
+    value = round(runif(10, 10, 100), 2)
+  ),
+  group = "items_demo"
+)
+
+# Create table
+alpine_crosstalk_table(
+  shared_data,
+  key_column = "id",
+  selectable = TRUE,
+  columns = c("id", "name", "value"),
+  height = "300px"
+) |>
+  htmltools::browsable()
+
+# Users can click rows to select them
+# Selection persists and can trigger other Crosstalk widgets
+```
+
+## Example 2: Multi-Filter Dashboard
+
+**Scenario:** Users filter data with dropdowns and range sliders. The table updates to show only matching rows. Summary statistics update as data changes.
+
+```r
+library(alpinejs)
+library(crosstalk)
+library(htmltools)
+
+# Create sample data
+data <- data.frame(
+  id = seq_len(100),
+  category = sample(c("A", "B", "C"), 100, replace = TRUE),
+  region = sample(c("North", "South", "East", "West"), 100, replace = TRUE),
+  value = rnorm(100, mean = 50, sd = 15)
+)
+
+shared_data <- crosstalk::SharedData$new(data, group = "dashboard_demo")
+
+# Create dashboard
+alpine_tag("div",
+  style = "padding: 20px;",
+
+  alpine_tag("h1", "Data Dashboard"),
+
+  # Filter controls
+  alpine_tag("div",
+    style = "display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;",
+
+    # Category filter
+    alpine_tag("div",
+      alpine_tag("label", "Category:"),
+      alpine_tag("select",
+        alpine_tag("option", value = "", "All"),
+        alpine_tag("option", value = "A", "Category A"),
+        alpine_tag("option", value = "B", "Category B"),
+        alpine_tag("option", value = "C", "Category C")
+      ) |>
+        alpine_model("selectedCategory")
+    ),
+
+    # Region filter
+    alpine_tag("div",
+      alpine_tag("label", "Region:"),
+      alpine_tag("select",
+        alpine_tag("option", value = "", "All"),
+        alpine_tag("option", value = "North", "North"),
+        alpine_tag("option", value = "South", "South"),
+        alpine_tag("option", value = "East", "East"),
+        alpine_tag("option", value = "West", "West")
+      ) |>
+        alpine_model("selectedRegion")
+    )
+  ),
+
+  # Summary stats
+  alpine_tag("div",
+    style = "display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;",
+
+    alpine_tag("div",
+      style = "background: #e3f2fd; padding: 15px; border-radius: 4px;",
+      alpine_tag("strong", "Total Records: "),
+      alpine_tag("span", "{{ filteredData.length }}")
+    ),
+
+    alpine_tag("div",
+      style = "background: #f3e5f5; padding: 15px; border-radius: 4px;",
+      alpine_tag("strong", "Selected: "),
+      alpine_tag("span", "{{ selectedKeys.length }}")
+    )
+  ),
+
+  # Data table
+  alpine_crosstalk_table(
+    shared_data,
+    columns = c("id", "category", "region", "value"),
+    selectable = TRUE,
+    height = "400px"
+  )
+) |>
+  alpine_data(
+    selectedCategory = "",
+    selectedRegion = "",
+    selectedKeys = htmlwidgets::JS("[]"),
+    filteredData = htmlwidgets::JS("data")
+  ) |>
+  htmltools::browsable()
+```
+
+## Example 3: Alpine + Plotly Sync
+
+**Scenario:** Users click points in a Plotly scatter plot to select rows. The Alpine table highlights corresponding rows and vice versa.
+
+```r
+library(alpinejs)
+library(crosstalk)
+library(plotly)
+library(htmltools)
+
+# Create shared data
+shared_iris <- crosstalk::SharedData$new(iris, group = "iris_demo")
+
+# Create layout
+alpine_tag("div",
+  style = "display: flex; gap: 20px; padding: 20px;",
+
+  # Plotly chart
+  alpine_tag("div",
+    style = "flex: 1;",
+    alpine_tag("h3", "Plotly Scatter (Click to select)"),
+    # Use bscols() for Crosstalk-Plotly integration
+    crosstalk::bscols(
+      plotly::plot_ly(shared_iris, x = ~Sepal.Length, y = ~Petal.Length,
+                      mode = "markers", color = ~Species)
+    )
+  ),
+
+  # Alpine table
+  alpine_tag("div",
+    style = "flex: 1;",
+    alpine_tag("h3", "Alpine Table"),
+    alpine_crosstalk_table(
+      shared_iris,
+      columns = c("Species", "Sepal.Length", "Petal.Length"),
+      selectable = TRUE,
+      height = "400px"
+    )
+  )
+) |>
+  htmltools::browsable()
+```
+
+When users click points in the Plotly chart, rows are selected. The Alpine table automatically highlights matching rows thanks to Crosstalk.
+
+## Data Flow & Architecture
+
+### How Selection Works
+
+```
+User clicks row in Alpine table
+         ↓
+Alpine updates selectedKeys in x-data
+         ↓
+JavaScript sends Crosstalk SelectionHandle event
+         ↓
+Other Crosstalk widgets receive selection event
+         ↓
+Plotly, Leaflet, other tables update
+```
+
+### Preventing Circular Updates
+
+When both widgets respond to Crosstalk events, we must prevent infinite loops:
+
+```
+Alpine -> Crosstalk -> Plotly -> Crosstalk -> Alpine (LOOP!)
+```
+
+The `alpine_crosstalk_table()` function handles this automatically by checking event senders and skipping self-triggered updates.
+
+## Advanced: Custom Listeners
+
+For complex scenarios, inject listeners into custom components:
+
+```r
+custom_div <- alpine_tag("div",
+  "Custom Alpine component here"
+) |>
+  alpine_data(selectedKeys = htmlwidgets::JS("[]"))
+
+# Add Crosstalk listener
+custom_div_with_listener <- add_crosstalk_listener(
+  custom_div,
+  group = "my_group",
+  handle_type = "selection",
+  key_column = "id"
+)
+```
+
+## Performance Considerations
+
+- **Recommended dataset size:** Up to ~25,000 rows
+- **Very large datasets (>25K rows):** Consider pagination or server-side filtering
+- **Network:** Crosstalk works entirely in-browser; no server calls needed
+- **Browser compatibility:** Works in all modern browsers (Chrome, Firefox, Safari, Edge)
+
+## Common Patterns
+
+### Pattern 1: Filter -> Display
+
+```r
+# Users filter with Crosstalk filters, Alpine table shows results
+alpine_crosstalk_table(shared_data, height = "500px")
+```
+
+### Pattern 2: Select -> Chart
+
+```r
+# Users select rows in Alpine, Plotly chart updates to highlight selection
+plotly::plot_ly(shared_data) %>%
+  crosstalk::bscols(
+    alpine_crosstalk_table(shared_data, selectable = TRUE)
+  )
+```
+
+### Pattern 3: Multi-Widget Dashboard
+
+```r
+# Users interact with multiple Alpine and Crosstalk widgets simultaneously
+# All synchronized without server code
+alpine_tag("div",
+  alpine_crosstalk_table(shared_data1),
+  alpine_crosstalk_table(shared_data2),  # Same group
+  plotly::plot_ly(shared_data1)          # Same group
+)
+```
+
+## Troubleshooting
+
+**Q: Table shows "No data to display"**
+A: Check that your data.frame is not empty and that you're using a non-empty SharedData object.
+
+**Q: Selections don't sync with other widgets**
+A: Verify all widgets use the same Crosstalk group name. Check browser console for JavaScript errors.
+
+**Q: Performance is slow with large datasets**
+A: Consider pagination or filtering large datasets server-side before passing to `alpine_crosstalk_table()`.
+
+**Q: Crosstalk errors**
+A: Ensure `crosstalk` package is installed. Use `alpinejs::alpine_has_crosstalk()` to check availability.
+
+## See Also
+
+- [Crosstalk documentation](https://rstudio.github.io/crosstalk/)
+- [Alpine.js modifiers](getting-started.qmd) - Learn `alpine_model()`, `alpine_on()`, etc.
+- [Components and patterns](components-and-patterns.qmd) - Build custom components

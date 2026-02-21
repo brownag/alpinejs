@@ -1,0 +1,600 @@
+---
+title: Performance & Best Practices
+---
+
+
+
+```{r setup, include=FALSE}
+litedown::reactor(echo = TRUE)
+RUN_EXAMPLES <- nzchar(Sys.getenv("R_ALPINEJS_RUN_EXAMPLES"))
+library(alpinejs)
+```
+
+```{r test_performance, eval=RUN_EXAMPLES, echo=FALSE}
+# Verify performance patterns work
+cat("Creating different DOM structures to test\n")
+# Both slow and fast versions should build valid tags
+slow <- alpine_tag("ul",
+  alpine_tag("li", "item 1"), 
+  alpine_tag("li", "item 2")
+)
+fast <- alpine_tag("ul",
+  alpine_tag("li", "item 1"), 
+  alpine_tag("li", "item 2")
+)
+cat("Both structures created successfully\n")
+```
+
+## Overview
+
+This vignette covers optimization strategies, debugging techniques, and best practices for building performant, maintainable Alpine.js applications in R.
+
+## Performance Optimization
+
+### 1. Reduce DOM Size
+
+Minimize the number of DOM nodes, especially in loops:
+
+```r
+# Slow approach: Renders every field for every item
+alpine_tag("ul",
+  alpine_tag("li",
+    ":for" = "item in items",
+    # 20 child elements per item
+    alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "item.name")
+    ),
+    alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "item.email")
+    ),
+    alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "item.status")
+    )
+    # ... many more spans
+  )
+)
+
+# Faster approach: Use single computed property
+alpine_tag("ul",
+  alpine_tag("li",
+    ":for" = "item in items",
+    alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "formatItem(item)")
+    )
+  )
+) |>
+  alpine_data(
+    items = list(...),
+    formatItem = htmlwidgets::JS("
+      function(item) {
+        return item.name + ' (' + item.email + ')';
+      }
+    ")
+  )
+```
+
+### 2. Use Computed Properties Strategically
+
+Pre-compute expensive operations instead of recalculating on every render:
+
+```r
+# Slow approach: Recalculates on every update
+alpine_tag("div",
+  alpine_tag("span",
+    alpine_attr(`x-bind:textContent` = "items.filter(i => i.active).length")
+  )
+)
+
+# Faster approach: Computed property with caching
+alpine_tag("div",
+  alpine_tag("span",
+    alpine_attr(`x-bind:textContent` = "activeCount")
+  )
+) |>
+  alpine_data(
+    items = list(...),
+    activeCount = htmlwidgets::JS("
+      get activeCount() {
+        return this.items.filter(i => i.active).length;
+      }
+    ")
+  )
+```
+
+### 3. Debounce Expensive Operations
+
+Use `.debounce` modifier for search, filter, and validation:
+
+```r
+# Slow approach: API call on every keystroke
+alpine_tag("input") |>
+  alpine_model("query") |>
+  alpine_on("change", "performSearch()")
+
+# Faster approach: Debounced search (wait 300ms)
+alpine_tag("input") |>
+  alpine_model("query", .debounce = 300) |>
+  alpine_on("change", "performSearch()")
+```
+
+### 4. Limit Loop Rendering with Pagination
+
+Large datasets should be paginated client-side or server-side:
+
+```r
+# Recommended approach: Show only current page
+alpine_tag("div",
+  alpine_tag("ul",
+    alpine_tag("li",
+      ":for" = "(item, idx) in visibleItems",
+      alpine_tag("span",
+        alpine_attr(`x-bind:textContent` = "item.name")
+      )
+    )
+  ),
+  
+  # Pagination controls
+  alpine_tag("button", "Previous") |>
+    alpine_on("click", "page--"),
+  alpine_tag("span",
+    alpine_attr(`x-bind:textContent` = "page")
+  ),
+  alpine_tag("button", "Next") |>
+    alpine_on("click", "page++")
+) |>
+  alpine_data(
+    items = list(...),  # 10,000 items
+    page = 1,
+    pageSize = 20,
+    visibleItems = htmlwidgets::JS("
+      get visibleItems() {
+        const start = (this.page - 1) * this.pageSize;
+        return this.items.slice(start, start + this.pageSize);
+      }
+    ")
+  )
+```
+
+### 5. Avoid Excessive Event Listeners
+
+Attach listeners at parent level (event delegation):
+
+```r
+# Slow approach: Separate listener for each item
+alpine_tag("ul",
+  alpine_tag("li",
+    ":for" = "item in items",
+    alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "item.name")
+    ),
+    alpine_tag("button", "Delete") |>
+      alpine_on("click", "deleteItem(item.id)")
+  )
+)
+
+# Faster approach: Single parent listener with event delegation
+alpine_tag("ul",
+  alpine_tag("li",
+    ":for" = "item in items",
+    alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "item.name")
+    ),
+    alpine_tag("button", ":data-id" = "item.id", "Delete")
+  ) |>
+    alpine_on("click", "handleDelete(event)")  # Single listener
+) |>
+  alpine_data(
+    items = list(...),
+    handleDelete = htmlwidgets::JS("
+      function(e) {
+        if (e.target.tagName === 'BUTTON') {
+          this.deleteItem(e.target.dataset.id);
+        }
+      }
+    ")
+  )
+```
+
+## Data & State Management
+
+### 1. Structure State Logically
+
+Group related data in nested objects:
+
+```r
+# Poor organization: Flat structure
+alpine_data(
+  username = "",
+  email = "",
+  phone = "",
+  address = "",
+  city = "",
+  country = ""
+  # ... many more fields
+)
+
+# Better organization: Nested objects
+alpine_data(
+  user = htmlwidgets::JS("
+    {
+      username: '',
+      email: '',
+      phone: ''
+    }
+  "),
+  address = htmlwidgets::JS("
+    {
+      street: '',
+      city: '',
+      country: ''
+    }
+  ")
+)
+
+# Access as: this.user.email, this.address.city
+```
+
+### 2. Use Proper Data Types
+
+Match JavaScript types to your data:
+
+```r
+# Incorrect: Numbers as strings
+alpine_data(
+  age = "25",      # String, not number
+  balance = "100"  # String, not number
+)
+
+# Correct: Use proper types
+alpine_data(
+  age = htmlwidgets::JS("25"),      # Number
+  balance = htmlwidgets::JS("100")  # Number
+)
+```
+
+### 3. Validate on Client Only When Appropriate
+
+Use client validation for UX, server validation for security:
+
+```r
+# Form with client-side feedback
+alpine_tag("form",
+  alpine_tag("input",
+    type = "email",
+    placeholder = "Email"
+  ) |>
+    alpine_model("email", .lazy = TRUE),
+  
+  alpine_tag("div",
+    "Invalid email" |>
+      alpine_show("email && !isValidEmail()")
+  ),
+  
+  alpine_tag("button", "Submit") |>
+    htmlwidgets::html_attr("disabled", htmlwidgets::JS("!isValidEmail()"))
+) |>
+  alpine_data(
+    email = "",
+    isValidEmail = htmlwidgets::JS("
+      function() {
+        return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(this.email);
+      }
+    ")
+  )
+
+# ⚠️ ALWAYS validate on server too for security
+```
+
+## Debugging & Inspection
+
+### 1. Use Browser Developer Tools
+
+Alpine.js state is accessible in console:
+
+```r
+alpine_tag("div") |>
+  alpine_data(
+    message = "Hello",
+    count = 0,
+    increment = htmlwidgets::JS("
+      function() {
+        console.log('Current state:', {
+          message: this.message,
+          count: this.count
+        });
+        this.count++;
+      }
+    ")
+  )
+```
+
+Open browser console and type: `document.body.__x.$data`
+
+### 2. Log Component State
+
+Add logging to track state changes:
+
+```r
+alpine_tag("div",
+  alpine_tag("button", "Click me") |>
+    alpine_on("click", "logState()")
+) |>
+  alpine_data(
+    clicks = 0,
+    logState = htmlwidgets::JS("
+      function() {
+        this.clicks++;
+        console.log('Clicks:', this.clicks);
+        console.log('Full state:', this);
+      }
+    ")
+  )
+```
+
+### 3. Use Alpine DevTools (Browser Extension)
+
+Install [Alpine.js DevTools](https://chrome.google.com/webstore/detail/alpinejs-devtools) for visual debugging:
+
+- Inspect component state
+- Watch state changes in real-time
+- Trigger methods from DevTools
+- Time travel through state history
+
+## Code Organization
+
+### 1. Keep Components Focused
+
+One responsibility per component:
+
+```r
+# Poor: Component doing too many things
+alpine_data(
+  // Sales data
+  sales = list(...),
+  // UI state
+  selectedTab = "",
+  // Filters
+  filterCategory = "",
+  // Sorting
+  sortBy = "",
+  // Form data
+  formField = "",
+  // ... 50 more lines
+)
+
+# Better: Component for specific feature
+alpine_data(
+  sales = list(...),      # One concern
+  selectedTab = "recent"
+)
+```
+
+### 2. Extract Reusable Functions
+
+Create helper functions for complex logic:
+
+```r
+# ❌ INLINE: Hard to test and reuse
+alpine_data(
+  items = list(...),
+  processAndFilter = htmlwidgets::JS("
+    function() {
+      return this.items
+        .map(item => ({
+          ...item,
+          calculated: item.a + item.b
+        }))
+        .filter(item => item.calculated > 100)
+        .sort((a, b) => b.calculated - a.calculated);
+    }
+  ")
+)
+
+# PREFERRED: Reusable functions
+alpine_data(
+  items = list(...),
+  add = htmlwidgets::JS("(a, b) => a + b"),
+  processAndFilter = htmlwidgets::JS("
+    function() {
+      return this.items
+        .map(item => ({...item, calculated: this.add(item.a, item.b)}))
+        .filter(item => item.calculated > 100)
+        .sort((a, b) => b.calculated - a.calculated);
+    }
+  ")
+)
+```
+
+### 3. Use Meaningful Names
+
+Clear naming improves readability:
+
+```r
+# NOT RECOMMENDED: Vague naming
+alpine_data(
+  d = list(...),
+  fn = htmlwidgets::JS("function() {...}"),
+  x = ""
+)
+
+# PREFERRED: Clear naming
+alpine_data(
+  documentList = list(...),
+  formatDocument = htmlwidgets::JS("function() {...}"),
+  searchQuery = ""
+)
+```
+
+## Testing Strategies
+
+### 1. Test State Transitions
+
+```r
+# Example test pseudo-code
+test_that("Counter increments correctly", {
+  # Create component with counter
+  component <- alpine_tag("div") |>
+    alpine_data(count = 0, increment = JS("function() { this.count++; }"))
+  
+  # Verify initial state
+  # Trigger action
+  # Verify new state
+})
+```
+
+### 2. Test Edge Cases
+
+```r
+# Test boundary conditions
+test_cases <- list(
+  list(input = -1, expected = 0),      # Negative
+  list(input = 0, expected = 0),       # Zero
+  list(input = 1, expected = 1),       # Single
+  list(input = 1000000, expected = NA) # Large number
+)
+```
+
+### 3. Performance Tests
+
+Use browser timing tools:
+
+```r
+# Measure operation timing
+alpine_data(
+  slowOperation = htmlwidgets::JS("
+    function() {
+      const start = performance.now();
+      // ... operation ...
+      const duration = performance.now() - start;
+      console.log('Operation took ' + duration + 'ms');
+    }
+  ")
+)
+```
+
+## Security Best Practices
+
+### 1. Validate All User Input
+
+```r
+# Client-side feedback (UX)
+alpine_tag("input") |>
+  alpine_model("username", .trim = TRUE) |>
+  alpine_on("change", "validateUsername()")
+
+# Server-side validation (security)
+# Always validate on the server!
+```
+
+### 2. Escape Output for XSS Protection
+
+```r
+# NOT RECOMMENDED: Renders HTML as-is
+alpine_tag("div",
+  alpine_attr(`x-bind:innerHTML` = "userInput")
+)
+
+# RECOMMENDED: Renders as text
+alpine_tag("div",
+  alpine_attr(`x-bind:textContent` = "userInput")
+)
+```
+
+### 3. Use CSP-Compatible Patterns
+
+```r
+# NOT RECOMMENDED: Eval with user data
+alpine_data(
+  expression = JS("eval(userData)")  # Dangerous!
+)
+
+# RECOMMENDED: Pre-defined operations
+alpine_data(
+  operation = "add",  # String, not code
+  operations = JS("
+    {
+      add: (a, b) => a + b,
+      subtract: (a, b) => a - b
+    }
+  ")
+)
+```
+
+## Common Patterns
+
+### Pattern 1: Loading State
+
+```r
+alpine_tag("div",
+  alpine_tag("button", "Fetch Data") |>
+    alpine_on("click", "fetchData()")
+) |>
+  alpine_data(
+    isLoading = htmlwidgets::JS("false"),
+    fetchData = htmlwidgets::JS("
+      async function() {
+        this.isLoading = true;
+        try {
+          const response = await fetch('/api/data');
+          const data = await response.json();
+          // Process data
+        } finally {
+          this.isLoading = false;
+        }
+      }
+    ")
+  )
+```
+
+### Pattern 2: Error Handling
+
+```r
+alpine_data(
+  error = "",
+  operation = htmlwidgets::JS("
+    async function() {
+      this.error = '';
+      try {
+        // Perform operation
+      } catch (e) {
+        this.error = e.message;
+      }
+    }
+  ")
+)
+```
+
+### Pattern 3: Undo/Redo
+
+```r
+alpine_data(
+  state = htmlwidgets::JS("{ value: 0 }"),
+  history = htmlwidgets::JS("[]"),
+  undo = htmlwidgets::JS("
+    function() {
+      if (this.history.length > 0) {
+        this.state = this.history.pop();
+      }
+    }
+  ")
+)
+```
+
+## Checklist: Production Ready
+
+- [ ] All user input validated (client + server)
+- [ ] State structure is clear and organized
+- [ ] No unnecessary re-renders (debouncing in place)
+- [ ] Pagination for large datasets
+- [ ] Error handling with user-friendly messages
+- [ ] Loading/async states handled
+- [ ] Responsive on mobile devices
+- [ ] Browser DevTools work without errors
+- [ ] CSP-compatible (if using CSP)
+- [ ] Performance acceptable on slow connections
+
+## See Also
+
+- [Getting Started](getting-started.qmd)
+- [Crosstalk Integration](crosstalk-integration.qmd)
+- [Alpine.js Performance Guide](https://alpinejs.dev/)

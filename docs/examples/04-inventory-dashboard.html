@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory Dashboard | alpinejs</title>
+  <!-- Load Crosstalk for cross-widget reactivity -->
+  <script src="https://cdn.jsdelivr.net/npm/crosstalk@1.2.0/dist/crosstalk.min.js"></script>
+  <!-- Load Alpine.js for interactive components -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+  <style>
+    /* 1990s Web 1.0 aesthetic - authentic retro feel */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Verdana, Geneva, sans-serif;
+      line-height: 1.6;
+      color: #000;
+      background: #c0c0c0;
+      font-size: 14px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: #dfdfdf;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #dfdfdf;
+      padding-top: 0.8rem;
+    }
+
+    nav a {
+      color: #0000ff;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    nav a:visited {
+      color: #800080;
+    }
+
+    nav a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Main content */
+    main {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      padding: 1rem;
+      background: #fff;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      min-height: calc(100vh - 250px);
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1.5rem 0 0.5rem;
+      font-weight: bold;
+      line-height: 1.3;
+    }
+
+    h1 { 
+      font-size: 2rem;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+      margin-top: 0;
+      color: #0000ff;
+    }
+
+    h2 { 
+      font-size: 1.4rem;
+      color: #0000cc;
+      border-bottom: 1px solid #000;
+    }
+
+    h3 { font-size: 1.1rem; color: #000080; }
+    h4 { font-size: 1rem; color: #000; font-weight: bold; }
+
+    /* Paragraphs & text */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #800080;
+    }
+
+    a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Inline code */
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+      color: #000;
+      border: 1px solid #ccc;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #f0f0f0;
+      border: 1px solid #999;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.4;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #000;
+      border: none;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid #999;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #333;
+      font-style: italic;
+      background: #f5f5f5;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #999;
+      margin: 1.5rem 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      border: 1px solid #999;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border: 1px solid #999;
+    }
+
+    th {
+      background: #c0c0c0;
+      font-weight: bold;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #999;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      color: #000;
+      font-size: 0.85rem;
+      margin: 2rem 1rem 0;
+      background: #dfdfdf;
+    }
+
+    footer a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    footer a:visited {
+      color: #800080;
+    }
+
+    /* Horizontal rule dividers */
+    .divider {
+      border: none;
+      height: 2px;
+      background: linear-gradient(to right, #dfdfdf 0%, #000 50%, #dfdfdf 100%);
+      margin: 1.5rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      main {
+        padding: 0.8rem;
+      }
+
+      header {
+        padding: 0.8rem;
+      }
+
+      nav {
+        gap: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html" style="color: #000; text-decoration: none;">alpinejs</a></h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../guides/">Guides</a>
+      <a href="../examples/">Examples</a>
+      <a href="../reference/">Reference</a>
+      <a href="https://github.com/brownag/alpinejs" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    
+<div class="frontmatter">
+<div class="title"><h1>Example: Product Inventory Dashboard</h1></div>
+</div>
+<div class="body">
+<div class="dashboard-container" style="max-width: 1000px; margin: 40px auto; font-family: sans-serif;" x-data="window.inventoryApp">
+  <h1 id="chp:product-inventory" style="color: #333; margin-bottom: 10px;">Product Inventory</h1>
+  <p style="color: #666; margin-bottom: 30px;">Manage your product inventory with real-time search and filters</p>
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px;">
+    <div class="stat-card" style="background-color: #f0f8ff; padding: 16px; border-radius: 8px; text-align: center; color: #0066cc; ">
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 8px;opacity: 0.8;">Total Products</div>
+      <div style="font-size: 28px; font-weight: bold; color: #0066cc;" x-text="products.length"></div>
+    </div>
+    <div class="stat-card" style="background-color: #fffdf0; padding: 16px; border-radius: 8px; text-align: center; color: #ff8800; ">
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 8px;opacity: 0.8;">Low Stock</div>
+      <div style="font-size: 28px; font-weight: bold; color: #ff8800;" x-text="lowStockCount()"></div>
+    </div>
+    <div class="stat-card" style="background-color: #f0fff0; padding: 16px; border-radius: 8px; text-align: center; color: #00aa00; ">
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 8px;opacity: 0.8;">Total Value</div>
+      <div style="font-size: 28px; font-weight: bold; color: #00aa00;" x-text="&#39;$&#39; + totalValue().toFixed(2)"></div>
+    </div>
+    <div class="stat-card" style="background-color: #f5f5f5; padding: 16px; border-radius: 8px; text-align: center; color: #666; ">
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 8px;opacity: 0.8;">Categories</div>
+      <div style="font-size: 28px; font-weight: bold; color: #666;" x-text="categories().length"></div>
+    </div>
+  </div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+    <div>
+      <label style="display: block; margin-bottom: 5px; color: #666; font-size: 14px;">Search</label>
+      <input type="text" placeholder="Search by product name..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" x-model.debounce.250.trim="searchTerm"/>
+    </div>
+    <div>
+      <label style="display: block; margin-bottom: 5px; color: #666; font-size: 14px;">Category</label>
+      <select style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" x-model="selectedCategory">
+        <option value="">All Categories</option>
+        <template x-for="category in categories()">
+          <option style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" x-bind:value="category" x-text="category"></option>
+        </template>
+      </select>
+    </div>
+    <div>
+      <label style="display: block; margin-bottom: 5px; color: #666; font-size: 14px;">Stock Status</label>
+      <div style="display: flex; gap: 4px; flex-wrap: wrap;" All Items="<button style=&quot;padding: 8px 16px; margin: 4px; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;&quot; @click=&quot;stockFilter = &amp;#39;all&amp;#39;&quot; x-bind:style=&quot;stockFilter === &amp;#39;all&amp;#39; ? &amp;#39;background-color: #007bff; color: white;&amp;#39; : &amp;#39;background-color: #e9ecef; color: #333;&amp;#39;&quot;>All Items</button>" Low Stock Only="<button style=&quot;padding: 8px 16px; margin: 4px; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;&quot; @click=&quot;stockFilter = &amp;#39;low&amp;#39;&quot; x-bind:style=&quot;stockFilter === &amp;#39;low&amp;#39; ? &amp;#39;background-color: #007bff; color: white;&amp;#39; : &amp;#39;background-color: #e9ecef; color: #333;&amp;#39;&quot;>Low Stock Only</button>" Out of Stock="<button style=&quot;padding: 8px 16px; margin: 4px; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;&quot; @click=&quot;stockFilter = &amp;#39;out&amp;#39;&quot; x-bind:style=&quot;stockFilter === &amp;#39;out&amp;#39; ? &amp;#39;background-color: #007bff; color: white;&amp;#39; : &amp;#39;background-color: #e9ecef; color: #333;&amp;#39;&quot;>Out of Stock</button>"></div>
+    </div>
+  </div>
+  <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 2px solid #007bff;">
+    <h3 id="sec:add-new-product" style="margin-top: 0; color: #333;">Add New Product</h3>
+    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px;">
+      <input type="text" placeholder="Product name" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;" x-model.trim="newProduct.name"/>
+      <select style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;" x-model="newProduct.category">
+        <template x-for="category in categories()">
+          <option x-text="category" x-bind:value="category"></option>
+        </template>
+      </select>
+      <input type="number" placeholder="Qty" min="0" step="1" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;" x-model.number="newProduct.quantity"/>
+      <input type="number" placeholder="Price" min="0" step="0.01" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;" x-model.number="newProduct.price"/>
+      <button style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;" x-bind:disabled="!newProduct.name || !newProduct.category || newProduct.quantity < 0 || newProduct.price <= 0" @click="addProduct()">Add</button>
+    </div>
+  </div>
+  <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 120px; gap: 15px; padding: 15px; background: #f9f9f9; border-bottom: 2px solid #eee; font-weight: bold; color: #333;">
+      Product
+      Category
+      Quantity
+      Price
+      Value
+      Actions
+    </div>
+    <template x-for="product in filteredProducts()" x-key="product.id">
+      <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 120px; gap: 15px; padding: 15px; border-bottom: 1px solid #eee; align-items: center;">
+        <div x-text="product.name" x-bind:style="product.quantity <= 10 ? &#39;color: #ff8800; font-weight: bold;&#39; : &#39;color: #333;&#39;"></div>
+        <div style="padding: 4px 8px; background: #e3f2fd; color: #1976d2; border-radius: 4px; font-size: 12px; text-align: center;" x-text="product.category"></div>
+        <div x-text="product.quantity" x-bind:style="product.quantity <= 5 ? &#39;color: #dc3545; font-weight: bold;&#39; : product.quantity <= 10 ? &#39;color: #ff8800;&#39; : &#39;color: #333;&#39;"></div>
+        <div style="text-align: right;" x-text="&#39;$&#39; + product.price.toFixed(2)"></div>
+        <div style="text-align: right; font-weight: bold;" x-text="&#39;$&#39; + (product.quantity * product.price).toFixed(2)"></div>
+        <div style="display: flex; gap: 5px;">
+          <button style="background: #ff8800; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: bold;" @click="updateQuantity(product.id, product.quantity - 1)">-</button>
+          <button style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: bold;" @click="updateQuantity(product.id, product.quantity + 1)">+</button>
+          <button style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 12px;" @click="deleteProduct(product.id)">Del</button>
+        </div>
+      </div>
+    </template>
+    <div style="padding: 40px; text-align: center; color: #999;" x-show="filteredProducts().length === 0" x-text="No products found matching your criteria"></div>
+  </div>
+</div>
+</div>
+<nav style="margin-bottom: 1.5rem; font-size: 0.9em;">
+      <a href="../index.html" style="color: #0000ff; text-decoration: underline;">Home</a> &gt;
+      <a href="../examples/index.html" style="color: #0000ff; text-decoration: underline;">Examples</a> &gt;
+      <span style="color: #666;">Inventory Dashboard</span>
+      </nav>
+  </main>
+
+  <footer>
+    <p>
+      alpinejs &mdash; R interface for Alpine.js<br>
+      <a href="https://github.com/brownag/alpinejs">View on GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,478 @@
+---
+title: Input Modifiers: Enhancing Form Controls
+---
+
+
+
+```{r setup, include=FALSE}
+litedown::reactor(echo = TRUE)
+RUN_EXAMPLES <- nzchar(Sys.getenv("R_ALPINEJS_RUN_EXAMPLES"))
+library(alpinejs)
+library(htmltools)
+```
+
+```{r test_modifiers, eval=RUN_EXAMPLES, echo=FALSE}
+# Verify modifiers work and return proper structure
+result <- alpine_tag("input") |> alpine_model("field", .lazy = TRUE)
+cat("alpine_model with .lazy creates proper tag\n")
+cat("Class:", class(result), "\n")
+```
+
+## Overview
+
+Alpine.js input modifiers modify form control behavior including debouncing, lazy updates, and automatic type conversion. The `alpine_model()` function supports these modifiers using parameters prefixed with a dot (`.`).
+
+**Available Modifiers:**
+
+| Modifier | Behavior | Use Case |
+|----------|----------|----------|
+| `.lazy` | Update on blur instead of keystroke | Validation, expensive operations |
+| `.debounce` | Delay updates by N milliseconds | Search, filter, API calls |
+| `.number` | Auto-convert input to numeric | Age, price, quantity fields |
+| `.trim` | Strip whitespace | Username, email, API keys |
+
+## Basic Usage
+
+### Syntax
+
+```r
+# Single modifier
+alpine_tag("input") |> alpine_model("fieldName", .lazy = TRUE)
+
+# Multiple modifiers
+alpine_tag("input") |> alpine_model("fieldName", .lazy = TRUE, .debounce = 300, .number = TRUE)
+
+# Pipe-friendly chaining
+alpine_tag("input", placeholder = "Search...") |>
+  alpine_model("query", .debounce = 300)
+```
+
+```{r verify_modifiers, eval=RUN_EXAMPLES, echo=FALSE}
+# Test all modifiers work and create proper tags
+lazy_input <- alpine_tag("input") |> alpine_model("field1", .lazy = TRUE)
+debounce_input <- alpine_tag("input") |> alpine_model("field2", .debounce = 300)
+number_input <- alpine_tag("input") |> alpine_model("field3", .number = TRUE)
+trim_input <- alpine_tag("input") |> alpine_model("field4", .trim = TRUE)
+combined <- alpine_tag("input") |> alpine_model("field5", .lazy = TRUE, .debounce = 500, .trim = TRUE)
+
+cat("All modifiers work successfully:\n")
+cat("- .lazy\n")
+cat("- .debounce\n")
+cat("- .number\n")
+cat("- .trim\n")
+cat("- Combined modifiers\n")
+```
+
+### Simple Example
+
+```r
+library(alpinejs)
+library(htmltools)
+
+alpine_tag("div",
+  alpine_tag("label", "Email:"),
+  alpine_tag("input",
+    type = "email",
+    placeholder = "Enter email"
+  ) |>
+    alpine_model("email", .lazy = TRUE),
+  
+  alpine_tag("div",
+    "Current: ", 
+    alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "email")
+    )
+  )
+) |>
+  alpine_data(email = "") |>
+  htmltools::browsable()
+```
+
+The `.lazy` modifier defers updates until the element loses focus (blur event).
+
+## Modifier Behaviors
+
+### 1. `.lazy = TRUE` -- Lazy Evaluation
+
+By default, Alpine.js updates the model on every keystroke. The `.lazy` modifier defers updates until the element loses focus (blur event).
+
+**When to use:**
+
+- Form validation (email, password, username)
+- Expensive operations (database lookups)
+- Reducing network traffic
+
+```r
+# Email validation example
+alpine_tag("div",
+  alpine_tag("input",
+    type = "email",
+    placeholder = "your@email.com"
+  ) |>
+    alpine_model("email", .lazy = TRUE),
+  
+  alpine_tag("span",
+    "Valid: ",
+    alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "isValidEmail()")
+    )
+  )
+) |>
+  alpine_data(
+    email = "",
+    isValidEmail = htmlwidgets::JS(
+      "function() { return this.email.includes('@'); }"
+    )
+  )
+```
+
+### 2. `.debounce = N` -- Debounced Updates
+
+Debouncing adds a delay (in milliseconds) between keystroke and model update.
+
+**When to use:**
+
+- Search inputs (typing triggers database queries)
+- Auto-save features
+- Real-time filtering
+- API rate limiting
+
+```r
+# Live search example
+alpine_tag("div",
+  alpine_tag("input",
+    type = "text",
+    placeholder = "Search..."
+  ) |>
+    alpine_model("searchQuery", .debounce = 300),
+  
+  alpine_tag("ul",
+    alpine_tag("li", "Results will appear here")
+  )
+) |>
+  alpine_data(searchQuery = "") |>
+  htmltools::browsable()
+
+# With debounce = 300ms, updates trigger 300ms after user stops typing
+```
+
+Typical use: 200-500ms.
+
+### 3. `.number = TRUE` -- Automatic Type Conversion
+
+Type conversion converts string input to numeric value.
+
+**When to use:**
+
+- Numeric form fields (age, price, quantity)
+- Math operations
+- Range sliders, spinners
+
+```r
+# Age input example
+alpine_tag("div",
+  alpine_tag("label", "Age:"),
+  alpine_tag("input",
+    type = "number",
+    min = "0",
+    max = "120",
+    placeholder = "Enter age"
+  ) |>
+    alpine_model("age", .number = TRUE),
+  
+  alpine_tag("div",
+    alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "age")
+    ),
+    " years old"
+  )
+) |>
+  alpine_data(age = 0) |>
+  htmltools::browsable()
+```
+
+**Automatic behavior:**
+
+- Input `"25"` -> `age = 25` (numeric)
+- Input `"invalid"` -> `age = NaN`
+- Input `""` -> `age = null`
+
+### 4. `.trim = TRUE` -- Strip Whitespace
+
+Removes leading and trailing whitespace before updating the model.
+
+**When to use:**
+
+- Username/email fields
+- API keys, credentials
+- Search inputs
+
+```r
+# Username input
+alpine_tag("div",
+  alpine_tag("input",
+    placeholder = "Username"
+  ) |>
+    alpine_model("username", .trim = TRUE),
+  
+  alpine_tag("div",
+    "Length: ",
+    alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "username.length")
+    )
+  )
+) |>
+  alpine_data(username = "") |>
+  htmltools::browsable()
+```
+
+**Behavior:**
+
+- Input `"  john  "` -> `username = "john"`
+- Input `"  a  "` -> `username = "a"`
+
+## Combining Modifiers
+
+Multiple modifiers work together:
+
+```r
+# Form field with all modifiers
+alpine_tag("textarea", placeholder = "Notes...") |>
+  alpine_model(
+    "notes",
+    .lazy = TRUE,      # Update on blur
+    .debounce = 500,   # Wait 500ms
+    .trim = TRUE       # Remove whitespace
+  )
+
+# This updates only after user:
+# 1. Stops typing for 500ms, AND
+# 2. Clicks away, AND
+# 3. The value gets trimmed
+```
+
+## Real-World Examples
+
+### Example 1: Password Strength Validator
+
+```r
+library(alpinejs)
+library(htmltools)
+
+alpine_tag("div",
+  style = "max-width: 400px; padding: 20px;",
+  
+  alpine_tag("h3", "Password Strength Checker"),
+  
+  # Password input
+  alpine_tag("div",
+    alpine_tag("label", "Password:"),
+    alpine_tag("input",
+      type = "password",
+      placeholder = "Enter password"
+    ) |>
+      alpine_model("password", .lazy = TRUE)
+  ),
+  
+  # Strength indicator
+  alpine_tag("div",
+    style = "display: flex; gap: 5px; margin-top: 10px;",
+    alpine_tag("div",
+      style = "width: 25px; height: 4px; background: #ccc;",
+      alpine_attr(`x-bind:class` = "strengthClass()")
+    ),
+    alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "strengthLabel()")
+    )
+  )
+) |>
+  alpine_data(
+    password = "",
+    strengthClass = htmlwidgets::JS("function() {
+      const len = this.password.length;
+      if (len < 4) return 'weak';
+      if (len < 8) return 'fair';
+      if (len < 12) return 'good';
+      return 'excellent';
+    }"),
+    strengthLabel = htmlwidgets::JS("function() {
+      const classes = {weak: 'Weak', fair: 'Fair', good: 'Good', excellent: 'Excellent'};
+      return classes[this.strengthClass()];
+    }")
+  ) |>
+  htmltools::browsable()
+```
+
+### Example 2: Dynamic Form with Debounced Search
+
+```r
+library(alpinejs)
+library(htmltools)
+
+alpine_tag("div",
+  style = "padding: 20px;",
+  
+  alpine_tag("h3", "User Search"),
+  
+  # Search input with .debounce
+  alpine_tag("input",
+    type = "text",
+    placeholder = "Search users..."
+  ) |>
+    alpine_model("searchQuery", .debounce = 300),
+  
+  # Loading indicator
+  alpine_tag("div",
+    "Loading..." |>
+      alpine_show("isSearching")
+  ),
+  
+  # Results
+  alpine_tag("div",
+    alpine_tag("ul",
+      alpine_tag("li",
+        "Result 1" |> alpine_show("!isSearching && searchQuery")
+      )
+    )
+  )
+) |>
+  alpine_data(
+    searchQuery = "",
+    isSearching = htmlwidgets::JS("false"),
+    performSearch = htmlwidgets::JS("
+      function() {
+        if (!this.searchQuery) return;
+        this.isSearching = true;
+        // Simulate API call
+        setTimeout(() => { this.isSearching = false; }, 500);
+      }
+    ")
+  ) |>
+  htmltools::browsable()
+```
+
+### Example 3: Multi-Field Form with Mixed Modifiers
+
+```r
+# Registration form with different modifier strategies
+alpine_tag("form",
+  style = "max-width: 500px; padding: 20px;",
+  
+  # Username: lazy + trim
+  alpine_tag("div",
+    alpine_tag("label", "Username:"),
+    alpine_tag("input",
+      type = "text",
+      placeholder = "Choose username"
+    ) |>
+      alpine_model("username", .lazy = TRUE, .trim = TRUE)
+  ),
+  
+  # Email: lazy (for validation)
+  alpine_tag("div",
+    alpine_tag("label", "Email:"),
+    alpine_tag("input",
+      type = "email",
+      placeholder = "your@email.com"
+    ) |>
+      alpine_model("email", .lazy = TRUE)
+  ),
+  
+  # Age: number conversion
+  alpine_tag("div",
+    alpine_tag("label", "Age:"),
+    alpine_tag("input",
+      type = "number",
+      min = "18",
+      max = "120"
+    ) |>
+      alpine_model("age", .number = TRUE)
+  ),
+  
+  # Bio: lazy + debounce + trim (auto-save)
+  alpine_tag("div",
+    alpine_tag("label", "Bio:"),
+    alpine_tag("textarea", placeholder = "Tell us about yourself") |>
+      alpine_model("bio", .lazy = TRUE, .debounce = 500, .trim = TRUE)
+  ),
+  
+  # Submit button
+  alpine_tag("button", "Register") |>
+    alpine_on("click", "submitForm()")
+) |>
+  alpine_data(
+    username = "",
+    email = "",
+    age = 18,
+    bio = "",
+    submitForm = htmlwidgets::JS("function() {
+      console.log({
+        username: this.username,
+        email: this.email,
+        age: this.age,
+        bio: this.bio
+      });
+    }")
+  ) |>
+  htmltools::browsable()
+```
+
+## Browser Compatibility
+
+All input modifiers work in modern browsers:
+
+- Chrome/Edge 88+
+- Firefox 78+
+- Safari 14+
+- IE: Not supported (use polyfill if needed)
+
+## Performance Optimization
+
+### Debounce Values by Use Case
+
+| Use Case | Recommended | Rationale |
+|----------|-------------|-----------|
+| Live search | 300-500ms | Balance responsiveness & server load |
+| Input validation | 200ms | Fast feedback for users |
+| Text input | 150-300ms | Feel responsive without lag |
+| Multi-field form | 200-400ms | Depends on complexity |
+| Auto-save | 500ms-1s | Reduces API calls |
+
+### Common Pattern: Search with Loading State
+
+```r
+# Optimize with debounce + loading indicator
+alpine_tag("div",
+  alpine_tag("input",
+    type = "text",
+    placeholder = "Search..."
+  ) |>
+    alpine_model("query", .debounce = 400),  # Wait 400ms
+  
+  alpine_tag("div", "Searching...") |> alpine_show("isSearching")
+) |>
+  alpine_data(
+    query = "",
+    isSearching = htmlwidgets::JS("false")
+  )
+```
+
+## Troubleshooting
+
+**Q: Input seems unresponsive with .lazy modifier**
+A: This is normal--updates only happen on blur. Combine with `.debounce` for faster feedback during typing.
+
+**Q: Numbers appearing as strings despite .number**
+A: Verify input uses `type = "number"` and check browser console for errors.
+
+**Q: Debounce delays too much**
+A: Reduce the delay value (try 200ms instead of 500ms) or combine with other feedback mechanisms.
+
+**Q: Whitespace not trimming with .trim**
+A: Trim only applies to model binding, not to display. Trim in JavaScript if needed: `value.trim()`.
+
+## See Also
+
+- [Alpine.js Modifier Documentation](https://alpinejs.dev/)
+- [Getting Started with alpinejs](getting-started.qmd)
+- [Components and Patterns](components-and-patterns.qmd)

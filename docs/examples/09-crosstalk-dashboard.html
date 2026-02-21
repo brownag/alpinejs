@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crosstalk Dashboard | alpinejs</title>
+  <!-- Load Crosstalk for cross-widget reactivity -->
+  <script src="https://cdn.jsdelivr.net/npm/crosstalk@1.2.0/dist/crosstalk.min.js"></script>
+  <!-- Load Alpine.js for interactive components -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+  <style>
+    /* 1990s Web 1.0 aesthetic - authentic retro feel */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Verdana, Geneva, sans-serif;
+      line-height: 1.6;
+      color: #000;
+      background: #c0c0c0;
+      font-size: 14px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: #dfdfdf;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #dfdfdf;
+      padding-top: 0.8rem;
+    }
+
+    nav a {
+      color: #0000ff;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    nav a:visited {
+      color: #800080;
+    }
+
+    nav a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Main content */
+    main {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      padding: 1rem;
+      background: #fff;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      min-height: calc(100vh - 250px);
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1.5rem 0 0.5rem;
+      font-weight: bold;
+      line-height: 1.3;
+    }
+
+    h1 { 
+      font-size: 2rem;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+      margin-top: 0;
+      color: #0000ff;
+    }
+
+    h2 { 
+      font-size: 1.4rem;
+      color: #0000cc;
+      border-bottom: 1px solid #000;
+    }
+
+    h3 { font-size: 1.1rem; color: #000080; }
+    h4 { font-size: 1rem; color: #000; font-weight: bold; }
+
+    /* Paragraphs & text */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #800080;
+    }
+
+    a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Inline code */
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+      color: #000;
+      border: 1px solid #ccc;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #f0f0f0;
+      border: 1px solid #999;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.4;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #000;
+      border: none;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid #999;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #333;
+      font-style: italic;
+      background: #f5f5f5;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #999;
+      margin: 1.5rem 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      border: 1px solid #999;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border: 1px solid #999;
+    }
+
+    th {
+      background: #c0c0c0;
+      font-weight: bold;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #999;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      color: #000;
+      font-size: 0.85rem;
+      margin: 2rem 1rem 0;
+      background: #dfdfdf;
+    }
+
+    footer a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    footer a:visited {
+      color: #800080;
+    }
+
+    /* Horizontal rule dividers */
+    .divider {
+      border: none;
+      height: 2px;
+      background: linear-gradient(to right, #dfdfdf 0%, #000 50%, #dfdfdf 100%);
+      margin: 1.5rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      main {
+        padding: 0.8rem;
+      }
+
+      header {
+        padding: 0.8rem;
+      }
+
+      nav {
+        gap: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html" style="color: #000; text-decoration: none;">alpinejs</a></h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../guides/">Guides</a>
+      <a href="../examples/">Examples</a>
+      <a href="../reference/">Reference</a>
+      <a href="https://github.com/brownag/alpinejs" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    
+<div class="frontmatter">
+<div class="title"><h1>Example: Crosstalk Integration Examples: Multi-Widget Reactivity</h1></div>
+</div>
+<div class="body">
+<div style="padding: 20px; background: white;" x-init="this.filterHandle = new crosstalk.FilterHandle(&#39;dashboard_demo&#39;)" x-data="{&quot;selectedCategory&quot;:&quot;&quot;,&quot;selectedRegion&quot;:&quot;&quot;,&quot;searchText&quot;:&quot;&quot;,&quot;selectedKeys&quot;:[],&quot;filteredData&quot;:[{&quot;id&quot;:1,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:68.744,&quot;date&quot;:&quot;2026-05-16&quot;},{&quot;id&quot;:2,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:61.3169,&quot;date&quot;:&quot;2026-05-21&quot;},{&quot;id&quot;:3,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:30.86,&quot;date&quot;:&quot;2026-04-27&quot;},{&quot;id&quot;:4,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:53.9766,&quot;date&quot;:&quot;2026-05-17&quot;},{&quot;id&quot;:5,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:15.9696,&quot;date&quot;:&quot;2026-05-25&quot;},{&quot;id&quot;:6,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:66.7728,&quot;date&quot;:&quot;2026-05-27&quot;},{&quot;id&quot;:7,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:52.6427,&quot;date&quot;:&quot;2026-05-07&quot;},{&quot;id&quot;:8,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:55.2128,&quot;date&quot;:&quot;2026-05-25&quot;},{&quot;id&quot;:9,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:45.9728,&quot;date&quot;:&quot;2026-05-15&quot;},{&quot;id&quot;:10,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:50.0149,&quot;date&quot;:&quot;2026-05-08&quot;},{&quot;id&quot;:11,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:30.7191,&quot;date&quot;:&quot;2026-04-28&quot;},{&quot;id&quot;:12,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:59.7542,&quot;date&quot;:&quot;2026-05-12&quot;},{&quot;id&quot;:13,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:70.6893,&quot;date&quot;:&quot;2026-05-10&quot;},{&quot;id&quot;:14,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:54.3434,&quot;date&quot;:&quot;2026-05-09&quot;},{&quot;id&quot;:15,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:33.4047,&quot;date&quot;:&quot;2026-05-15&quot;},{&quot;id&quot;:16,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:16.2407,&quot;date&quot;:&quot;2026-05-25&quot;},{&quot;id&quot;:17,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:39.0492,&quot;date&quot;:&quot;2026-05-08&quot;},{&quot;id&quot;:18,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:24.7564,&quot;date&quot;:&quot;2026-05-16&quot;},{&quot;id&quot;:19,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:45.0465,&quot;date&quot;:&quot;2026-04-28&quot;},{&quot;id&quot;:20,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:44.7258,&quot;date&quot;:&quot;2026-05-15&quot;},{&quot;id&quot;:21,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:48.4525,&quot;date&quot;:&quot;2026-05-14&quot;},{&quot;id&quot;:22,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:52.442,&quot;date&quot;:&quot;2026-05-15&quot;},{&quot;id&quot;:23,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:41.9089,&quot;date&quot;:&quot;2026-05-04&quot;},{&quot;id&quot;:24,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:48.699,&quot;date&quot;:&quot;2026-05-04&quot;},{&quot;id&quot;:25,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:73.3376,&quot;date&quot;:&quot;2026-05-12&quot;},{&quot;id&quot;:26,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:34.9958,&quot;date&quot;:&quot;2026-05-25&quot;},{&quot;id&quot;:27,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:60.7522,&quot;date&quot;:&quot;2026-05-13&quot;},{&quot;id&quot;:28,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:48.8264,&quot;date&quot;:&quot;2026-05-02&quot;},{&quot;id&quot;:29,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:54.1994,&quot;date&quot;:&quot;2026-05-24&quot;},{&quot;id&quot;:30,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:55.0339,&quot;date&quot;:&quot;2026-05-10&quot;},{&quot;id&quot;:31,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:50.1123,&quot;date&quot;:&quot;2026-05-02&quot;},{&quot;id&quot;:32,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:64.4141,&quot;date&quot;:&quot;2026-05-23&quot;},{&quot;id&quot;:33,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:66.2103,&quot;date&quot;:&quot;2026-05-22&quot;},{&quot;id&quot;:34,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:54.3012,&quot;date&quot;:&quot;2026-05-22&quot;},{&quot;id&quot;:35,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:56.3242,&quot;date&quot;:&quot;2026-05-04&quot;},{&quot;id&quot;:36,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:25.4934,&quot;date&quot;:&quot;2026-05-02&quot;},{&quot;id&quot;:37,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:67.4418,&quot;date&quot;:&quot;2026-05-15&quot;},{&quot;id&quot;:38,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:38.9185,&quot;date&quot;:&quot;2026-05-06&quot;},{&quot;id&quot;:39,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:57.4955,&quot;date&quot;:&quot;2026-05-17&quot;},{&quot;id&quot;:40,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:54.7634,&quot;date&quot;:&quot;2026-05-18&quot;},{&quot;id&quot;:41,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:69.0103,&quot;date&quot;:&quot;2026-05-10&quot;},{&quot;id&quot;:42,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:50.6399,&quot;date&quot;:&quot;2026-05-24&quot;},{&quot;id&quot;:43,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:62.9157,&quot;date&quot;:&quot;2026-05-08&quot;},{&quot;id&quot;:44,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:51.4005,&quot;date&quot;:&quot;2026-05-06&quot;},{&quot;id&quot;:45,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:51.0777,&quot;date&quot;:&quot;2026-05-23&quot;},{&quot;id&quot;:46,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:38.8834,&quot;date&quot;:&quot;2026-05-27&quot;},{&quot;id&quot;:47,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:60.7883,&quot;date&quot;:&quot;2026-05-23&quot;},{&quot;id&quot;:48,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:62.2711,&quot;date&quot;:&quot;2026-05-12&quot;},{&quot;id&quot;:49,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:42.9603,&quot;date&quot;:&quot;2026-05-19&quot;},{&quot;id&quot;:50,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:55.3801,&quot;date&quot;:&quot;2026-05-06&quot;},{&quot;id&quot;:51,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:38.0221,&quot;date&quot;:&quot;2026-05-09&quot;},{&quot;id&quot;:52,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:51.6276,&quot;date&quot;:&quot;2026-05-21&quot;},{&quot;id&quot;:53,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:29.3262,&quot;date&quot;:&quot;2026-05-10&quot;},{&quot;id&quot;:54,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:43.5873,&quot;date&quot;:&quot;2026-05-04&quot;},{&quot;id&quot;:55,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:47.9839,&quot;date&quot;:&quot;2026-05-06&quot;},{&quot;id&quot;:56,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:32.1024,&quot;date&quot;:&quot;2026-05-10&quot;},{&quot;id&quot;:57,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:32.9799,&quot;date&quot;:&quot;2026-05-21&quot;},{&quot;id&quot;:58,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:64.2169,&quot;date&quot;:&quot;2026-05-07&quot;},{&quot;id&quot;:59,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:32.82,&quot;date&quot;:&quot;2026-05-15&quot;},{&quot;id&quot;:60,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:28.3042,&quot;date&quot;:&quot;2026-05-20&quot;},{&quot;id&quot;:61,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:43.5215,&quot;date&quot;:&quot;2026-05-20&quot;},{&quot;id&quot;:62,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:40.0663,&quot;date&quot;:&quot;2026-05-11&quot;},{&quot;id&quot;:63,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:33.4074,&quot;date&quot;:&quot;2026-05-07&quot;},{&quot;id&quot;:64,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:43.8318,&quot;date&quot;:&quot;2026-05-25&quot;},{&quot;id&quot;:65,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:41.1152,&quot;date&quot;:&quot;2026-04-30&quot;},{&quot;id&quot;:66,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:62.8746,&quot;date&quot;:&quot;2026-05-07&quot;},{&quot;id&quot;:67,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:34.2249,&quot;date&quot;:&quot;2026-05-04&quot;},{&quot;id&quot;:68,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:46.2309,&quot;date&quot;:&quot;2026-05-05&quot;},{&quot;id&quot;:69,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:24.4006,&quot;date&quot;:&quot;2026-04-29&quot;},{&quot;id&quot;:70,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:56.5886,&quot;date&quot;:&quot;2026-04-27&quot;},{&quot;id&quot;:71,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:89.7977,&quot;date&quot;:&quot;2026-05-24&quot;},{&quot;id&quot;:72,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:62.6465,&quot;date&quot;:&quot;2026-05-10&quot;},{&quot;id&quot;:73,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:23.1393,&quot;date&quot;:&quot;2026-05-12&quot;},{&quot;id&quot;:74,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:64.1989,&quot;date&quot;:&quot;2026-05-22&quot;},{&quot;id&quot;:75,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:69.0519,&quot;date&quot;:&quot;2026-05-13&quot;},{&quot;id&quot;:76,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:34.3371,&quot;date&quot;:&quot;2026-04-30&quot;},{&quot;id&quot;:77,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:64.3616,&quot;date&quot;:&quot;2026-05-02&quot;},{&quot;id&quot;:78,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:41.3249,&quot;date&quot;:&quot;2026-05-20&quot;},{&quot;id&quot;:79,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:47.7567,&quot;date&quot;:&quot;2026-05-09&quot;},{&quot;id&quot;:80,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:42.4326,&quot;date&quot;:&quot;2026-05-24&quot;},{&quot;id&quot;:81,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:76.4999,&quot;date&quot;:&quot;2026-05-11&quot;},{&quot;id&quot;:82,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:41.5264,&quot;date&quot;:&quot;2026-05-12&quot;},{&quot;id&quot;:83,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:13.8245,&quot;date&quot;:&quot;2026-05-24&quot;},{&quot;id&quot;:84,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:42.1934,&quot;date&quot;:&quot;2026-04-28&quot;},{&quot;id&quot;:85,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:45.6877,&quot;date&quot;:&quot;2026-05-13&quot;},{&quot;id&quot;:86,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:24.6072,&quot;date&quot;:&quot;2026-05-19&quot;},{&quot;id&quot;:87,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:38.97,&quot;date&quot;:&quot;2026-05-23&quot;},{&quot;id&quot;:88,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:62.6185,&quot;date&quot;:&quot;2026-05-11&quot;},{&quot;id&quot;:89,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:77.8725,&quot;date&quot;:&quot;2026-05-26&quot;},{&quot;id&quot;:90,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:53.3143,&quot;date&quot;:&quot;2026-05-06&quot;},{&quot;id&quot;:91,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:71.9884,&quot;date&quot;:&quot;2026-05-08&quot;},{&quot;id&quot;:92,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:53.5856,&quot;date&quot;:&quot;2026-05-17&quot;},{&quot;id&quot;:93,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:77.189,&quot;date&quot;:&quot;2026-05-08&quot;},{&quot;id&quot;:94,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:38.7468,&quot;date&quot;:&quot;2026-04-27&quot;},{&quot;id&quot;:95,&quot;category&quot;:&quot;B&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:66.051,&quot;date&quot;:&quot;2026-05-16&quot;},{&quot;id&quot;:96,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:74.3849,&quot;date&quot;:&quot;2026-05-23&quot;},{&quot;id&quot;:97,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;East&quot;,&quot;value&quot;:36.8478,&quot;date&quot;:&quot;2026-05-23&quot;},{&quot;id&quot;:98,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;South&quot;,&quot;value&quot;:51.1208,&quot;date&quot;:&quot;2026-05-16&quot;},{&quot;id&quot;:99,&quot;category&quot;:&quot;A&quot;,&quot;region&quot;:&quot;West&quot;,&quot;value&quot;:31.6102,&quot;date&quot;:&quot;2026-05-24&quot;},{&quot;id&quot;:100,&quot;category&quot;:&quot;C&quot;,&quot;region&quot;:&quot;North&quot;,&quot;value&quot;:39.3955,&quot;date&quot;:&quot;2026-05-08&quot;}],&quot;getFilteredData&quot;:function() { return this.filteredData.filter(item => { const categoryMatch = !this.selectedCategory || item.category === this.selectedCategory; const regionMatch = !this.selectedRegion || item.region === this.selectedRegion; const searchMatch = !this.searchText || String(item.id).includes(this.searchText) || String(item.category).includes(this.searchText) || String(item.region).includes(this.searchText) || String(item.value).toLowerCase().includes(this.searchText.toLowerCase()); return categoryMatch &amp;&amp; regionMatch &amp;&amp; searchMatch; }); },&quot;toggleSelection&quot;:function(id) { const idx = this.selectedKeys.indexOf(String(id)); if (idx > -1) { this.selectedKeys.splice(idx, 1); } else { this.selectedKeys.push(String(id)); } },&quot;emitFilterEvent&quot;:function() { if (!this.filterHandle) return; const filteredKeys = this.getFilteredData().map(item => String(item.id)); this.filterHandle.set(filteredKeys); }}">
+  <h1 id="chp:crosstalk-dashboard">Crosstalk Dashboard</h1>
+  <p>Select items in the table to update charts (when integrated with Plotly/Leaflet).</p>
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+    <div>
+      <label>Filter by Category:</label>
+      <select x-model="selectedCategory" @change="emitFilterEvent()">
+        <option value="">All</option>
+        <option value="A">Category A</option>
+        <option value="B">Category B</option>
+        <option value="C">Category C</option>
+      </select>
+    </div>
+    <div>
+      <label>Filter by Region:</label>
+      <select x-model="selectedRegion" @change="emitFilterEvent()">
+        <option value="">All</option>
+        <option value="North">North</option>
+        <option value="South">South</option>
+        <option value="East">East</option>
+        <option value="West">West</option>
+      </select>
+    </div>
+    <div>
+      <label>Search:</label>
+      <input type="text" placeholder="Search..." x-model.debounce.300="searchText" @change="emitFilterEvent()"/>
+    </div>
+  </div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+    <div style="background: #e3f2fd; padding: 15px; border-radius: 4px;">
+      <strong>Total Records:</strong>
+      <div x-text="getFilteredData().length"></div>
+    </div>
+    <div style="background: #f3e5f5; padding: 15px; border-radius: 4px;">
+      <strong>Avg Value:</strong>
+      <div x-text="getFilteredData().length > 0 ? (getFilteredData().reduce((a,b) => a + b.value, 0) / getFilteredData().length).toFixed(2) : &#39;0.00&#39;"></div>
+    </div>
+    <div style="background: #e8f5e9; padding: 15px; border-radius: 4px;">
+      <strong>Selected Count:</strong>
+      <div x-text="selectedKeys.length"></div>
+    </div>
+  </div>
+  <div style="height: 500px; overflow-y: auto;">
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th style="padding: 8px; background: #f5f5f5; font-weight: bold; border: 1px solid #ddd;">ID</th>
+          <th style="padding: 8px; background: #f5f5f5; font-weight: bold; border: 1px solid #ddd;">Category</th>
+          <th style="padding: 8px; background: #f5f5f5; font-weight: bold; border: 1px solid #ddd;">Region</th>
+          <th style="padding: 8px; background: #f5f5f5; font-weight: bold; border: 1px solid #ddd;">Value</th>
+          <th style="padding: 8px; background: #f5f5f5; font-weight: bold; border: 1px solid #ddd;">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr x-show="getFilteredData().some(d => d.id === 1)" @click="toggleSelection(&#39;1&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;1&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">1</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">68.744</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-16</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 2)" @click="toggleSelection(&#39;2&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;2&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">2</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">61.3169</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-21</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 3)" @click="toggleSelection(&#39;3&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;3&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">3</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">30.86</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-04-27</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 4)" @click="toggleSelection(&#39;4&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;4&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">4</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">53.9766</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-17</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 5)" @click="toggleSelection(&#39;5&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;5&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">5</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">15.9696</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-25</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 6)" @click="toggleSelection(&#39;6&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;6&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">6</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">66.7728</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-27</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 7)" @click="toggleSelection(&#39;7&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;7&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">7</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">52.6427</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-07</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 8)" @click="toggleSelection(&#39;8&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;8&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">8</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">55.2128</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-25</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 9)" @click="toggleSelection(&#39;9&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;9&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">9</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">45.9728</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-15</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 10)" @click="toggleSelection(&#39;10&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;10&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">10</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">50.0149</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-08</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 11)" @click="toggleSelection(&#39;11&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;11&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">11</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">30.7191</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-04-28</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 12)" @click="toggleSelection(&#39;12&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;12&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">12</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">59.7542</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-12</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 13)" @click="toggleSelection(&#39;13&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;13&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">13</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">70.6893</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-10</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 14)" @click="toggleSelection(&#39;14&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;14&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">14</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">54.3434</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-09</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 15)" @click="toggleSelection(&#39;15&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;15&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">15</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">33.4047</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-15</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 16)" @click="toggleSelection(&#39;16&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;16&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">16</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">16.2407</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-25</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 17)" @click="toggleSelection(&#39;17&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;17&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">17</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">39.0492</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-08</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 18)" @click="toggleSelection(&#39;18&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;18&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">18</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">24.7564</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-16</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 19)" @click="toggleSelection(&#39;19&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;19&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">19</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">45.0465</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-04-28</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 20)" @click="toggleSelection(&#39;20&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;20&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">20</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">44.7258</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-15</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 21)" @click="toggleSelection(&#39;21&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;21&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">21</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">48.4525</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-14</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 22)" @click="toggleSelection(&#39;22&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;22&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">22</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">52.442</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-15</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 23)" @click="toggleSelection(&#39;23&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;23&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">23</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">41.9089</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-04</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 24)" @click="toggleSelection(&#39;24&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;24&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">24</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">48.699</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-04</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 25)" @click="toggleSelection(&#39;25&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;25&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">25</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">73.3376</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-12</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 26)" @click="toggleSelection(&#39;26&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;26&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">26</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">34.9958</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-25</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 27)" @click="toggleSelection(&#39;27&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;27&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">27</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">60.7522</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-13</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 28)" @click="toggleSelection(&#39;28&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;28&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">28</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">48.8264</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-02</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 29)" @click="toggleSelection(&#39;29&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;29&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">29</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">54.1994</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-24</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 30)" @click="toggleSelection(&#39;30&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;30&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">30</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">55.0339</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-10</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 31)" @click="toggleSelection(&#39;31&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;31&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">31</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">50.1123</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-02</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 32)" @click="toggleSelection(&#39;32&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;32&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">32</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">64.4141</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-23</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 33)" @click="toggleSelection(&#39;33&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;33&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">33</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">66.2103</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-22</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 34)" @click="toggleSelection(&#39;34&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;34&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">34</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">54.3012</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-22</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 35)" @click="toggleSelection(&#39;35&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;35&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">35</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">56.3242</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-04</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 36)" @click="toggleSelection(&#39;36&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;36&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">36</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">25.4934</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-02</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 37)" @click="toggleSelection(&#39;37&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;37&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">37</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">67.4418</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-15</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 38)" @click="toggleSelection(&#39;38&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;38&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">38</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">38.9185</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-06</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 39)" @click="toggleSelection(&#39;39&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;39&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">39</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">57.4955</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-17</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 40)" @click="toggleSelection(&#39;40&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;40&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">40</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">54.7634</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-18</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 41)" @click="toggleSelection(&#39;41&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;41&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">41</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">69.0103</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-10</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 42)" @click="toggleSelection(&#39;42&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;42&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">42</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">50.6399</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-24</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 43)" @click="toggleSelection(&#39;43&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;43&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">43</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">62.9157</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-08</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 44)" @click="toggleSelection(&#39;44&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;44&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">44</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">51.4005</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-06</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 45)" @click="toggleSelection(&#39;45&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;45&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">45</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">51.0777</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-23</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 46)" @click="toggleSelection(&#39;46&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;46&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">46</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">38.8834</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-27</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 47)" @click="toggleSelection(&#39;47&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;47&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">47</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">60.7883</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-23</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 48)" @click="toggleSelection(&#39;48&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;48&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">48</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">62.2711</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-12</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 49)" @click="toggleSelection(&#39;49&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;49&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">49</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">42.9603</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-19</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 50)" @click="toggleSelection(&#39;50&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;50&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">50</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">55.3801</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-06</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 51)" @click="toggleSelection(&#39;51&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;51&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">51</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">38.0221</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-09</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 52)" @click="toggleSelection(&#39;52&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;52&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">52</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">51.6276</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-21</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 53)" @click="toggleSelection(&#39;53&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;53&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">53</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">29.3262</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-10</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 54)" @click="toggleSelection(&#39;54&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;54&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">54</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">43.5873</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-04</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 55)" @click="toggleSelection(&#39;55&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;55&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">55</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">47.9839</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-06</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 56)" @click="toggleSelection(&#39;56&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;56&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">56</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">32.1024</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-10</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 57)" @click="toggleSelection(&#39;57&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;57&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">57</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">32.9799</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-21</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 58)" @click="toggleSelection(&#39;58&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;58&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">58</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">64.2169</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-07</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 59)" @click="toggleSelection(&#39;59&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;59&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">59</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">32.82</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-15</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 60)" @click="toggleSelection(&#39;60&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;60&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">60</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">28.3042</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-20</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 61)" @click="toggleSelection(&#39;61&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;61&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">61</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">43.5215</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-20</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 62)" @click="toggleSelection(&#39;62&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;62&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">62</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">40.0663</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-11</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 63)" @click="toggleSelection(&#39;63&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;63&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">63</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">33.4074</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-07</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 64)" @click="toggleSelection(&#39;64&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;64&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">64</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">43.8318</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-25</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 65)" @click="toggleSelection(&#39;65&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;65&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">65</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">41.1152</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-04-30</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 66)" @click="toggleSelection(&#39;66&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;66&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">66</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">62.8746</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-07</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 67)" @click="toggleSelection(&#39;67&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;67&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">67</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">34.2249</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-04</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 68)" @click="toggleSelection(&#39;68&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;68&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">68</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">46.2309</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-05</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 69)" @click="toggleSelection(&#39;69&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;69&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">69</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">24.4006</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-04-29</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 70)" @click="toggleSelection(&#39;70&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;70&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">70</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">56.5886</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-04-27</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 71)" @click="toggleSelection(&#39;71&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;71&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">71</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">89.7977</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-24</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 72)" @click="toggleSelection(&#39;72&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;72&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">72</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">62.6465</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-10</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 73)" @click="toggleSelection(&#39;73&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;73&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">73</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">23.1393</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-12</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 74)" @click="toggleSelection(&#39;74&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;74&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">74</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">64.1989</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-22</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 75)" @click="toggleSelection(&#39;75&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;75&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">75</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">69.0519</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-13</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 76)" @click="toggleSelection(&#39;76&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;76&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">76</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">34.3371</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-04-30</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 77)" @click="toggleSelection(&#39;77&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;77&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">77</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">64.3616</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-02</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 78)" @click="toggleSelection(&#39;78&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;78&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">78</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">41.3249</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-20</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 79)" @click="toggleSelection(&#39;79&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;79&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">79</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">47.7567</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-09</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 80)" @click="toggleSelection(&#39;80&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;80&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">80</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">42.4326</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-24</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 81)" @click="toggleSelection(&#39;81&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;81&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">81</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">76.4999</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-11</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 82)" @click="toggleSelection(&#39;82&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;82&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">82</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">41.5264</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-12</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 83)" @click="toggleSelection(&#39;83&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;83&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">83</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">13.8245</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-24</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 84)" @click="toggleSelection(&#39;84&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;84&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">84</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">42.1934</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-04-28</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 85)" @click="toggleSelection(&#39;85&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;85&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">85</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">45.6877</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-13</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 86)" @click="toggleSelection(&#39;86&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;86&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">86</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">24.6072</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-19</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 87)" @click="toggleSelection(&#39;87&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;87&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">87</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">38.97</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-23</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 88)" @click="toggleSelection(&#39;88&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;88&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">88</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">62.6185</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-11</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 89)" @click="toggleSelection(&#39;89&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;89&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">89</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">77.8725</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-26</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 90)" @click="toggleSelection(&#39;90&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;90&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">90</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">53.3143</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-06</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 91)" @click="toggleSelection(&#39;91&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;91&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">91</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">71.9884</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-08</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 92)" @click="toggleSelection(&#39;92&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;92&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">92</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">53.5856</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-17</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 93)" @click="toggleSelection(&#39;93&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;93&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">93</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">77.189</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-08</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 94)" @click="toggleSelection(&#39;94&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;94&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">94</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">38.7468</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-04-27</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 95)" @click="toggleSelection(&#39;95&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;95&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">95</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">B</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">66.051</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-16</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 96)" @click="toggleSelection(&#39;96&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;96&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">96</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">74.3849</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-23</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 97)" @click="toggleSelection(&#39;97&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;97&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">97</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">East</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">36.8478</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-23</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 98)" @click="toggleSelection(&#39;98&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;98&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">98</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">South</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">51.1208</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-16</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 99)" @click="toggleSelection(&#39;99&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;99&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">99</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">A</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">West</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">31.6102</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-24</td>
+        </tr>
+        <tr x-show="getFilteredData().some(d => d.id === 100)" @click="toggleSelection(&#39;100&#39;)" x-bind:class="{ selected: selectedKeys.includes(&#39;100&#39;) }" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px; border: 1px solid #ddd;">100</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">C</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">North</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">39.3955</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">2026-05-08</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+<nav style="margin-bottom: 1.5rem; font-size: 0.9em;">
+      <a href="../index.html" style="color: #0000ff; text-decoration: underline;">Home</a> &gt;
+      <a href="../examples/index.html" style="color: #0000ff; text-decoration: underline;">Examples</a> &gt;
+      <span style="color: #666;">Crosstalk Dashboard</span>
+      </nav>
+  </main>
+
+  <footer>
+    <p>
+      alpinejs &mdash; R interface for Alpine.js<br>
+      <a href="https://github.com/brownag/alpinejs">View on GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

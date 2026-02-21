@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Wizard | alpinejs</title>
+  <!-- Load Crosstalk for cross-widget reactivity -->
+  <script src="https://cdn.jsdelivr.net/npm/crosstalk@1.2.0/dist/crosstalk.min.js"></script>
+  <!-- Load Alpine.js for interactive components -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+  <style>
+    /* 1990s Web 1.0 aesthetic - authentic retro feel */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Verdana, Geneva, sans-serif;
+      line-height: 1.6;
+      color: #000;
+      background: #c0c0c0;
+      font-size: 14px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: #dfdfdf;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #dfdfdf;
+      padding-top: 0.8rem;
+    }
+
+    nav a {
+      color: #0000ff;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    nav a:visited {
+      color: #800080;
+    }
+
+    nav a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Main content */
+    main {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      padding: 1rem;
+      background: #fff;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      min-height: calc(100vh - 250px);
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1.5rem 0 0.5rem;
+      font-weight: bold;
+      line-height: 1.3;
+    }
+
+    h1 { 
+      font-size: 2rem;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+      margin-top: 0;
+      color: #0000ff;
+    }
+
+    h2 { 
+      font-size: 1.4rem;
+      color: #0000cc;
+      border-bottom: 1px solid #000;
+    }
+
+    h3 { font-size: 1.1rem; color: #000080; }
+    h4 { font-size: 1rem; color: #000; font-weight: bold; }
+
+    /* Paragraphs & text */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #800080;
+    }
+
+    a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Inline code */
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+      color: #000;
+      border: 1px solid #ccc;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #f0f0f0;
+      border: 1px solid #999;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.4;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #000;
+      border: none;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid #999;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #333;
+      font-style: italic;
+      background: #f5f5f5;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #999;
+      margin: 1.5rem 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      border: 1px solid #999;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border: 1px solid #999;
+    }
+
+    th {
+      background: #c0c0c0;
+      font-weight: bold;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #999;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      color: #000;
+      font-size: 0.85rem;
+      margin: 2rem 1rem 0;
+      background: #dfdfdf;
+    }
+
+    footer a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    footer a:visited {
+      color: #800080;
+    }
+
+    /* Horizontal rule dividers */
+    .divider {
+      border: none;
+      height: 2px;
+      background: linear-gradient(to right, #dfdfdf 0%, #000 50%, #dfdfdf 100%);
+      margin: 1.5rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      main {
+        padding: 0.8rem;
+      }
+
+      header {
+        padding: 0.8rem;
+      }
+
+      nav {
+        gap: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html" style="color: #000; text-decoration: none;">alpinejs</a></h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../guides/">Guides</a>
+      <a href="../examples/">Examples</a>
+      <a href="../reference/">Reference</a>
+      <a href="https://github.com/brownag/alpinejs" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    
+<div class="frontmatter">
+<div class="title"><h1>Example: Multi-Step Form Wizard</h1></div>
+</div>
+<div class="body">
+<script>
+  window.wizardApp = {
+    step: 1,
+    submitted: false,
+    form: {
+      firstName: '',
+      lastName: '',
+      dateOfBirth: '',
+      email: '',
+      phone: '',
+      address: '',
+      agreeToTerms: false
+    },
+    errors: {
+      firstName: '',
+      lastName: '',
+      dateOfBirth: '',
+      email: '',
+      phone: '',
+      address: ''
+    },
+
+    // Validation methods
+    validateEmail: function(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    },
+
+    validatePhone: function(phone) {
+      const re = /^[\d\s()+-]*\d[\d\s()+-]*$/;
+      return phone.length >= 10 && re.test(phone);
+    },
+
+    validateAddress: function(address) {
+      return address.length >= 10;
+    },
+
+    validateStep1: function() {
+      let isValid = true;
+      this.errors.firstName = !this.form.firstName ? 'First name is required' : '';
+      this.errors.lastName = !this.form.lastName ? 'Last name is required' : '';
+      this.errors.dateOfBirth = !this.form.dateOfBirth ? 'Date of birth is required' : '';
+      return !this.errors.firstName && !this.errors.lastName && !this.errors.dateOfBirth;
+    },
+
+    validateStep2: function() {
+      this.errors.email = !this.form.email ? 'Email is required' :
+                          !this.validateEmail(this.form.email) ? 'Invalid email format' : '';
+      this.errors.phone = !this.form.phone ? 'Phone is required' :
+                          !this.validatePhone(this.form.phone) ? 'Invalid phone format (at least 10 digits)' : '';
+      this.errors.address = !this.form.address ? 'Address is required' :
+                           !this.validateAddress(this.form.address) ? 'Address must be at least 10 characters' : '';
+      return !this.errors.email && !this.errors.phone && !this.errors.address;
+    },
+
+    nextFromStep1: function() {
+      if (this.validateStep1()) {
+        this.step = 2;
+      }
+    },
+
+    nextFromStep2: function() {
+      if (this.validateStep2()) {
+        this.step = 3;
+      }
+    },
+
+    submitForm: function() {
+      const formData = JSON.stringify(this.form);
+      console.log('Submitted form:', formData);
+      this.submitted = true;
+      setTimeout(() => {
+        this.step = 1;
+        this.submitted = false;
+        this.form = {
+          firstName: '',
+          lastName: '',
+          dateOfBirth: '',
+          email: '',
+          phone: '',
+          address: '',
+          agreeToTerms: false
+        };
+        this.errors = {
+          firstName: '',
+          lastName: '',
+          dateOfBirth: '',
+          email: '',
+          phone: '',
+          address: ''
+        };
+      }, 2000);
+    }
+  };
+</script>
+<div class="form-wizard" style="max-width: 600px; margin: 40px auto; font-family: sans-serif;" x-data="window.wizardApp">
+  <h1 id="chp:account-setup-wizard" style="color: #333; margin-bottom: 30px; text-align: center;">Account Setup Wizard</h1>
+  <div style="margin-bottom: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;">
+      <div style="padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s;" x-bind:style="step >= 1 ? &#39;background: #007bff; color: white;&#39; : &#39;background: #f0f0f0; color: #999;&#39;" x-bind:class="step === 1 ? &#39;font-weight-bold&#39; : &#39;&#39;" @click="step = 1">Personal Info</div>
+      <div style="padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s;" x-bind:style="step >= 2 ? &#39;background: #007bff; color: white;&#39; : &#39;background: #f0f0f0; color: #999;&#39;" x-bind:class="step === 2 ? &#39;font-weight-bold&#39; : &#39;&#39;" @click="step = 2">Contact Info</div>
+      <div style="padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s;" x-bind:style="step >= 3 ? &#39;background: #007bff; color: white;&#39; : &#39;background: #f0f0f0; color: #999;&#39;" x-bind:class="step === 3 ? &#39;font-weight-bold&#39; : &#39;&#39;" @click="step = 3">Confirmation</div>
+    </div>
+    <div style="height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden;">
+      <div style="height: 100%; background: #007bff; border-radius: 3px; transition: width 0.3s;" x-bind:style="{ width: ((step / 3) * 100) + &#39;%&#39; }"></div>
+    </div>
+  </div>
+  <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;" x-show="step === 1">
+    <h3 id="sec:step-1-personal-information" style="margin-bottom: 20px; color: #333;">Step 1: Personal Information</h3>
+    <div>
+      <label style="display: block; margin-bottom: 4px;" for="form.firstName">First Name</label>
+      <input type="text" placeholder="John" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" x-model.trim="form.firstName"/>
+      <div style="margin-top: 4px; color: #dc3545; font-size: 0.9em;" x-text="errors.firstName" x-show="errors.firstName"></div>
+    </div>
+    <div>
+      <label style="display: block; margin-bottom: 4px;" for="form.lastName">Last Name</label>
+      <input type="text" placeholder="Doe" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" x-model.trim="form.lastName"/>
+      <div style="margin-top: 4px; color: #dc3545; font-size: 0.9em;" x-text="errors.lastName" x-show="errors.lastName"></div>
+    </div>
+    <div>
+      <label style="display: block; margin-bottom: 4px;" for="form.dateOfBirth">Date of Birth</label>
+      <input type="date" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" x-model="form.dateOfBirth"/>
+      <div style="margin-top: 4px; color: #dc3545; font-size: 0.9em;" x-text="errors.dateOfBirth" x-show="errors.dateOfBirth"></div>
+    </div>
+    <button style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px;" @click="nextFromStep1()">Next</button>
+  </div>
+  <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;" x-show="step === 2">
+    <h3 id="sec:step-2-contact-information" style="margin-bottom: 20px; color: #333;">Step 2: Contact Information</h3>
+    <div>
+      <label style="display: block; margin-bottom: 4px;" for="form.email">Email</label>
+      <input type="email" placeholder="john@example.com" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" x-model.trim="form.email"/>
+      <div style="margin-top: 4px; color: #dc3545; font-size: 0.9em;" x-text="errors.email" x-show="errors.email"></div>
+    </div>
+    <div>
+      <label style="display: block; margin-bottom: 4px;" for="form.phone">Phone</label>
+      <input type="tel" placeholder="(555) 123-4567" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" x-model.trim="form.phone"/>
+      <div style="margin-top: 4px; color: #dc3545; font-size: 0.9em;" x-text="errors.phone" x-show="errors.phone"></div>
+    </div>
+    <div>
+      <label style="display: block; margin-bottom: 4px;" for="form.address">Address</label>
+      <textarea placeholder="123 Main St, City, State 12345" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; min-height: 80px;" x-model.trim="form.address"></textarea>
+      <div style="margin-top: 4px; color: #dc3545; font-size: 0.9em;" x-text="errors.address" x-show="errors.address"></div>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <button style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px;" @click="step = 1">Back</button>
+      <button style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px;" @click="nextFromStep2()">Next</button>
+    </div>
+  </div>
+  <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;" x-show="step === 3">
+    <h3 id="sec:step-3-review-amp-confirm" style="margin-bottom: 20px; color: #333;">Step 3: Review &amp; Confirm</h3>
+    <div style="">
+      <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
+        <h4 id="sec:personal-information" style="margin-top: 0; color: #666;">Personal Information</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div>
+            <div style="color: #999; font-size: 12px;">Full Name</div>
+            <div style="font-weight: bold; color: #333;" x-text="form.firstName + &#39; &#39; + form.lastName"></div>
+          </div>
+          <div>
+            <div style="color: #999; font-size: 12px;">Date of Birth</div>
+            <div style="font-weight: bold; color: #333;" x-text="form.dateOfBirth"></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <h4 id="sec:contact-information" style="margin-top: 0; color: #666;">Contact Information</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div>
+            <div style="color: #999; font-size: 12px;">Email</div>
+            <div style="font-weight: bold; color: #333;" x-text="form.email"></div>
+          </div>
+          <div>
+            <div style="color: #999; font-size: 12px;">Phone</div>
+            <div style="font-weight: bold; color: #333;" x-text="form.phone"></div>
+          </div>
+        </div>
+        <div style="margin-top: 10px;">
+          <div style="color: #999; font-size: 12px;">Address</div>
+          <div style="font-weight: bold; color: #333;" x-text="form.address"></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 4px;">
+      <label style="display: flex; align-items: center; cursor: pointer;">
+        <input type="checkbox" style="margin-right: 10px; cursor: pointer;" x-model="form.agreeToTerms"/>
+        <span style="color: #333;">I agree to the Terms and Conditions</span>
+      </label>
+    </div>
+    <div style="margin-bottom: 20px; padding: 15px; background: #d4edda; color: #155724; border-radius: 4px;" x-show="submitted" x-text="&#39;Account created successfully!&#39;"></div>
+    <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px;">
+      <button style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px;" @click="step = 2">Back</button>
+      <button style="background: #28a745; color: white; border: none; padding: 10px 30px; border-radius: 4px; cursor: pointer; font-size: 16px;" x-text="submitted ? &#39;Done&#39; : &#39;Create Account&#39;" x-bind:disabled="!form.agreeToTerms || submitted" @click="submitForm()"></button>
+    </div>
+  </div>
+</div>
+</div>
+<nav style="margin-bottom: 1.5rem; font-size: 0.9em;">
+      <a href="../index.html" style="color: #0000ff; text-decoration: underline;">Home</a> &gt;
+      <a href="../examples/index.html" style="color: #0000ff; text-decoration: underline;">Examples</a> &gt;
+      <span style="color: #666;">Form Wizard</span>
+      </nav>
+  </main>
+
+  <footer>
+    <p>
+      alpinejs &mdash; R interface for Alpine.js<br>
+      <a href="https://github.com/brownag/alpinejs">View on GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

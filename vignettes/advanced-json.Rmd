@@ -1,0 +1,490 @@
+---
+title: Advanced: Data Serialization and JavaScript Injection
+---
+
+
+
+```{r, include = FALSE}
+litedown::reactor(
+  collapse = TRUE,
+  comment = "#> "
+)
+RUN_EXAMPLES <- nzchar(Sys.getenv("R_ALPINEJS_RUN_EXAMPLES"))
+```
+
+```{r setup, eval=TRUE, echo=TRUE}
+library(alpinejs)
+library(htmltools)
+library(jsonlite)
+```
+
+```{r test_serialization, eval=RUN_EXAMPLES, echo=FALSE}
+# Verify data serialization works
+cat("Testing R-to-JSON conversion...\n")
+# Test basic types
+test_data <- list(
+  count = 42,
+  ratio = 3.14,
+  active = TRUE,
+  name = "Alice",
+  items = c(1, 2, 3)
+)
+json_str <- jsonlite::toJSON(test_data)
+cat("JSON conversion successful\n")
+cat("Sample output (first 100 chars):", substr(as.character(json_str), 1, 100), "\n")
+```
+
+# Advanced: Data Serialization and JavaScript Injection
+
+This vignette covers how alpinejs converts R data types to JSON and how to inject raw JavaScript expressions.
+
+## Type Conversion Rules
+
+When you call `alpine_data()`, alpinejs serializes R objects to JSON using specific rules:
+
+### Atomic Types
+
+```{r}
+# Numeric, logical, character -> JSON equivalents
+result <- alpine_tag("div") |>
+  alpine_data(
+    count = 42,            # number -> 42
+    ratio = 3.14,          # numeric -> 3.14
+    active = TRUE,         # logical -> true
+    name = "Alice"         # character -> "Alice"
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+### Vectors
+
+Unnamed vectors become JSON arrays:
+
+```{r}
+result <- alpine_tag("div") |>
+  alpine_data(
+    ids = c(1, 2, 3, 4, 5),                    # -> [1,2,3,4,5]
+    names = c("Alice", "Bob", "Charlie"),      # -> ["Alice","Bob","Charlie"]
+    enabled = c(TRUE, FALSE, TRUE)             # -> [true,false,true]
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+### Lists
+
+Named lists become JSON objects:
+
+```{r}
+result <- alpine_tag("div") |>
+  alpine_data(
+    user = list(
+      name = "Alice",
+      age = 30,
+      email = "alice@example.com"
+    ),
+    config = list(
+      apiUrl = "https://api.example.com",
+      timeout = 5000,
+      debug = FALSE
+    )
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+This renders as:
+
+```javascript
+{
+  user: {name: "Alice", age: 30, email: "alice@example.com"},
+  config: {apiUrl: "https://api.example.com", timeout: 5000, debug: false}
+}
+```
+
+### Data Frames
+
+Data frames become arrays of objects (row-oriented to column-oriented):
+
+```{r}
+# Simple data frame
+df <- data.frame(
+  id = 1:3,
+  name = c("Alice", "Bob", "Charlie"),
+  score = c(95, 87, 92),
+  stringsAsFactors = FALSE
+)
+
+result <- alpine_tag("div") |>
+  alpine_data(data = df)
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+This becomes:
+
+```javascript
+{
+  data: [
+    {id: 1, name: "Alice", score: 95},
+    {id: 2, name: "Bob", score: 87},
+    {id: 3, name: "Charlie", score: 92}
+  ]
+}
+```
+
+### Special R Types
+
+**Factors** are converted to character vectors:
+
+```{r}
+# Factor -> character vector
+factors_data <- factor(c("A", "B", "B", "C"))
+
+result <- alpine_tag("div") |>
+  alpine_data(categories = factors_data) |>  # -> ["A","B","B","C"]
+  htmltools::browsable()
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+**Dates and POSIXct** are converted to ISO 8601 strings:
+
+```{r}
+# Date -> ISO 8601 string
+today <- Sys.Date()
+now <- Sys.time()
+
+result <- alpine_tag("div") |>
+  alpine_data(
+    date = today,    # -> "2026-02-21"
+    datetime = now   # -> "2026-02-21T10:30:45Z"
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+**NA values** become JSON `null`:
+
+```{r}
+# NA -> null
+result <- alpine_tag("div") |>
+  alpine_data(
+    value = NA,
+    text = NA_character_,
+    date = as.Date(NA)
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+Renders as:
+
+```javascript
+{value: null, text: null, date: null}
+```
+
+## Nested and Complex Structures
+
+You can combine different types by nesting:
+
+```{r}
+# Complex nested structure
+result <- alpine_tag("div") |>
+  alpine_data(
+    analytics = list(
+      users = data.frame(
+        id = 1:3,
+        name = c("Alice", "Bob", "Charlie"),
+        active = c(TRUE, FALSE, TRUE),
+        stringsAsFactors = FALSE
+      ),
+      summary = list(
+        total = 3,
+        active = 2,
+        lastUpdated = Sys.time()
+      ),
+      categories = c("A", "B", "B", "C")
+    )
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+## Edge Cases and Gotchas
+
+### Empty Vectors and Lists
+
+```{r}
+result <- alpine_tag("div") |>
+  alpine_data(
+    empty_vector = c(),           # -> []
+    empty_list = list(),          # -> {}
+    null_value = NULL             # -> null
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+### Mixed Types in Vectors
+
+R coerces mixed types; this is preserved in JSON:
+
+```{r}
+# Vector with mixed types (coerced to character)
+result <- alpine_tag("div") |>
+  alpine_data(
+    mixed = c(1, "two", 3.5)  # -> ["1","two","3.5"]
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+### Performance with Large Data
+
+For very large data frames (1000+ rows), consider:
+
+1. **Server-side filtering**: Pass only visible rows
+2. **Pagination**: Load data on demand
+3. **htmlwidgets**: For specialized views (DT tables, Plotly)
+
+```{r}
+# Good: subset to first 100 rows
+large_df <- data.frame(x = 1:10000, y = rnorm(10000))
+
+result <- alpine_tag("div") |>
+  alpine_data(data = head(large_df, 100)) |>  # Only first 100 rows
+  htmltools::browsable()
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+## JavaScript Injection with JS()
+
+For custom logic, inject raw JavaScript using `htmlwidgets::JS()`:
+
+```{r}
+# Define a method using JS()
+result <- alpine_tag("div",
+  alpine_tag("button", "Greet",
+    alpine_attr(`@click` = "greet()")
+  ),
+  alpine_tag("p",
+    alpine_attr(`x-bind:textContent` = "greeting")
+  )
+) |>
+  alpine_data(
+    greeting = "Ready",
+    greet = htmlwidgets::JS(
+      "function() { this.greeting = 'Hello, Alpine!'; }"
+    )
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+### When to Use JS()
+
+Use `JS()` for:
+
+**Functions and Methods**
+```{r}
+result <- alpine_tag("div") |>
+  alpine_data(
+    increment = htmlwidgets::JS("function() { this.count++; }"),
+    formatDate = htmlwidgets::JS("(date) => new Date(date).toLocaleDateString()")
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+**Arrow Functions**
+```{r}
+result <- alpine_tag("div") |>
+  alpine_data(
+    double = htmlwidgets::JS("(x) => x * 2"),
+    filter = htmlwidgets::JS("(arr, pred) => arr.filter(pred)")
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+**Complex Expressions**
+```{r}
+result <- alpine_tag("div") |>
+  alpine_data(
+    timestamp = htmlwidgets::JS("Date.now()"),
+    location = htmlwidgets::JS("window.location.href")
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+**Simple Values** (use plain R instead)
+```{r}
+# Don't do this (syntactically valid but wasteful):
+result <- alpine_tag("div") |>
+  alpine_data(name = htmlwidgets::JS('"Alice"')) |>  # Use: name = "Alice"
+  htmltools::browsable()
+
+# Better approach:
+alpine_tag("div") |>
+  alpine_data(count = 5) |>  # Use plain R, not JS()
+  htmltools::browsable()
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+## CSP-Safe JavaScript
+
+The default CSP-compliant build of Alpine.js limits what JavaScript expressions you can use. The following expressions are allowed:
+
+### Permitted Expressions (CSP-safe)
+
+```{r}
+result <- alpine_tag("div") |>
+  alpine_data(
+    count = 0,
+    doubled = htmlwidgets::JS("this.count * 2"),           # arithmetic
+    message = htmlwidgets::JS("this.name + ' is here'"),   # string concat
+    result = htmlwidgets::JS("this.x > 10 ? 'Yes' : 'No'") # ternary
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+### Restricted Expressions (CSP-incompatible)
+
+These require `options(alpinejs.use_csp = FALSE)`:
+
+```{r, eval=FALSE}
+# NOT CSP-safe: function definition
+greet = htmlwidgets::JS("function() { return 'Hi'; }")
+
+# NOT CSP-safe: arrow function
+double = htmlwidgets::JS("x => x * 2")
+
+# NOT CSP-safe: constructor
+data = htmlwidgets::JS("new Map()")
+
+# NOT CSP-safe: eval/exec
+result = htmlwidgets::JS("eval('1+1')")
+```
+
+To use unsafe expressions:
+
+```{r}
+# Disable CSP mode for the entire session
+options(alpinejs.use_csp = FALSE)
+
+# Now arrow functions work
+result <- alpine_tag("div") |>
+  alpine_data(
+    double = htmlwidgets::JS("(x) => x * 2")
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+## Debugging Serialization
+
+To inspect what JSON is generated, use browser dev tools or R itself:
+
+```{r}
+# Examine the generated HTML
+component <- result <- alpine_tag("div") |>
+  alpine_data(
+    users = data.frame(name = c("Alice", "Bob"), age = c(30, 25)),
+    config = list(debug = TRUE, version = "1.0")
+  )
+
+# View raw HTML
+as.character(component)  # Shows the x-data attribute value
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+Or check in browser:
+
+```javascript
+// Browser console
+console.log(Alpine.$data(document.querySelector('div')))  // Inspect component state
+```
+
+## Working with Dates and Times
+
+Be explicit about timezone handling:
+
+```{r}
+# UTC datetime
+utc_time <- as.POSIXct("2026-02-21 12:00:00", tz = "UTC")
+
+# Local time (converted to ISO with Z suffix)
+local_time <- Sys.time()
+
+result <- alpine_tag("div") |>
+  alpine_data(
+    created = utc_time,    # -> "2026-02-21T12:00:00Z"
+    modified = local_time   # -> "2026-02-21T10:30:45Z" (or local TZ)
+  )
+
+cat("```html\n", as.character(result), "\n```", sep="")
+```
+
+In Alpine.js, parse ISO strings back to dates:
+
+```r
+alpine_tag("div") |>
+  alpine_data(
+    created = Sys.time(),
+    createdDate = htmlwidgets::JS("new Date(this.created)")
+  )
+```
+
+## Performance Tips
+
+1. **Avoid huge data frames in alpine_data**: Pass only what's needed for the UI
+2. **Use lists for structured data**: More efficient than nested data frames
+3. **Minimize nested structures**: Flatten when possible
+4. **Cache computed values**: Pre-calculate in R, pass as state
+
+```{r}
+# Good: pre-compute statistics
+system_status <- list(
+  total_users = 1000,
+  active_users = 750,
+  inactive_users = 250  # Pre-computed instead of calculated in JS
+)
+
+# Instead of:
+# total_users = 1000,
+# active_users = ...,
+# inactive_users = htmlwidgets::JS("this.total_users - this.active_users")
+```
+
+## Troubleshooting
+
+**Q: "JSON.parse error"**
+
+- Your data contains invalid characters (e.g., backslashes)
+- Solution: Let alpinejs handle serialization; don't pre-stringify
+
+**Q: "Undefined variable"**
+
+- Typo in variable name or JS() expression
+- Solution: Check browser console; verify spelling in both R and HTML
+
+**Q: Data looks wrong in Alpine**
+
+- Factor converted to character (unexpected)?
+- Solution: Convert factors to character explicitly before alpine_data()
+
+**Q: CSP violation in production**
+
+- Using unsafe expressions with CSP mode enabled
+- Solution: Set `options(alpinejs.use_csp = FALSE)` or simplify expressions
+
+---
+
+For examples, see the vignettes and `examples/` directory (e.g., `examples/01-todo-list.R`)!

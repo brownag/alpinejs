@@ -1,0 +1,652 @@
+---
+title: Alpine Plugins: Extending Functionality
+---
+
+
+
+```{r setup, include=FALSE}
+litedown::reactor(echo = TRUE)
+RUN_EXAMPLES <- nzchar(Sys.getenv("R_ALPINEJS_RUN_EXAMPLES"))
+library(alpinejs)
+library(htmltools)
+```
+
+```{r test_plugins, eval=RUN_EXAMPLES, echo=FALSE}
+# Verify plugin registration works
+alpine_setup_persist()
+cat("setup_persist() executed successfully\n")
+alpine_setup_mask()
+cat("setup_mask() executed successfully\n")
+```
+
+## Overview
+
+Alpine.js plugins extend the framework with additional directives and utilities. The alpinejs package provides convenient setup functions for the most popular plugins and a system to register custom ones.
+
+**alpinejs provides convenient access to:**
+
+- **persist** -- Save Alpine state to browser localStorage
+- **mask** -- Format input fields (phone, credit card, date)
+- **sort** -- Add sorting to lists and tables
+- **observatory** -- Debug Alpine state in real-time
+- Custom plugins from npm or CDN
+
+## Quick Start
+
+### Setup Built-in Plugins
+
+```r
+library(alpinejs)
+library(htmltools)
+
+# Enable persist plugin
+setup_persist()
+
+# Enable mask plugin  
+setup_mask()
+
+# Enable sort plugin
+setup_sort()
+
+# Check what's registered
+get_plugin_registry()
+```
+
+```{r test_plugin_registry, eval=RUN_EXAMPLES, echo=FALSE}
+# Test that plugin registry functions work
+alpine_setup_persist()
+alpine_setup_mask()
+alpine_setup_sort()
+
+registry <- alpine_get_plugin_registry()
+cat("Plugin registry contains:", nrow(registry), "plugins\n")
+cat("Registered plugins:", paste(registry$name, collapse = ", "), "\n")
+```
+
+### Using Plugins
+
+Once registered, plugins can be used in Alpine components:
+
+```r
+# With persist
+alpine_setup_persist()
+
+alpine_tag("div",
+  alpine_tag("input",
+    type = "text",
+    placeholder = "Your name",
+    alpine_attr(`x-model` = "name")
+  ),
+  
+  "Saved name: ",
+  alpine_tag("span",
+    alpine_attr(`x-bind:textContent` = "name")
+  )
+) |>
+  alpine_data(
+    # With persist, this auto-loads from localStorage
+    name = htmlwidgets::JS("localStorage.getItem('name') || ''")
+  )
+```
+
+## Built-in Plugins
+
+### 1. persist -- localStorage Integration
+
+Automatically save and restore Alpine component state using browser localStorage.
+
+#### Setup
+
+```r
+setup_persist()
+```
+
+#### Use Cases
+
+- Remember user preferences (theme, layout, language)
+- Save form drafts
+- Persist filter choices
+- Remember sidebar state
+
+#### Example: Remember Theme Preference
+
+```r
+library(alpinejs)
+library(htmltools)
+
+setup_persist()
+
+alpine_tag("div",
+  style = "padding: 20px;",
+  
+  # Theme toggle
+  alpine_tag("button", "Toggle Dark Mode") |>
+    alpine_on("click", "darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)"),
+  
+  # Content
+  alpine_tag("div",
+    "Welcome! Your theme preference is saved.",
+    alpine_attr(`x-bind:style` = "darkMode ? 'background: #222; color: #fff;' : 'background: white'")
+  )
+) |>
+  alpine_data(
+    darkMode = htmlwidgets::JS("localStorage.getItem('darkMode') === 'true'")
+  ) |>
+  htmltools::browsable()
+```
+
+#### Data Persistence
+
+localStorage stores data as JSON strings:
+
+```js
+// R code
+localStorage.setItem('preferences', JSON.stringify({theme: 'dark', lang: 'en'}))
+
+// Later, retrieve:
+JSON.parse(localStorage.getItem('preferences'))  // {theme: 'dark', lang: 'en'}
+```
+
+### 2. mask -- Input Formatting
+
+Format input fields with patterns (phone, credit card, date, etc.).
+
+#### Setup
+
+```r
+setup_mask()
+```
+
+#### Common Patterns
+
+| Pattern | Example | Use Case |
+|---------|---------|----------|
+| `(999) 999-9999` | Phone | US phone numbers |
+| `9999-9999-9999-9999` | Credit card | 16-digit cards |
+| `99/99/9999` | Date | MM/DD/YYYY format |
+| `AAA-999` | Custom | License plates, codes |
+
+#### Example: Phone Number Input
+
+```r
+library(alpinejs)
+library(htmltools)
+
+setup_mask()
+
+alpine_tag("div",
+  style = "padding: 20px;",
+  
+  alpine_tag("label", "Phone Number:"),
+  alpine_tag("input",
+    type = "text",
+    placeholder = "(123) 456-7890"
+  ) |>
+    alpine_model("phone") |>
+    htmlwidgets::html_attr("x-mask", "(999) 999-9999"),
+  
+  # Display raw (unformatted) value
+  alpine_tag("div",
+    "Raw value: ",
+    alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "phone")
+    )
+  )
+) |>
+  alpine_data(phone = "") |>
+  htmltools::browsable()
+```
+
+**How it works:**
+
+- User types: `"1234567890"`
+- Mask formats: `"(123) 456-7890"`
+- `phone` contains: `"1234567890"` (raw digits)
+
+#### Example: Credit Card Input
+
+```r
+alpine_tag("div",
+  style = "max-width: 300px; padding: 20px;",
+  
+  alpine_tag("label", "Card Number:"),
+  alpine_tag("input",
+    type = "text",
+    placeholder = "0000-0000-0000-0000"
+  ) |>
+    alpine_model("card") |>
+    htmlwidgets::html_attr("x-mask", "9999-9999-9999-9999"),
+  
+  # Display formatted
+  alpine_tag("div",
+    "Formatted: ",
+    alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "cardFormatted()")
+    )
+  )
+) |>
+  alpine_data(
+    card = "",
+    cardFormatted = htmlwidgets::JS("
+      function() {
+        return this.card.split('-').join(' ');
+      }
+    ")
+  )
+```
+
+### 3. sort -- Array Sorting
+
+Add dynamic sorting to lists and tables.
+
+#### Setup
+
+```r
+setup_sort()
+```
+
+#### Use Cases
+
+- Sortable table headers
+- Re-orderable lists
+- Dynamic data arrangement
+- Multi-column sorting
+
+#### Example: Sortable Table
+
+```r
+library(alpinejs)
+library(htmltools)
+
+setup_sort()
+
+alpine_tag("table",
+  style = "width: 100%; border-collapse: collapse;",
+  
+  # Headers
+  alpine_tag("thead",
+    alpine_tag("tr",
+      alpine_tag("th", "Name") |>
+        alpine_on("click", "sortBy('name')") |>
+        htmlwidgets::html_attr("style", "cursor: pointer;"),
+      
+      alpine_tag("th", "Age") |>
+        alpine_on("click", "sortBy('age')") |>
+        htmlwidgets::html_attr("style", "cursor: pointer;"),
+      
+      alpine_tag("th", "City") |>
+        alpine_on("click", "sortBy('city')") |>
+        htmlwidgets::html_attr("style", "cursor: pointer;")
+    )
+  ),
+  
+  # Rows
+  alpine_tag("tbody",
+    alpine_tag("tr",
+      ":for" = "(person, idx) in sortedPeople",
+      ":key" = "idx",
+      alpine_tag("td",
+        alpine_attr(`x-bind:textContent` = "person.name")
+      ),
+      alpine_tag("td",
+        alpine_attr(`x-bind:textContent` = "person.age")
+      ),
+      alpine_tag("td",
+        alpine_attr(`x-bind:textContent` = "person.city")
+      )
+    )
+  )
+) |>
+  alpine_data(
+    people = htmlwidgets::JS("
+      [
+        {name: 'Alice', age: 28, city: 'NYC'},
+        {name: 'Bob', age: 34, city: 'LA'},
+        {name: 'Carol', age: 26, city: 'Chicago'}
+      ]
+    "),
+    sortBy = htmlwidgets::JS("
+      function(field) {
+        this.sortBy = field;
+        this.sortedPeople.sort((a, b) => {
+          if (a[field] < b[field]) return -1;
+          if (a[field] > b[field]) return 1;
+          return 0;
+        });
+      }
+    "),
+    sortedPeople = htmlwidgets::JS("this.people")
+  )
+```
+
+## Plugin Manager Functions
+
+### `setup_persist()`
+
+Register the persist plugin for localStorage support:
+
+```r
+setup_persist()
+
+# Verify registration
+is_plugin_registered("persist")  # TRUE
+```
+
+### `setup_mask()`
+
+Register mask plugin for input formatting:
+
+```r
+setup_mask()
+
+is_plugin_registered("mask")  # TRUE
+```
+
+### `setup_sort()`
+
+Register sort plugin for array sorting:
+
+```r
+setup_sort()
+
+is_plugin_registered("sort")  # TRUE
+```
+
+### `register_alpine_plugin()`
+
+Register a custom plugin from npm or CDN:
+
+```r
+# From npm (requires @-scope)
+register_alpine_plugin(
+  name = "my-custom",
+  version = "1.0.0",
+  npm_scope = "my-org"  # Becomes @my-org/my-custom
+)
+
+# From CDN (advanced)
+register_alpine_plugin(
+  name = "from-cdn",
+  version = "2.0.0",
+  src = "https://cdn.example.com/plugin.js"
+)
+```
+
+### `is_plugin_registered()`
+
+Check if a plugin is registered:
+
+```r
+is_plugin_registered("persist")  # TRUE/FALSE
+is_plugin_registered("mask")     # TRUE/FALSE
+```
+
+### `get_plugin_registry()`
+
+View all registered plugins:
+
+```r
+registry <- get_plugin_registry()
+str(registry)
+
+# Output example:
+# List of 3
+#  $ persist: list(version = "1.0.0", ...)
+#  $ mask   : list(version = "1.0.0", ...)
+#  $ sort   : list(version = "1.0.0", ...)
+```
+
+## Advanced: Custom Plugins
+
+### Registering from npm
+
+If you have a custom Alpine.js plugin on npm:
+
+```r
+# My company publishes @acme/analytics on npm
+register_alpine_plugin(
+  name = "analytics",
+  version = "1.2.3",
+  npm_scope = "acme"  # Becomes @acme/analytics
+)
+```
+
+### CSP Considerations
+
+Plugins must be CSP-compatible (no `eval` or inline scripts):
+
+```r
+# Tell alpinejs about CSP compliance
+register_alpine_plugin(
+  name = "safe-plugin",
+  version = "1.0.0",
+  npm_scope = "org",
+  csp = TRUE  # CSP-compatible
+)
+```
+
+## Real-World Examples
+
+### Example 1: Todo List with Persistence
+
+```r
+library(alpinejs)
+library(htmltools)
+
+alpine_setup_persist()
+
+alpine_tag("div",
+  style = "max-width: 500px; padding: 20px;",
+  
+  alpine_tag("h2", "Todo List (Auto-saved)"),
+  
+  # Input
+  alpine_tag("div",
+    style = "display: flex; gap: 10px; margin-bottom: 20px;",
+    alpine_tag("input",
+      type = "text",
+      placeholder = "New task...",
+      alpine_attr(`x-model` = "newTask")
+    ),
+    
+    alpine_tag("button", "Add",
+      alpine_attr(`@click` = "addTask()")
+    )
+  ),
+  
+  # List
+  alpine_tag("ul",
+    alpine_tag("li",
+      ":for" = "(task, idx) in tasks",
+      ":key" = "idx",
+      alpine_tag("span",
+        alpine_attr(`x-bind:textContent` = "task")
+      ),
+      alpine_tag("button", "Delete",
+        alpine_attr(`@click` = "removeTask(idx)")
+      )
+    )
+  )
+) |>
+  alpine_data(
+    tasks = htmlwidgets::JS("
+      JSON.parse(localStorage.getItem('todos')) || []
+    "),
+    newTask = "",
+    addTask = htmlwidgets::JS("
+      function() {
+        if (!this.newTask.trim()) return;
+        this.tasks.push(this.newTask);
+        localStorage.setItem('todos', JSON.stringify(this.tasks));
+        this.newTask = '';
+      }
+    "),
+    removeTask = htmlwidgets::JS("
+      function(idx) {
+        this.tasks.splice(idx, 1);
+        localStorage.setItem('todos', JSON.stringify(this.tasks));
+      }
+    ")
+  ) |>
+  htmltools::browsable()
+```
+
+### Example 2: Formatted Payment Form
+
+```r
+library(alpinejs)
+library(htmltools)
+
+alpine_setup_mask()
+
+alpine_tag("form",
+  style = "max-width: 400px; padding: 20px;",
+  
+  # Card number
+  alpine_tag("div",
+    alpine_tag("label", "Card Number:"),
+    alpine_tag("input",
+      type = "text",
+      placeholder = "0000-0000-0000-0000",
+      alpine_attr(
+        `x-model` = "card",
+        `x-mask` = "9999-9999-9999-9999"
+      )
+    )
+  ),
+  
+  # Expiry
+  alpine_tag("div",
+    alpine_tag("label", "Expires:"),
+    alpine_tag("input",
+      type = "text",
+      placeholder = "MM/YY",
+      alpine_attr(
+        `x-model` = "expiry",
+        `x-mask` = "99/99"
+      )
+    )
+  ),
+  
+  # CVC
+  alpine_tag("div",
+    alpine_tag("label", "CVC:"),
+    alpine_tag("input",
+      type = "text",
+      placeholder = "000",
+      alpine_attr(
+        `x-model` = "cvc",
+        `x-mask` = "999"
+      )
+    )
+  ),
+  
+  button("Pay") |>
+    alpine_on("click", "processPayment()")
+) |>
+  alpine_data(
+    card = "",
+    expiry = "",
+    cvc = "",
+    processPayment = htmlwidgets::JS("
+      function() {
+        console.log({card: this.card, expiry: this.expiry, cvc: this.cvc});
+      }
+    ")
+  )
+```
+
+### Example 3: Preferences with Persistence
+
+```r
+library(alpinejs)
+library(htmltools)
+
+setup_persist()
+
+alpine_tag("div",
+  style = "padding: 20px;",
+  
+  alpine_tag("h3", "User Preferences"),
+  
+  # Theme
+  div(
+    label("Theme:"),
+    select(
+      option(value = "light", "Light"),
+      option(value = "dark", "Dark"),
+      option(value = "auto", "Auto")
+    ) |>
+      alpine_model("theme") |>
+      alpine_on("change", "savePreferences()")
+  ),
+  
+  # Language
+  div(
+    label("Language:"),
+    select(
+      option(value = "en", "English"),
+      option(value = "es", "Español"),
+      option(value = "fr", "Français")
+    ) |>
+      alpine_model("language") |>
+      alpine_on("change", "savePreferences()")
+  ),
+  
+  # Notifications
+  div(
+    label("Notifications:"),
+    input(type = "checkbox") |>
+      alpine_model("notifications") |>
+      alpine_on("change", "savePreferences()")
+  ),
+  
+  div("Preferences saved to browser!")
+) |>
+  alpine_data(
+    theme = htmlwidgets::JS("
+      localStorage.getItem('pref_theme') || 'light'
+    "),
+    language = htmlwidgets::JS("
+      localStorage.getItem('pref_language') || 'en'
+    "),
+    notifications = htmlwidgets::JS("
+      localStorage.getItem('pref_notifications') === 'true'
+    "),
+    savePreferences = htmlwidgets::JS("
+      function() {
+        localStorage.setItem('pref_theme', this.theme);
+        localStorage.setItem('pref_language', this.language);
+        localStorage.setItem('pref_notifications', this.notifications);
+      }
+    ")
+  )
+```
+
+## Plugin Performance
+
+Plugins are loaded once per page:
+
+- No performance penalty for multiple components
+- Lazy-loaded when first component using plugin renders
+- Minimal bundle size impact
+
+## Troubleshooting
+
+**Q: Plugin not working even after setup?**
+A: Verify with `is_plugin_registered()`. Reload page if freshly added.
+
+**Q: Mask input too restrictive?**
+A: Use looser patterns. `x-mask` is optional; users can enter any characters.
+
+**Q: localStorage full errors?**
+A: Clear old data or reduce what you're persisting.
+
+**Q: Plugin breaks in production?**
+A: Check CSP settings. Use CSP-compatible plugins (persist, mask are safe).
+
+## See Also
+
+- [Alpine.js Official Plugins](https://alpinejs.dev/)
+- [Getting Started](getting-started.qmd)
+- [Input Modifiers Guide](input-modifiers.qmd)

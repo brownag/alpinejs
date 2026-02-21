@@ -1,0 +1,438 @@
+---
+title: Getting Started with alpinejs
+---
+
+
+```{r, include = FALSE
+litedown::reactor(
+  collapse = TRUE,
+  comment = "#> "
+)
+```
+
+## Installation
+
+```{r, eval=FALSE}
+# Install from GitHub
+remotes::install_github("brownag/alpinejs")
+```
+
+```{r setup, eval=TRUE, echo=TRUE}
+library(alpinejs)
+library(htmltools)
+```
+
+# Getting Started with alpinejs
+
+The **alpinejs** R package lets you build interactive HTML applications without writing JavaScript. You write R code; alpinejs generates the HTML and JavaScript that Alpine.js (a lightweight JavaScript framework) uses to handle interactivity in the browser.
+
+```{r test_basic_concepts, eval=TRUE, echo=FALSE}
+# Verify core functions work and return proper tags
+result <- div() |> alpine_data(count = 0)
+cat("alpine_data creates class:", class(result), "\n")
+cat("Has Alpine attribute:", "x-data" %in% names(attributes(result)), "\n")
+```
+
+## What is alpinejs?
+
+alpinejs is an R package that:
+
+1. **Generates HTML** using R functions like `alpine_tag()`, `alpine_data()`, `alpine_on()`, etc.
+2. **Creates Alpine.js directives** inside that HTML (attributes like `x-data`, `@click`, `x-model`)
+3. **Serializes R data to JSON** for Alpine.js to use as reactive state
+4. **Works with R's pipe operator** (`|>`) for clean, readable chains
+
+In the browser, Alpine.js then handles reactivity, event listeners, and DOM updates. You never write JavaScript—only R!
+
+## Core Concepts
+
+### State (x-data)
+
+Every Alpine component starts with **data** -- the reactive state that drives the UI:
+
+```{r}
+alpine_tag("div",
+  alpine_tag("button", "Count: ", alpine_tag("span",
+    alpine_attr(`x-bind:textContent` = "count")
+  ))
+) |>
+  alpine_data(count = 0)
+```
+
+The `alpine_data()` function initiates a component's state. Pass named arguments to set initial values:
+
+```{r}
+alpine_tag("div",
+  alpine_tag("p", "Username: ", alpine_tag("span",
+    alpine_attr(`x-bind:textContent` = "username")
+  )),
+  alpine_tag("p", "Email: ", alpine_tag("span",
+    alpine_attr(`x-bind:textContent` = "email")
+  )),
+  alpine_tag("p", "Logged in: ", alpine_tag("span",
+    alpine_attr(`x-bind:textContent` = "isLoggedIn")
+  ))
+) |>
+  alpine_data(
+    username = "Alice",
+    email = "alice@example.com",
+    isLoggedIn = TRUE
+  )
+```
+
+### Events (x-on)
+
+Respond to user interactions with `alpine_on()`:
+
+```{r}
+alpine_tag("div",
+  alpine_tag("button", "Increment",
+    alpine_attr(`@click` = "count++")
+  ),
+  alpine_tag("p", "Count: ", alpine_tag("span",
+    alpine_attr(`x-bind:textContent` = "count")
+  ))
+) |>
+  alpine_data(count = 0)
+```
+
+Common events:
+
+- **Mouse**: `click`, `dblclick`, `mouseenter`, `mouseleave`
+- **Keyboard**: `keydown`, `keyup`, `keypress`
+- **Form**: `input`, `change`, `submit`, `focus`, `blur`
+
+### Conditional Display (x-show)
+
+Show and hide elements based on boolean conditions:
+
+```{r}
+alpine_tag("div",
+  alpine_tag("button", "Toggle Details",
+    alpine_attr(`@click` = "showDetails = !showDetails")
+  ),
+  alpine_tag("div",
+    "These are secret details!",
+    style = "color: red; margin-top: 10px;",
+    alpine_attr(`x-show` = "showDetails")
+  )
+) |>
+  alpine_data(showDetails = FALSE)
+```
+
+### Conditional Rendering (x-if)
+
+`alpine_if()` completely removes an element from the DOM when the condition is false.
+Use it for elements that are rarely shown or that are expensive to initialize.
+
+```{r}
+alpine_tag("div",
+  alpine_tag("button", "Show Admin Panel",
+    alpine_attr(`@click` = "isAdmin = !isAdmin")
+  ),
+  alpine_if(
+    alpine_tag("div",
+      style = "padding: 10px; background: #fee;",
+      "Admin controls here"
+    ),
+    "isAdmin"
+  )
+) |>
+  alpine_data(isAdmin = FALSE)
+```
+
+**`x-show` vs `x-if`:** Use `alpine_show()` (CSS hide) for elements that toggle
+frequently or need state preserved between toggles. Use `alpine_if()` (DOM removal)
+for elements that are rarely shown, conditionally loaded content, or when you want
+to guarantee the element's lifecycle hooks run on each toggle.
+
+### Preventing Flash of Unrendered Content (x-cloak)
+
+When Alpine.js loads asynchronously, reactive elements may briefly flash their raw
+template state. `alpine_cloak()` hides elements until Alpine has initialized them.
+
+```{r}
+alpine_tag("div",
+  alpine_tag("span") |>
+    alpine_text("message") |>
+    alpine_cloak()
+) |>
+  alpine_data(message = "Hello from Alpine!")
+```
+
+`alpine_cloak()` automatically injects the required CSS (`[x-cloak] { display: none !important; }`)
+so no additional stylesheet configuration is needed.
+
+### DOM References (x-ref and $refs)
+
+Label elements with `alpine_ref()` and access them directly in event handlers
+using `$refs.name`. This replaces manual `getElementById` or `querySelector` calls.
+
+```{r}
+alpine_tag("div",
+  alpine_tag("input", type = "text", placeholder = "Type something...") |>
+    alpine_ref("textInput"),
+  alpine_tag("button", "Copy to Clipboard") |>
+    alpine_on("click", "navigator.clipboard.writeText($refs.textInput.value)")
+) |>
+  alpine_data(x = "")
+```
+
+Use `alpine_refs()` to generate `$refs.name` expressions for use in other directives:
+
+```{r, eval=FALSE}
+# Programmatic $refs expression (useful when building complex expressions)
+alpine_refs("textInput")
+# Returns JS expression: $refs.textInput
+```
+
+### Two-Way Binding (x-model)
+
+Synchronize input fields with state:
+
+```{r}
+alpine_tag("div",
+  alpine_tag("input", type = "text", placeholder = "Enter your name") |> alpine_model("name"),
+  alpine_tag("p", "Hello, ", alpine_tag("span",
+    alpine_attr(`x-bind:textContent` = "name")
+  ), "!")
+) |>
+  alpine_data(name = "")
+```
+
+Typing in the input field automatically updates the `name` state, and the greeting updates reactively.
+
+### Attribute Binding (x-bind)
+
+Dynamically set HTML attributes:
+
+```{r}
+alpine_tag("div",
+  alpine_tag("input",
+    type = "text",
+    placeholder = "Enter username",
+    alpine_attr(`x-model` = "username")
+  ),
+  alpine_tag("button", "Submit",
+    alpine_attr(`x-bind:disabled` = "username.length === 0")
+  )
+) |>
+  alpine_data(username = "")
+```
+
+The button is disabled until the username field has text. Note how we use `alpine_attr()` to keep HTML attributes and Alpine directives organized together.
+
+## Practical Example: A Form with Validation
+
+Build a form that validates in real-time:
+
+```{r}
+alpine_tag("div",
+  style = "max-width: 400px; margin: 20px auto;",
+  alpine_tag("h2", "Register"),
+  
+  alpine_tag("label", "Full Name:", style = "display: block; margin-top: 10px; font-weight: bold;"),
+  alpine_tag("input", type = "text", style = "width: 100%; padding: 5px;") |> alpine_model("fullName"),
+  
+  alpine_tag("label", "Email:", style = "display: block; margin-top: 10px; font-weight: bold;"),
+  alpine_tag("input", type = "email", style = "width: 100%; padding: 5px;") |> alpine_model("email"),
+  
+  alpine_tag("label", "Password:", style = "display: block; margin-top: 10px; font-weight: bold;"),
+  alpine_tag("input", type = "password", style = "width: 100%; padding: 5px;") |> alpine_model("password"),
+  
+  # Validation messages
+  alpine_tag("div",
+    "Email is invalid",
+    style = "color: red; margin-top: 5px; font-size: 12px;"
+  ) |> alpine_show("email.length > 0 && !isValidEmail()"),
+  
+  alpine_tag("div",
+    "Password must be at least 8 characters",
+    style = "color: red; margin-top: 5px; font-size: 12px;"
+  ) |> alpine_show("password.length > 0 && password.length < 8"),
+  
+  # Submit button
+  alpine_tag("button",
+    "Register",
+    style = "margin-top: 20px; padding: 10px 20px;",
+    alpine_attr(`x-bind:disabled` = "!isFormValid()"),
+    alpine_attr(`@click` = "submitForm()")
+  )
+) |>
+  alpine_data(
+    fullName = "",
+    email = "",
+    password = "",
+    isValidEmail = htmlwidgets::JS(
+      "function() { return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(this.email); }"
+    ),
+    isFormValid = htmlwidgets::JS(
+      "function() { return this.fullName.length > 0 && this.isValidEmail() && this.password.length >= 8; }"
+    ),
+    submitForm = htmlwidgets::JS(
+      "function() { alert('Form submitted!'); }"
+    )
+  )
+```
+
+This example demonstrates:
+
+- Multiple state variables
+- Real-time validation
+- Conditional showing of error messages
+- JavaScript functions injected with `htmlwidgets::JS()`
+- Dynamic button disabling
+
+## Data Type Conversions
+
+alpinejs automatically converts R data types to JSON. The conversion is as follows:
+
+```{r}
+# Various data types
+alpine_tag("div", "Data demo") |>
+  alpine_data(
+    # Simple types
+    count = 42,
+    name = "Alice",
+    isActive = TRUE,
+    score = 3.14,
+    
+    # Collections
+    colors = c("red", "blue", "green"),
+    metadata = list(version = "1.0", author = "dev"),
+    
+    # Factors (converted to character)
+    category = factor(c("A", "B", "C")),
+    
+    # Dates (converted to ISO 8601)
+    today = Sys.Date(),
+    now = Sys.time(),
+    
+    # NA becomes null
+    missing = NA
+  ) |>
+  htmltools::browsable()
+```
+
+Result in Alpine state:
+```javascript
+{
+  count: 42,
+  name: "Alice",
+  isActive: true,
+  score: 3.14,
+  colors: ["red", "blue", "green"],
+  metadata: {version: "1.0", author: "dev"},
+  category: ["A", "B", "C"],
+  today: "2026-02-21",
+  now: "2026-02-21T10:30:45Z",
+  missing: null
+}
+```
+
+## JavaScript Expressions
+
+For custom interactivity, inject raw JavaScript using `htmlwidgets::JS()`:
+
+```{r}
+alpine_tag("div",
+  alpine_tag("button", "Click me",
+    alpine_attr(`@click` = "greet()")
+  ),
+  alpine_tag("p",
+    alpine_attr(`x-bind:textContent` = "greeting")
+  )
+) |>
+  alpine_data(
+    greeting = "Hello!",
+    greet = htmlwidgets::JS("function() { this.greeting = 'You clicked!'; }")
+  )
+```
+
+**Important:** CSP mode (default) has limitations on JavaScript expressions. Stick to:
+- Simple variable assignments
+- Method calls
+- Basic operators
+- Conditionals
+
+Avoid closures, function definitions, or complex expressions in CSP mode.
+
+## Exporting to HTML Files
+
+Generate standalone HTML files that work without a server:
+
+```{r}
+alpine_tag("div",
+  alpine_tag("button", "Toggle") |> alpine_on("click", "show = !show"),
+  alpine_tag("div", "Hidden content") |> alpine_show("show")
+) |>
+  alpine_data(show = FALSE)
+```
+
+## Integration with Shiny
+
+Use alpinejs components in Shiny for lightweight interactivity:
+
+```{r, eval=FALSE}
+library(shiny)
+library(alpinejs)
+
+ui <- fluidPage(
+  alpine_tag("h1", "My App"),
+  
+  alpine_tag("div",
+    alpine_tag("input", type = "text",
+      alpine_attr(`x-model` = "text")
+    ),
+    alpine_tag("p", "You typed: ", alpine_tag("span",
+      alpine_attr(`x-bind:textContent` = "text")
+    ))
+  ) |>
+    alpine_data(text = "")
+)
+
+server <- function(input, output, session) {
+  # Server logic here
+}
+
+shinyApp(ui, server)
+```
+
+## Next Steps
+
+- **Pre-built Components**: See the [Components Vignette](components-and-patterns.qmd) for accordion, modal, and tabs examples
+- **Reactivity and Global State**: See the [Reactivity and Globals Vignette](reactivity-and-globals.qmd) for `$watch`, `$dispatch`, and `Alpine.store()`
+- **Advanced Patterns**: Learn about composition, nested components, and performance optimization
+- **Deeper Integration**: Custom event handlers and component composition patterns
+
+## Best Practices
+
+1. **Keep State Simple**: Use Alpine for UI logic, not business logic
+2. **Use Events Sparingly**: For simple interactions; use HTMX/Plumber for server calls
+3. **Validate Client-Side**: Show errors early with `x-show`
+4. **Structure Components**: Create reusable R functions that return Alpine components
+5. **Test Rendered HTML**: Verify the final HTML structure in browser dev tools
+
+## Troubleshooting
+
+**Q: My Alpine component isn't interactive**
+
+- Check browser console for JavaScript errors
+- Verify CDN is loaded (should see `<script src="...alpinejs..."></script>` in page source)
+- Ensure Alpine expressions are valid JavaScript
+
+**Q: State isn't updating**
+
+- Verify state variable names match in `x-data` and expressions
+- Check that event handlers are spelled correctly (`x-on`, not `@on`)
+- Use browser DevTools to inspect the Alpine component state
+
+**Q: CSP security warning?**
+
+- alpinejs uses CSP-compliant build by default
+- Some complex JavaScript may require `options(alpinejs.use_csp = FALSE)`
+- Document any CSP exceptions in your app's policy
+
+---
+
+See the next vignette for pre-built components!
