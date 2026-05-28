@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plugin Ecosystem | alpinejs</title>
+  <!-- Load Crosstalk for cross-widget reactivity -->
+  <script src="https://cdn.jsdelivr.net/npm/crosstalk@1.2.0/dist/crosstalk.min.js"></script>
+  <!-- Load Alpine.js for interactive components -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+  <style>
+    /* 1990s Web 1.0 aesthetic - authentic retro feel */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Verdana, Geneva, sans-serif;
+      line-height: 1.6;
+      color: #000;
+      background: #c0c0c0;
+      font-size: 14px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: #dfdfdf;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #dfdfdf;
+      padding-top: 0.8rem;
+    }
+
+    nav a {
+      color: #0000ff;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    nav a:visited {
+      color: #800080;
+    }
+
+    nav a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Main content */
+    main {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      padding: 1rem;
+      background: #fff;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      min-height: calc(100vh - 250px);
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1.5rem 0 0.5rem;
+      font-weight: bold;
+      line-height: 1.3;
+    }
+
+    h1 { 
+      font-size: 2rem;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+      margin-top: 0;
+      color: #0000ff;
+    }
+
+    h2 { 
+      font-size: 1.4rem;
+      color: #0000cc;
+      border-bottom: 1px solid #000;
+    }
+
+    h3 { font-size: 1.1rem; color: #000080; }
+    h4 { font-size: 1rem; color: #000; font-weight: bold; }
+
+    /* Paragraphs & text */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #800080;
+    }
+
+    a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Inline code */
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+      color: #000;
+      border: 1px solid #ccc;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #f0f0f0;
+      border: 1px solid #999;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.4;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #000;
+      border: none;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid #999;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #333;
+      font-style: italic;
+      background: #f5f5f5;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #999;
+      margin: 1.5rem 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      border: 1px solid #999;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border: 1px solid #999;
+    }
+
+    th {
+      background: #c0c0c0;
+      font-weight: bold;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #999;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      color: #000;
+      font-size: 0.85rem;
+      margin: 2rem 1rem 0;
+      background: #dfdfdf;
+    }
+
+    footer a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    footer a:visited {
+      color: #800080;
+    }
+
+    /* Horizontal rule dividers */
+    .divider {
+      border: none;
+      height: 2px;
+      background: linear-gradient(to right, #dfdfdf 0%, #000 50%, #dfdfdf 100%);
+      margin: 1.5rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      main {
+        padding: 0.8rem;
+      }
+
+      header {
+        padding: 0.8rem;
+      }
+
+      nav {
+        gap: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html" style="color: #000; text-decoration: none;">alpinejs</a></h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../guides/">Guides</a>
+      <a href="../examples/">Examples</a>
+      <a href="../reference/">Reference</a>
+      <a href="https://github.com/brownag/alpinejs" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    
+<div class="frontmatter">
+<div class="title"><h1>Alpine Plugins: Extending Functionality</h1></div>
+</div>
+<div class="body">
+<h2 id="sec:overview">Overview</h2>
+<p>Alpine.js plugins extend the framework with additional directives and utilities. The alpinejs package provides convenient setup functions for the most popular plugins and a system to register custom ones.</p>
+<p><strong>alpinejs provides convenient access to:</strong></p>
+<ul>
+<li><strong>persist</strong> – Save Alpine state to browser localStorage</li>
+<li><strong>mask</strong> – Format input fields (phone, credit card, date)</li>
+<li><strong>sort</strong> – Add sorting to lists and tables</li>
+<li><strong>observatory</strong> – Debug Alpine state in real-time</li>
+<li>Custom plugins from npm or CDN</li>
+</ul>
+<h2 id="sec:quick-start">Quick Start</h2>
+<h3 id="sec:setup-built-in-plugins">Setup Built-in Plugins</h3>
+<pre><code class="language-r">library(alpinejs)
+library(htmltools)
+
+# Enable persist plugin
+setup_persist()
+
+# Enable mask plugin  
+setup_mask()
+
+# Enable sort plugin
+setup_sort()
+
+# Check what's registered
+get_plugin_registry()
+</code></pre>
+<h3 id="sec:using-plugins">Using Plugins</h3>
+<p>Once registered, plugins can be used in Alpine components:</p>
+<pre><code class="language-r"># With persist
+alpine_setup_persist()
+
+alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;input&quot;,
+    type = &quot;text&quot;,
+    placeholder = &quot;Your name&quot;,
+    alpine_attr(`x-model` = &quot;name&quot;)
+  ),
+  
+  &quot;Saved name: &quot;,
+  alpine_tag(&quot;span&quot;,
+    alpine_attr(`x-bind:textContent` = &quot;name&quot;)
+  )
+) |>
+  alpine_data(
+    # With persist, this auto-loads from localStorage
+    name = htmlwidgets::JS(&quot;localStorage.getItem('name') || ''&quot;)
+  )
+</code></pre>
+<h2 id="sec:built-in-plugins">Built-in Plugins</h2>
+<h3 id="sec:1-persist-localstorage-integration">1. persist – localStorage Integration</h3>
+<p>Automatically save and restore Alpine component state using browser localStorage.</p>
+<h4 id="sec:setup_1">Setup</h4>
+<pre><code class="language-r">setup_persist()
+</code></pre>
+<h4 id="sec:use-cases_1">Use Cases</h4>
+<ul>
+<li>Remember user preferences (theme, layout, language)</li>
+<li>Save form drafts</li>
+<li>Persist filter choices</li>
+<li>Remember sidebar state</li>
+</ul>
+<h4 id="sec:example-remember-theme-preference">Example: Remember Theme Preference</h4>
+<pre><code class="language-r">library(alpinejs)
+library(htmltools)
+
+setup_persist()
+
+alpine_tag(&quot;div&quot;,
+  style = &quot;padding: 20px;&quot;,
+  
+  # Theme toggle
+  alpine_tag(&quot;button&quot;, &quot;Toggle Dark Mode&quot;) |>
+    alpine_on(&quot;click&quot;, &quot;darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)&quot;),
+  
+  # Content
+  alpine_tag(&quot;div&quot;,
+    &quot;Welcome! Your theme preference is saved.&quot;,
+    alpine_attr(`x-bind:style` = &quot;darkMode ? 'background: #222; color: #fff;' : 'background: white'&quot;)
+  )
+) |>
+  alpine_data(
+    darkMode = htmlwidgets::JS(&quot;localStorage.getItem('darkMode') === 'true'&quot;)
+  ) |>
+  htmltools::browsable()
+</code></pre>
+<h4 id="sec:data-persistence">Data Persistence</h4>
+<p>localStorage stores data as JSON strings:</p>
+<pre><code class="language-js">// R code
+localStorage.setItem('preferences', JSON.stringify({theme: 'dark', lang: 'en'}))
+
+// Later, retrieve:
+JSON.parse(localStorage.getItem('preferences'))  // {theme: 'dark', lang: 'en'}
+</code></pre>
+<h3 id="sec:2-mask-input-formatting">2. mask – Input Formatting</h3>
+<p>Format input fields with patterns (phone, credit card, date, etc.).</p>
+<h4 id="sec:setup_2">Setup</h4>
+<pre><code class="language-r">setup_mask()
+</code></pre>
+<h4 id="sec:common-patterns">Common Patterns</h4>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Example</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>(999) 999-9999</code></td>
+<td>Phone</td>
+<td>US phone numbers</td>
+</tr>
+<tr>
+<td><code>9999-9999-9999-9999</code></td>
+<td>Credit card</td>
+<td>16-digit cards</td>
+</tr>
+<tr>
+<td><code>99/99/9999</code></td>
+<td>Date</td>
+<td>MM/DD/YYYY format</td>
+</tr>
+<tr>
+<td><code>AAA-999</code></td>
+<td>Custom</td>
+<td>License plates, codes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sec:example-phone-number-input">Example: Phone Number Input</h4>
+<pre><code class="language-r">library(alpinejs)
+library(htmltools)
+
+setup_mask()
+
+alpine_tag(&quot;div&quot;,
+  style = &quot;padding: 20px;&quot;,
+  
+  alpine_tag(&quot;label&quot;, &quot;Phone Number:&quot;),
+  alpine_tag(&quot;input&quot;,
+    type = &quot;text&quot;,
+    placeholder = &quot;(123) 456-7890&quot;
+  ) |>
+    alpine_model(&quot;phone&quot;) |>
+    htmlwidgets::html_attr(&quot;x-mask&quot;, &quot;(999) 999-9999&quot;),
+  
+  # Display raw (unformatted) value
+  alpine_tag(&quot;div&quot;,
+    &quot;Raw value: &quot;,
+    alpine_tag(&quot;span&quot;,
+      alpine_attr(`x-bind:textContent` = &quot;phone&quot;)
+    )
+  )
+) |>
+  alpine_data(phone = &quot;&quot;) |>
+  htmltools::browsable()
+</code></pre>
+<p><strong>How it works:</strong></p>
+<ul>
+<li>User types: <code>&quot;1234567890&quot;</code></li>
+<li>Mask formats: <code>&quot;(123) 456-7890&quot;</code></li>
+<li><code>phone</code> contains: <code>&quot;1234567890&quot;</code> (raw digits)</li>
+</ul>
+<h4 id="sec:example-credit-card-input">Example: Credit Card Input</h4>
+<pre><code class="language-r">alpine_tag(&quot;div&quot;,
+  style = &quot;max-width: 300px; padding: 20px;&quot;,
+  
+  alpine_tag(&quot;label&quot;, &quot;Card Number:&quot;),
+  alpine_tag(&quot;input&quot;,
+    type = &quot;text&quot;,
+    placeholder = &quot;0000-0000-0000-0000&quot;
+  ) |>
+    alpine_model(&quot;card&quot;) |>
+    htmlwidgets::html_attr(&quot;x-mask&quot;, &quot;9999-9999-9999-9999&quot;),
+  
+  # Display formatted
+  alpine_tag(&quot;div&quot;,
+    &quot;Formatted: &quot;,
+    alpine_tag(&quot;span&quot;,
+      alpine_attr(`x-bind:textContent` = &quot;cardFormatted()&quot;)
+    )
+  )
+) |>
+  alpine_data(
+    card = &quot;&quot;,
+    cardFormatted = htmlwidgets::JS(&quot;
+      function() {
+        return this.card.split('-').join(' ');
+      }
+    &quot;)
+  )
+</code></pre>
+<h3 id="sec:3-sort-array-sorting">3. sort – Array Sorting</h3>
+<p>Add dynamic sorting to lists and tables.</p>
+<h4 id="sec:setup_3">Setup</h4>
+<pre><code class="language-r">setup_sort()
+</code></pre>
+<h4 id="sec:use-cases_2">Use Cases</h4>
+<ul>
+<li>Sortable table headers</li>
+<li>Re-orderable lists</li>
+<li>Dynamic data arrangement</li>
+<li>Multi-column sorting</li>
+</ul>
+<h4 id="sec:example-sortable-table">Example: Sortable Table</h4>
+<pre><code class="language-r">library(alpinejs)
+library(htmltools)
+
+setup_sort()
+
+alpine_tag(&quot;table&quot;,
+  style = &quot;width: 100%; border-collapse: collapse;&quot;,
+  
+  # Headers
+  alpine_tag(&quot;thead&quot;,
+    alpine_tag(&quot;tr&quot;,
+      alpine_tag(&quot;th&quot;, &quot;Name&quot;) |>
+        alpine_on(&quot;click&quot;, &quot;sortBy('name')&quot;) |>
+        htmlwidgets::html_attr(&quot;style&quot;, &quot;cursor: pointer;&quot;),
+      
+      alpine_tag(&quot;th&quot;, &quot;Age&quot;) |>
+        alpine_on(&quot;click&quot;, &quot;sortBy('age')&quot;) |>
+        htmlwidgets::html_attr(&quot;style&quot;, &quot;cursor: pointer;&quot;),
+      
+      alpine_tag(&quot;th&quot;, &quot;City&quot;) |>
+        alpine_on(&quot;click&quot;, &quot;sortBy('city')&quot;) |>
+        htmlwidgets::html_attr(&quot;style&quot;, &quot;cursor: pointer;&quot;)
+    )
+  ),
+  
+  # Rows
+  alpine_tag(&quot;tbody&quot;,
+    alpine_tag(&quot;tr&quot;,
+      &quot;:for&quot; = &quot;(person, idx) in sortedPeople&quot;,
+      &quot;:key&quot; = &quot;idx&quot;,
+      alpine_tag(&quot;td&quot;,
+        alpine_attr(`x-bind:textContent` = &quot;person.name&quot;)
+      ),
+      alpine_tag(&quot;td&quot;,
+        alpine_attr(`x-bind:textContent` = &quot;person.age&quot;)
+      ),
+      alpine_tag(&quot;td&quot;,
+        alpine_attr(`x-bind:textContent` = &quot;person.city&quot;)
+      )
+    )
+  )
+) |>
+  alpine_data(
+    people = htmlwidgets::JS(&quot;
+      [
+        {name: 'Alice', age: 28, city: 'NYC'},
+        {name: 'Bob', age: 34, city: 'LA'},
+        {name: 'Carol', age: 26, city: 'Chicago'}
+      ]
+    &quot;),
+    sortBy = htmlwidgets::JS(&quot;
+      function(field) {
+        this.sortBy = field;
+        this.sortedPeople.sort((a, b) => {
+          if (a[field] < b[field]) return -1;
+          if (a[field] > b[field]) return 1;
+          return 0;
+        });
+      }
+    &quot;),
+    sortedPeople = htmlwidgets::JS(&quot;this.people&quot;)
+  )
+</code></pre>
+<h2 id="sec:plugin-manager-functions">Plugin Manager Functions</h2>
+<h3 id="sec:setup-persist"><code>setup_persist()</code></h3>
+<p>Register the persist plugin for localStorage support:</p>
+<pre><code class="language-r">setup_persist()
+
+# Verify registration
+is_plugin_registered(&quot;persist&quot;)  # TRUE
+</code></pre>
+<h3 id="sec:setup-mask"><code>setup_mask()</code></h3>
+<p>Register mask plugin for input formatting:</p>
+<pre><code class="language-r">setup_mask()
+
+is_plugin_registered(&quot;mask&quot;)  # TRUE
+</code></pre>
+<h3 id="sec:setup-sort"><code>setup_sort()</code></h3>
+<p>Register sort plugin for array sorting:</p>
+<pre><code class="language-r">setup_sort()
+
+is_plugin_registered(&quot;sort&quot;)  # TRUE
+</code></pre>
+<h3 id="sec:register-alpine-plugin"><code>register_alpine_plugin()</code></h3>
+<p>Register a custom plugin from npm or CDN:</p>
+<pre><code class="language-r"># From npm (requires @-scope)
+register_alpine_plugin(
+  name = &quot;my-custom&quot;,
+  version = &quot;1.0.0&quot;,
+  npm_scope = &quot;my-org&quot;  # Becomes @my-org/my-custom
+)
+
+# From CDN (advanced)
+register_alpine_plugin(
+  name = &quot;from-cdn&quot;,
+  version = &quot;2.0.0&quot;,
+  src = &quot;https://cdn.example.com/plugin.js&quot;
+)
+</code></pre>
+<h3 id="sec:is-plugin-registered"><code>is_plugin_registered()</code></h3>
+<p>Check if a plugin is registered:</p>
+<pre><code class="language-r">is_plugin_registered(&quot;persist&quot;)  # TRUE/FALSE
+is_plugin_registered(&quot;mask&quot;)     # TRUE/FALSE
+</code></pre>
+<h3 id="sec:get-plugin-registry"><code>get_plugin_registry()</code></h3>
+<p>View all registered plugins:</p>
+<pre><code class="language-r">registry <- get_plugin_registry()
+str(registry)
+
+# Output example:
+# List of 3
+#  $ persist: list(version = &quot;1.0.0&quot;, ...)
+#  $ mask   : list(version = &quot;1.0.0&quot;, ...)
+#  $ sort   : list(version = &quot;1.0.0&quot;, ...)
+</code></pre>
+<h2 id="sec:advanced-custom-plugins">Advanced: Custom Plugins</h2>
+<h3 id="sec:registering-from-npm">Registering from npm</h3>
+<p>If you have a custom Alpine.js plugin on npm:</p>
+<pre><code class="language-r"># My company publishes @acme/analytics on npm
+register_alpine_plugin(
+  name = &quot;analytics&quot;,
+  version = &quot;1.2.3&quot;,
+  npm_scope = &quot;acme&quot;  # Becomes @acme/analytics
+)
+</code></pre>
+<h3 id="sec:csp-considerations">CSP Considerations</h3>
+<p>Plugins must be CSP-compatible (no <code>eval</code> or inline scripts):</p>
+<pre><code class="language-r"># Tell alpinejs about CSP compliance
+register_alpine_plugin(
+  name = &quot;safe-plugin&quot;,
+  version = &quot;1.0.0&quot;,
+  npm_scope = &quot;org&quot;,
+  csp = TRUE  # CSP-compatible
+)
+</code></pre>
+<h2 id="sec:real-world-examples">Real-World Examples</h2>
+<h3 id="sec:example-1-todo-list-with-persistence">Example 1: Todo List with Persistence</h3>
+<pre><code class="language-r">library(alpinejs)
+library(htmltools)
+
+alpine_setup_persist()
+
+alpine_tag(&quot;div&quot;,
+  style = &quot;max-width: 500px; padding: 20px;&quot;,
+  
+  alpine_tag(&quot;h2&quot;, &quot;Todo List (Auto-saved)&quot;),
+  
+  # Input
+  alpine_tag(&quot;div&quot;,
+    style = &quot;display: flex; gap: 10px; margin-bottom: 20px;&quot;,
+    alpine_tag(&quot;input&quot;,
+      type = &quot;text&quot;,
+      placeholder = &quot;New task...&quot;,
+      alpine_attr(`x-model` = &quot;newTask&quot;)
+    ),
+    
+    alpine_tag(&quot;button&quot;, &quot;Add&quot;,
+      alpine_attr(`@click` = &quot;addTask()&quot;)
+    )
+  ),
+  
+  # List
+  alpine_tag(&quot;ul&quot;,
+    alpine_tag(&quot;li&quot;,
+      &quot;:for&quot; = &quot;(task, idx) in tasks&quot;,
+      &quot;:key&quot; = &quot;idx&quot;,
+      alpine_tag(&quot;span&quot;,
+        alpine_attr(`x-bind:textContent` = &quot;task&quot;)
+      ),
+      alpine_tag(&quot;button&quot;, &quot;Delete&quot;,
+        alpine_attr(`@click` = &quot;removeTask(idx)&quot;)
+      )
+    )
+  )
+) |>
+  alpine_data(
+    tasks = htmlwidgets::JS(&quot;
+      JSON.parse(localStorage.getItem('todos')) || []
+    &quot;),
+    newTask = &quot;&quot;,
+    addTask = htmlwidgets::JS(&quot;
+      function() {
+        if (!this.newTask.trim()) return;
+        this.tasks.push(this.newTask);
+        localStorage.setItem('todos', JSON.stringify(this.tasks));
+        this.newTask = '';
+      }
+    &quot;),
+    removeTask = htmlwidgets::JS(&quot;
+      function(idx) {
+        this.tasks.splice(idx, 1);
+        localStorage.setItem('todos', JSON.stringify(this.tasks));
+      }
+    &quot;)
+  ) |>
+  htmltools::browsable()
+</code></pre>
+<h3 id="sec:example-2-formatted-payment-form">Example 2: Formatted Payment Form</h3>
+<pre><code class="language-r">library(alpinejs)
+library(htmltools)
+
+alpine_setup_mask()
+
+alpine_tag(&quot;form&quot;,
+  style = &quot;max-width: 400px; padding: 20px;&quot;,
+  
+  # Card number
+  alpine_tag(&quot;div&quot;,
+    alpine_tag(&quot;label&quot;, &quot;Card Number:&quot;),
+    alpine_tag(&quot;input&quot;,
+      type = &quot;text&quot;,
+      placeholder = &quot;0000-0000-0000-0000&quot;,
+      alpine_attr(
+        `x-model` = &quot;card&quot;,
+        `x-mask` = &quot;9999-9999-9999-9999&quot;
+      )
+    )
+  ),
+  
+  # Expiry
+  alpine_tag(&quot;div&quot;,
+    alpine_tag(&quot;label&quot;, &quot;Expires:&quot;),
+    alpine_tag(&quot;input&quot;,
+      type = &quot;text&quot;,
+      placeholder = &quot;MM/YY&quot;,
+      alpine_attr(
+        `x-model` = &quot;expiry&quot;,
+        `x-mask` = &quot;99/99&quot;
+      )
+    )
+  ),
+  
+  # CVC
+  alpine_tag(&quot;div&quot;,
+    alpine_tag(&quot;label&quot;, &quot;CVC:&quot;),
+    alpine_tag(&quot;input&quot;,
+      type = &quot;text&quot;,
+      placeholder = &quot;000&quot;,
+      alpine_attr(
+        `x-model` = &quot;cvc&quot;,
+        `x-mask` = &quot;999&quot;
+      )
+    )
+  ),
+  
+  button(&quot;Pay&quot;) |>
+    alpine_on(&quot;click&quot;, &quot;processPayment()&quot;)
+) |>
+  alpine_data(
+    card = &quot;&quot;,
+    expiry = &quot;&quot;,
+    cvc = &quot;&quot;,
+    processPayment = htmlwidgets::JS(&quot;
+      function() {
+        console.log({card: this.card, expiry: this.expiry, cvc: this.cvc});
+      }
+    &quot;)
+  )
+</code></pre>
+<h3 id="sec:example-3-preferences-with-persistence">Example 3: Preferences with Persistence</h3>
+<pre><code class="language-r">library(alpinejs)
+library(htmltools)
+
+setup_persist()
+
+alpine_tag(&quot;div&quot;,
+  style = &quot;padding: 20px;&quot;,
+  
+  alpine_tag(&quot;h3&quot;, &quot;User Preferences&quot;),
+  
+  # Theme
+  div(
+    label(&quot;Theme:&quot;),
+    select(
+      option(value = &quot;light&quot;, &quot;Light&quot;),
+      option(value = &quot;dark&quot;, &quot;Dark&quot;),
+      option(value = &quot;auto&quot;, &quot;Auto&quot;)
+    ) |>
+      alpine_model(&quot;theme&quot;) |>
+      alpine_on(&quot;change&quot;, &quot;savePreferences()&quot;)
+  ),
+  
+  # Language
+  div(
+    label(&quot;Language:&quot;),
+    select(
+      option(value = &quot;en&quot;, &quot;English&quot;),
+      option(value = &quot;es&quot;, &quot;Español&quot;),
+      option(value = &quot;fr&quot;, &quot;Français&quot;)
+    ) |>
+      alpine_model(&quot;language&quot;) |>
+      alpine_on(&quot;change&quot;, &quot;savePreferences()&quot;)
+  ),
+  
+  # Notifications
+  div(
+    label(&quot;Notifications:&quot;),
+    input(type = &quot;checkbox&quot;) |>
+      alpine_model(&quot;notifications&quot;) |>
+      alpine_on(&quot;change&quot;, &quot;savePreferences()&quot;)
+  ),
+  
+  div(&quot;Preferences saved to browser!&quot;)
+) |>
+  alpine_data(
+    theme = htmlwidgets::JS(&quot;
+      localStorage.getItem('pref_theme') || 'light'
+    &quot;),
+    language = htmlwidgets::JS(&quot;
+      localStorage.getItem('pref_language') || 'en'
+    &quot;),
+    notifications = htmlwidgets::JS(&quot;
+      localStorage.getItem('pref_notifications') === 'true'
+    &quot;),
+    savePreferences = htmlwidgets::JS(&quot;
+      function() {
+        localStorage.setItem('pref_theme', this.theme);
+        localStorage.setItem('pref_language', this.language);
+        localStorage.setItem('pref_notifications', this.notifications);
+      }
+    &quot;)
+  )
+</code></pre>
+<h2 id="sec:plugin-performance">Plugin Performance</h2>
+<p>Plugins are loaded once per page:</p>
+<ul>
+<li>No performance penalty for multiple components</li>
+<li>Lazy-loaded when first component using plugin renders</li>
+<li>Minimal bundle size impact</li>
+</ul>
+<h2 id="sec:troubleshooting">Troubleshooting</h2>
+<p><strong>Q: Plugin not working even after setup?</strong>
+A: Verify with <code>is_plugin_registered()</code>. Reload page if freshly added.</p>
+<p><strong>Q: Mask input too restrictive?</strong>
+A: Use looser patterns. <code>x-mask</code> is optional; users can enter any characters.</p>
+<p><strong>Q: localStorage full errors?</strong>
+A: Clear old data or reduce what you’re persisting.</p>
+<p><strong>Q: Plugin breaks in production?</strong>
+A: Check CSP settings. Use CSP-compatible plugins (persist, mask are safe).</p>
+<h2 id="sec:see-also">See Also</h2>
+<ul>
+<li><a href="https://alpinejs.dev/">Alpine.js Official Plugins</a></li>
+<li><a href="getting-started.qmd">Getting Started</a></li>
+<li><a href="input-modifiers.qmd">Input Modifiers Guide</a></li>
+</ul>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+<nav style="margin-bottom: 1.5rem; font-size: 0.9em;">
+      <a href="../index.html" style="color: #0000ff; text-decoration: underline;">Home</a> &gt;
+      <a href="../guides/index.html" style="color: #0000ff; text-decoration: underline;">Guides</a> &gt;
+      <span style="color: #666;">Plugin Ecosystem</span>
+      </nav>
+  </main>
+
+  <footer>
+    <p>
+      alpinejs &mdash; R interface for Alpine.js<br>
+      <a href="https://github.com/brownag/alpinejs">View on GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

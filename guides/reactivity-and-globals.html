@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reactivity & Globals | alpinejs</title>
+  <!-- Load Crosstalk for cross-widget reactivity -->
+  <script src="https://cdn.jsdelivr.net/npm/crosstalk@1.2.0/dist/crosstalk.min.js"></script>
+  <!-- Load Alpine.js for interactive components -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+  <style>
+    /* 1990s Web 1.0 aesthetic - authentic retro feel */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Verdana, Geneva, sans-serif;
+      line-height: 1.6;
+      color: #000;
+      background: #c0c0c0;
+      font-size: 14px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: #dfdfdf;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #dfdfdf;
+      padding-top: 0.8rem;
+    }
+
+    nav a {
+      color: #0000ff;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    nav a:visited {
+      color: #800080;
+    }
+
+    nav a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Main content */
+    main {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      padding: 1rem;
+      background: #fff;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      min-height: calc(100vh - 250px);
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1.5rem 0 0.5rem;
+      font-weight: bold;
+      line-height: 1.3;
+    }
+
+    h1 { 
+      font-size: 2rem;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+      margin-top: 0;
+      color: #0000ff;
+    }
+
+    h2 { 
+      font-size: 1.4rem;
+      color: #0000cc;
+      border-bottom: 1px solid #000;
+    }
+
+    h3 { font-size: 1.1rem; color: #000080; }
+    h4 { font-size: 1rem; color: #000; font-weight: bold; }
+
+    /* Paragraphs & text */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #800080;
+    }
+
+    a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Inline code */
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+      color: #000;
+      border: 1px solid #ccc;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #f0f0f0;
+      border: 1px solid #999;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.4;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #000;
+      border: none;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid #999;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #333;
+      font-style: italic;
+      background: #f5f5f5;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #999;
+      margin: 1.5rem 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      border: 1px solid #999;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border: 1px solid #999;
+    }
+
+    th {
+      background: #c0c0c0;
+      font-weight: bold;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #999;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      color: #000;
+      font-size: 0.85rem;
+      margin: 2rem 1rem 0;
+      background: #dfdfdf;
+    }
+
+    footer a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    footer a:visited {
+      color: #800080;
+    }
+
+    /* Horizontal rule dividers */
+    .divider {
+      border: none;
+      height: 2px;
+      background: linear-gradient(to right, #dfdfdf 0%, #000 50%, #dfdfdf 100%);
+      margin: 1.5rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      main {
+        padding: 0.8rem;
+      }
+
+      header {
+        padding: 0.8rem;
+      }
+
+      nav {
+        gap: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html" style="color: #000; text-decoration: none;">alpinejs</a></h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../guides/">Guides</a>
+      <a href="../examples/">Examples</a>
+      <a href="../reference/">Reference</a>
+      <a href="https://github.com/brownag/alpinejs" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    
+<div class="frontmatter">
+<div class="title"><h1>Reactivity and Global State</h1></div>
+</div>
+<div class="body">
+<pre><code>#> All new functions available: TRUE 
+</code></pre>
+<h1 id="chp:reactivity-and-global-state">Reactivity and Global State</h1>
+<p>This vignette covers Alpine.js magic properties and global methods – the tools
+for advanced reactivity: watching data, dispatching events between components,
+and sharing state across a page.</p>
+<ul>
+<li><strong>Magic properties</strong> (<code>$watch</code>, <code>$dispatch</code>, <code>$nextTick</code>, <code>$refs</code>, <code>$store</code>, <code>$el</code>)
+are available inside any Alpine expression.</li>
+<li><strong>Global methods</strong> (<code>Alpine.data()</code>, <code>Alpine.store()</code>) register reusable components
+and cross-component shared state before Alpine initializes.</li>
+</ul>
+<hr />
+<h2 id="sec:magic-properties">Magic Properties</h2>
+<p>Magic properties are special variables prefixed with <code>$</code> that are available inside
+Alpine.js expressions. The alpinejs package provides helper functions that generate
+the corresponding JavaScript expression strings.</p>
+<p>These helpers return <code>htmlwidgets::JS()</code> objects, so they can be used anywhere an
+expression string is accepted: in <code>alpine_init()</code>, <code>alpine_on()</code>, <code>alpine_bind()</code>,
+and other directives.</p>
+<h3 id="sec:watch-react-to-property-changes">$watch – React to Property Changes</h3>
+<p><code>alpine_watch(&quot;property&quot;, callback)</code> generates a <code>$watch('property', callback)</code>
+expression that runs the callback whenever the named property changes. Use it
+inside <code>alpine_init()</code> to set up watchers when the component first loads.</p>
+<pre><code class="language-r"># Log every change to the search query
+tagList(
+  tags$div(
+    tags$input(type = &quot;text&quot;, placeholder = &quot;Search...&quot;) |>
+      alpine_model(&quot;query&quot;),
+    tags$p() |>
+      alpine_text(&quot;'Searching for: ' + query&quot;)
+  ) |>
+    alpine_init(alpine_watch(&quot;query&quot;, &quot;value => console.log('Query:', value)&quot;)) |>
+    alpine_data(query = &quot;&quot;)
+)
+#> <div x-init=&quot;$watch(&amp;#39;query&amp;#39;, value =&amp;gt; console.log(&amp;#39;Query:&amp;#39;, value))&quot; x-data=&quot;{&amp;quot;query&amp;quot;:&amp;quot;&amp;quot;}&quot;>
+#>   <input type=&quot;text&quot; placeholder=&quot;Search...&quot; x-model=&quot;query&quot;/>
+#>   <p x-text=&quot;&amp;#39;Searching for: &amp;#39; + query&quot;></p>
+#> </div>
+</code></pre>
+<p>You can watch deeply nested properties using dot notation, and receive the old
+value as the second callback argument:</p>
+<pre><code class="language-r"># Watch a nested property (console only -- no visible output)
+tags$div() |>
+  alpine_init(
+    alpine_watch(&quot;user.name&quot;, &quot;(newVal, oldVal) => console.log(newVal, oldVal)&quot;)
+  ) |>
+  alpine_data_js(&quot;{ user: { name: 'Alice' } }&quot;)
+#> <div x-init=&quot;$watch(&amp;#39;user.name&amp;#39;, (newVal, oldVal) =&amp;gt; console.log(newVal, oldVal))&quot; x-data=&quot;{ user: { name: &amp;#39;Alice&amp;#39; } }&quot;></div>
+</code></pre>
+<h3 id="sec:dispatch-send-events-between-components">$dispatch – Send Events Between Components</h3>
+<p><code>alpine_dispatch(&quot;event-name&quot;, detail)</code> generates a <code>$dispatch('event', detail)</code>
+expression that emits a custom DOM event. Other elements can listen for it with
+<code>alpine_on(&quot;event-name.window&quot;, ...)</code> (the <code>.window</code> modifier is needed for
+cross-component communication since events bubble to the window).</p>
+<pre><code class="language-r"># Component 1: dispatch an event when the button is clicked
+emitter <- tags$div(
+  style = &quot;padding: 10px; border: 1px solid #ccc;&quot;,
+  tags$p(&quot;Component 1 -- Emitter&quot;),
+  tags$button(&quot;Notify Other Component&quot;) |>
+    alpine_on(&quot;click&quot;, alpine_dispatch(&quot;notify&quot;, list(message = &quot;Hello!&quot;)))
+) |>
+  alpine_data(x = 0)
+
+# Component 2: listen for the event from Component 1
+listener <- tags$div(
+  style = &quot;padding: 10px; border: 1px solid #ccc; margin-top: 8px;&quot;,
+  tags$p(&quot;Component 2 -- Listener&quot;),
+  tags$p() |>
+    alpine_text(&quot;lastMessage || 'No messages yet'&quot;)
+) |>
+  alpine_init(
+    &quot;$nextTick(() => {})&quot;  # placeholder init
+  ) |>
+  alpine_on(&quot;notify.window&quot;, &quot;lastMessage = $event.detail.message&quot;) |>
+  alpine_data(lastMessage = &quot;&quot;)
+
+tagList(emitter, listener)
+#> <div style=&quot;padding: 10px; border: 1px solid #ccc;&quot; x-data=&quot;{&amp;quot;x&amp;quot;:0}&quot;>
+#>   <p>Component 1 -- Emitter</p>
+#>   <button @click=&quot;$dispatch(&amp;#39;notify&amp;#39;, {&amp;quot;message&amp;quot;:&amp;quot;Hello!&amp;quot;})&quot;>Notify Other Component</button>
+#> </div>
+#> <div style=&quot;padding: 10px; border: 1px solid #ccc; margin-top: 8px;&quot; x-init=&quot;$nextTick(() =&amp;gt; {})&quot; @notify.window=&quot;lastMessage = $event.detail.message&quot; x-data=&quot;{&amp;quot;lastMessage&amp;quot;:&amp;quot;&amp;quot;}&quot;>
+#>   <p>Component 2 -- Listener</p>
+#>   <p x-text=&quot;lastMessage || &amp;#39;No messages yet&amp;#39;&quot;></p>
+#> </div>
+</code></pre>
+<h3 id="sec:nexttick-act-after-dom-updates">$nextTick – Act After DOM Updates</h3>
+<p><code>alpine_next_tick(callback)</code> generates a <code>$nextTick(callback)</code> expression that
+defers the callback until after Alpine has finished processing the current reactive
+update and updated the DOM. Use it when you need to measure or interact with the
+DOM after a state change.</p>
+<pre><code class="language-r"># Focus an input after toggling it visible
+tags$div(
+  tags$button(&quot;Show and focus input&quot;) |>
+    alpine_on(&quot;click&quot;, paste0(
+      &quot;show = true; &quot;,
+      alpine_next_tick(&quot;() => $refs.myInput.focus()&quot;)
+    )),
+  tags$input(type = &quot;text&quot;, placeholder = &quot;Now focused&quot;) |>
+    alpine_ref(&quot;myInput&quot;) |>
+    alpine_show(&quot;show&quot;)
+) |>
+  alpine_data(show = FALSE)
+#> <div x-data=&quot;{&amp;quot;show&amp;quot;:false}&quot;>
+#>   <button @click=&quot;show = true; $nextTick(() =&amp;gt; $refs.myInput.focus())&quot;>Show and focus input</button>
+#>   <input type=&quot;text&quot; placeholder=&quot;Now focused&quot; x-ref=&quot;myInput&quot; x-show=&quot;show&quot;/>
+#> </div>
+</code></pre>
+<h3 id="sec:refs-access-dom-elements">$refs – Access DOM Elements</h3>
+<p><code>alpine_refs(&quot;name&quot;)</code> generates a <code>$refs.name</code> expression for the element labeled
+with <code>alpine_ref()</code>. Use it to read values, call DOM methods, or pass elements
+to other functions.</p>
+<pre><code class="language-r"># Copy input value to clipboard
+tags$div(
+  tags$input(type = &quot;text&quot;, value = &quot;Copy me!&quot;) |>
+    alpine_ref(&quot;copyTarget&quot;),
+  tags$button(&quot;Copy to Clipboard&quot;) |>
+    alpine_on(&quot;click&quot;, paste0(
+      &quot;navigator.clipboard.writeText(&quot;,
+      alpine_refs(&quot;copyTarget&quot;),
+      &quot;.value)&quot;
+    )),
+  tags$span() |>
+    alpine_text(&quot;copied ? 'Copied!' : ''&quot;)
+) |>
+  alpine_on(&quot;click&quot;, &quot;copied = true; setTimeout(() => copied = false, 2000)&quot;,
+            .cssSelector = &quot;button&quot;) |>
+  alpine_data(copied = FALSE)
+#> <div @click=&quot;copied = true; setTimeout(() =&amp;gt; copied = false, 2000)&quot; x-data=&quot;{&amp;quot;copied&amp;quot;:false}&quot;>
+#>   <input type=&quot;text&quot; value=&quot;Copy me!&quot; x-ref=&quot;copyTarget&quot;/>
+#>   <button @click=&quot;navigator.clipboard.writeText($refs.copyTarget.value)&quot;>Copy to Clipboard</button>
+#>   <span x-text=&quot;copied ? &amp;#39;Copied!&amp;#39; : &amp;#39;&amp;#39;&quot;></span>
+#> </div>
+</code></pre>
+<p>You can also just write <code>$refs.name</code> inline – the helper is provided for
+programmatic expression building when the ref name is an R variable.</p>
+<h3 id="sec:store-access-global-stores">$store – Access Global Stores</h3>
+<p><code>alpine_store_js(&quot;store_name&quot;, &quot;property&quot;)</code> generates a <code>$store.name.property</code>
+expression for reading from or modifying a global Alpine store. See the
+<a href="#global-methods">Global Methods</a> section below for registering stores.</p>
+<pre><code class="language-r"># Read from a store
+alpine_store_js(&quot;theme&quot;)            # -> $store.theme
+alpine_store_js(&quot;theme&quot;, &quot;mode&quot;)    # -> $store.theme.mode
+</code></pre>
+<h3 id="sec:el-reference-the-root-element">$el – Reference the Root Element</h3>
+<p><code>alpine_el()</code> generates <code>$el</code>, which refers to the root DOM element of the
+current Alpine component. Useful for passing the element to third-party libraries
+or reading its dimensions.</p>
+<pre><code class="language-r"># Scroll the component into view
+tags$button(&quot;Scroll here&quot;) |>
+  alpine_on(&quot;click&quot;, paste0(alpine_el(), &quot;.scrollIntoView({ behavior: 'smooth' })&quot;))
+</code></pre>
+<hr />
+<h2 id="sec:x-effect-reactive-side-effects">x-effect: Reactive Side Effects</h2>
+<p><code>alpine_effect()</code> wraps an expression that Alpine.js re-evaluates automatically
+whenever any reactive data it references changes. Unlike <code>$watch</code>, you do not
+specify which property to watch – Alpine tracks all reactive data accessed.</p>
+<pre><code class="language-r"># Log query to console on every change (side effect)
+tags$div(
+  tags$input(type = &quot;text&quot;, placeholder = &quot;Type to search...&quot;) |>
+    alpine_model(&quot;query&quot;),
+  tags$p(style = &quot;color: gray; font-size: 0.9em;&quot;,
+    &quot;Open browser console to see reactive logging.&quot;
+  )
+) |>
+  alpine_effect(&quot;console.log('[effect] query is now:', query)&quot;) |>
+  alpine_data(query = &quot;&quot;)
+#> <div x-effect=&quot;console.log(&amp;#39;[effect] query is now:&amp;#39;, query)&quot; x-data=&quot;{&amp;quot;query&amp;quot;:&amp;quot;&amp;quot;}&quot;>
+#>   <input type=&quot;text&quot; placeholder=&quot;Type to search...&quot; x-model=&quot;query&quot;/>
+#>   <p style=&quot;color: gray; font-size: 0.9em;&quot;>Open browser console to see reactive logging.</p>
+#> </div>
+</code></pre>
+<hr />
+<h2 id="sec:global-methods">Global Methods</h2>
+<h3 id="sec:alpine-data-reusable-components">Alpine.data() – Reusable Components</h3>
+<p><code>alpine_global_data(name, js_definition)</code> registers a named, reusable Alpine
+component that can be used by name in any <code>x-data</code> attribute. This avoids
+repeating the same component definition when using it multiple times on a page.</p>
+<pre><code class="language-r"># Register a reusable counter component
+counter_registration <- alpine_global_data(
+  &quot;counter&quot;,
+  &quot;() => ({
+    count: 0,
+    increment() { this.count++ },
+    decrement() { if (this.count > 0) this.count-- },
+    reset()     { this.count = 0 }
+  })&quot;
+)
+
+# Use it twice -- each instance has its own state
+counter1 <- tags$div(
+  style = &quot;display: flex; gap: 8px; align-items: center;&quot;,
+  tags$span(&quot;Counter A:&quot;),
+  tags$button(&quot;-&quot;) |> alpine_on(&quot;click&quot;, &quot;decrement()&quot;),
+  tags$span() |> alpine_text(&quot;count&quot;),
+  tags$button(&quot;+&quot;) |> alpine_on(&quot;click&quot;, &quot;increment()&quot;),
+  tags$button(&quot;Reset&quot;) |> alpine_on(&quot;click&quot;, &quot;reset()&quot;)
+) |> alpine_data_js(&quot;counter&quot;)
+
+counter2 <- tags$div(
+  style = &quot;display: flex; gap: 8px; align-items: center; margin-top: 8px;&quot;,
+  tags$span(&quot;Counter B:&quot;),
+  tags$button(&quot;-&quot;) |> alpine_on(&quot;click&quot;, &quot;decrement()&quot;),
+  tags$span() |> alpine_text(&quot;count&quot;),
+  tags$button(&quot;+&quot;) |> alpine_on(&quot;click&quot;, &quot;increment()&quot;),
+  tags$button(&quot;Reset&quot;) |> alpine_on(&quot;click&quot;, &quot;reset()&quot;)
+) |> alpine_data_js(&quot;counter&quot;)
+
+tagList(counter_registration, counter1, counter2)
+#> <script>document.addEventListener('alpine:init', function() { Alpine.data('counter', () =&amp;gt; ({
+#>     count: 0,
+#>     increment() { this.count++ },
+#>     decrement() { if (this.count &amp;gt; 0) this.count-- },
+#>     reset()     { this.count = 0 }
+#>   })); });</script>
+#> <div style=&quot;display: flex; gap: 8px; align-items: center;&quot; x-data=&quot;counter&quot;>
+#>   <span>Counter A:</span>
+#>   <button @click=&quot;decrement()&quot;>-</button>
+#>   <span x-text=&quot;count&quot;></span>
+#>   <button @click=&quot;increment()&quot;>+</button>
+#>   <button @click=&quot;reset()&quot;>Reset</button>
+#> </div>
+#> <div style=&quot;display: flex; gap: 8px; align-items: center; margin-top: 8px;&quot; x-data=&quot;counter&quot;>
+#>   <span>Counter B:</span>
+#>   <button @click=&quot;decrement()&quot;>-</button>
+#>   <span x-text=&quot;count&quot;></span>
+#>   <button @click=&quot;increment()&quot;>+</button>
+#>   <button @click=&quot;reset()&quot;>Reset</button>
+#> </div>
+</code></pre>
+<p>Each counter has completely independent state – changing counter A does not
+affect counter B.</p>
+<h3 id="sec:alpine-store-global-shared-state">Alpine.store() – Global Shared State</h3>
+<p><code>alpine_global_store(name, ...)</code> registers a global store accessible from any
+Alpine component on the page via <code>$store.name</code>. When any component writes to the
+store, all other components that read from it update reactively.</p>
+<h4 id="sec:example-shared-theme-toggle">Example: Shared Theme Toggle</h4>
+<pre><code class="language-r"># Register a dark mode store with a toggle method (raw JS)
+theme_store <- alpine_global_store(
+  &quot;theme&quot;,
+  htmlwidgets::JS(&quot;{ dark: false, toggle() { this.dark = !this.dark } }&quot;)
+)
+
+# Component A: the toggle button
+toggle_btn <- tags$div(
+  tags$button() |>
+    alpine_text(&quot;$store.theme.dark ? 'Switch to Light' : 'Switch to Dark'&quot;) |>
+    alpine_on(&quot;click&quot;, &quot;$store.theme.toggle()&quot;) |>
+    alpine_bind(&quot;style&quot;, &quot;$store.theme.dark ? 'background:#222;color:#fff' : ''&quot;)
+) |>
+  alpine_data_js(&quot;{}&quot;)
+
+# Component B: themed content panel (completely separate component)
+themed_panel <- tags$div(
+  tags$p() |>
+    alpine_text(&quot;'Current mode: ' + ($store.theme.dark ? 'Dark' : 'Light')&quot;),
+  style = &quot;padding: 10px; margin-top: 8px; border: 1px solid #ccc;&quot;
+) |>
+  alpine_bind(&quot;style&quot;, &quot;$store.theme.dark ? 'background:#1a1a1a;color:#fff' : ''&quot;) |>
+  alpine_data_js(&quot;{}&quot;)
+
+tagList(theme_store, toggle_btn, themed_panel)
+#> <script>document.addEventListener('alpine:init', function() { Alpine.store('theme', { dark: false, toggle() { this.dark = !this.dark } }); });</script>
+#> <div x-data=&quot;{}&quot;>
+#>   <button x-text=&quot;$store.theme.dark ? &amp;#39;Switch to Light&amp;#39; : &amp;#39;Switch to Dark&amp;#39;&quot; @click=&quot;$store.theme.toggle()&quot; x-bind:style=&quot;$store.theme.dark ? &amp;#39;background:#222;color:#fff&amp;#39; : &amp;#39;&amp;#39;&quot;></button>
+#> </div>
+#> <div style=&quot;padding: 10px; margin-top: 8px; border: 1px solid #ccc;&quot; x-bind:style=&quot;$store.theme.dark ? &amp;#39;background:#1a1a1a;color:#fff&amp;#39; : &amp;#39;&amp;#39;&quot; x-data=&quot;{}&quot;>
+#>   <p x-text=&quot;&amp;#39;Current mode: &amp;#39; + ($store.theme.dark ? &amp;#39;Dark&amp;#39; : &amp;#39;Light&amp;#39;)&quot;></p>
+#> </div>
+</code></pre>
+<p>Clicking the toggle button in Component A instantly updates Component B, even
+though they share no parent <code>x-data</code> component – the store is the shared channel.</p>
+<h4 id="sec:example-notification-queue-r-data">Example: Notification Queue (R data)</h4>
+<p>Stores can also be initialized from R data:</p>
+<pre><code class="language-r">notif_store <- alpine_global_store(
+  &quot;notifications&quot;,
+  count   = 0L,
+  visible = FALSE
+)
+
+notif_ui <- tags$div(
+  tags$button(&quot;Trigger Notification&quot;) |>
+    alpine_on(&quot;click&quot;,
+      &quot;$store.notifications.count++; $store.notifications.visible = true;
+       setTimeout(() => $store.notifications.visible = false, 3000)&quot;
+    ),
+  tags$div(
+    style = &quot;background: #28a745; color: white; padding: 8px 12px; 
+             margin-top: 8px; border-radius: 4px;&quot;,
+    &quot;Notification sent! Total: &quot;,
+    tags$span() |> alpine_text(&quot;$store.notifications.count&quot;)
+  ) |>
+    alpine_show(&quot;$store.notifications.visible&quot;) |>
+    alpine_transition(.opacity = TRUE, .duration = 300)
+) |>
+  alpine_data_js(&quot;{}&quot;)
+
+tagList(notif_store, notif_ui)
+#> <script>document.addEventListener('alpine:init', function() { Alpine.store('notifications', {&quot;count&quot;:0,&quot;visible&quot;:false}); });</script>
+#> <div x-data=&quot;{}&quot;>
+#>   <button @click=&quot;$store.notifications.count++; $store.notifications.visible = true;&amp;#10;       setTimeout(() =&amp;gt; $store.notifications.visible = false, 3000)&quot;>Trigger Notification</button>
+#>   <div style=&quot;background: #28a745; color: white; padding: 8px 12px; &amp;#10;             margin-top: 8px; border-radius: 4px;&quot; x-show=&quot;$store.notifications.visible&quot; x-transition.opacity.duration.300ms=&quot;&quot;>
+#>     Notification sent! Total: 
+#>     <span x-text=&quot;$store.notifications.count&quot;></span>
+#>   </div>
+#> </div>
+</code></pre>
+<hr />
+<h2 id="sec:complete-example-search-with-effects-and-refs">Complete Example: Search with Effects and Refs</h2>
+<p>This example combines several features: <code>$watch</code> via <code>x-effect</code>, <code>x-ref</code>, and
+<code>alpine_if</code> for conditional rendering of results.</p>
+<pre><code class="language-r">search_demo <- tags$div(
+  style = &quot;font-family: sans-serif; max-width: 400px;&quot;,
+
+  # Search input with ref for auto-focus
+  tags$input(
+    type = &quot;text&quot;,
+    placeholder = &quot;Search items...&quot;,
+    style = &quot;width: 100%; padding: 6px; box-sizing: border-box;&quot;
+  ) |>
+    alpine_model(&quot;query&quot;, .debounce = 200) |>
+    alpine_ref(&quot;searchInput&quot;),
+
+  # Count display
+  tags$p(style = &quot;color: gray; font-size: 0.85em;&quot;) |>
+    alpine_text(&quot;filteredItems.length + ' results'&quot;),
+
+  # Results list
+  alpine_for(
+    tags$div(
+      style = &quot;padding: 4px 0; border-bottom: 1px solid #eee;&quot;,
+      tags$span() |> alpine_text(&quot;item&quot;)
+    ),
+    &quot;item in filteredItems&quot;,
+    key = &quot;item&quot;
+  ),
+
+  # Empty state
+  alpine_if(
+    tags$p(style = &quot;color: #999;&quot;, &quot;No items matched.&quot;),
+    &quot;filteredItems.length === 0 &amp;&amp; query.length > 0&quot;
+  )
+) |>
+  alpine_init(alpine_next_tick(&quot;() => $refs.searchInput.focus()&quot;)) |>
+  alpine_effect(&quot;console.log('[effect] Visible results:', filteredItems.length)&quot;) |>
+  alpine_data_js(&quot;{
+    query: '',
+    items: ['apples', 'bananas', 'cherries', 'dates', 'elderberries', 'figs'],
+    get filteredItems() {
+      if (!this.query) return this.items;
+      return this.items.filter(i => i.startsWith(this.query.toLowerCase()));
+    }
+  }&quot;)
+
+search_demo
+#> <div style=&quot;font-family: sans-serif; max-width: 400px;&quot; x-init=&quot;$nextTick(() =&amp;gt; $refs.searchInput.focus())&quot; x-effect=&quot;console.log(&amp;#39;[effect] Visible results:&amp;#39;, filteredItems.length)&quot; x-data=&quot;{&amp;#10;    query: &amp;#39;&amp;#39;,&amp;#10;    items: [&amp;#39;apples&amp;#39;, &amp;#39;bananas&amp;#39;, &amp;#39;cherries&amp;#39;, &amp;#39;dates&amp;#39;, &amp;#39;elderberries&amp;#39;, &amp;#39;figs&amp;#39;],&amp;#10;    get filteredItems() {&amp;#10;      if (!this.query) return this.items;&amp;#10;      return this.items.filter(i =&amp;gt; i.startsWith(this.query.toLowerCase()));&amp;#10;    }&amp;#10;  }&quot;>
+#>   <input type=&quot;text&quot; placeholder=&quot;Search items...&quot; style=&quot;width: 100%; padding: 6px; box-sizing: border-box;&quot; x-model.debounce.200=&quot;query&quot; x-ref=&quot;searchInput&quot;/>
+#>   <p style=&quot;color: gray; font-size: 0.85em;&quot; x-text=&quot;filteredItems.length + &amp;#39; results&amp;#39;&quot;></p>
+#>   <template x-for=&quot;item in filteredItems&quot; x-key=&quot;item&quot;>
+#>     <div style=&quot;padding: 4px 0; border-bottom: 1px solid #eee;&quot;>
+#>       <span x-text=&quot;item&quot;></span>
+#>     </div>
+#>   </template>
+#>   <template x-if=&quot;filteredItems.length === 0 &amp;amp;&amp;amp; query.length &amp;gt; 0&quot;>
+#>     <p style=&quot;color: #999;&quot;>No items matched.</p>
+#>   </template>
+#> </div>
+</code></pre>
+<hr />
+<h2 id="sec:reference-magic-property-helpers">Reference: Magic Property Helpers</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Function</th>
+<th align="left">Generated Expression</th>
+<th align="left">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>alpine_watch(&quot;p&quot;, &quot;cb&quot;)</code></td>
+<td align="left"><code>$watch('p', cb)</code></td>
+<td align="left">Watch a property for changes</td>
+</tr>
+<tr>
+<td align="left"><code>alpine_dispatch(&quot;ev&quot;, detail)</code></td>
+<td align="left"><code>$dispatch('ev', {...})</code></td>
+<td align="left">Dispatch a custom DOM event</td>
+</tr>
+<tr>
+<td align="left"><code>alpine_next_tick(&quot;cb&quot;)</code></td>
+<td align="left"><code>$nextTick(cb)</code></td>
+<td align="left">Run code after DOM update</td>
+</tr>
+<tr>
+<td align="left"><code>alpine_refs(&quot;name&quot;)</code></td>
+<td align="left"><code>$refs.name</code></td>
+<td align="left">Access a labeled DOM element</td>
+</tr>
+<tr>
+<td align="left"><code>alpine_store_js(&quot;n&quot;, &quot;p&quot;)</code></td>
+<td align="left"><code>$store.n.p</code></td>
+<td align="left">Read/write a global store property</td>
+</tr>
+<tr>
+<td align="left"><code>alpine_el()</code></td>
+<td align="left"><code>$el</code></td>
+<td align="left">Access the component root element</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sec:reference-global-method-functions">Reference: Global Method Functions</h2>
+<table>
+<thead>
+<tr>
+<th align="left">Function</th>
+<th align="left">Alpine.js Equivalent</th>
+<th align="left">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>alpine_global_data(&quot;name&quot;, jsDef)</code></td>
+<td align="left"><code>Alpine.data('name', factory)</code></td>
+<td align="left">Register a reusable component</td>
+</tr>
+<tr>
+<td align="left"><code>alpine_global_store(&quot;name&quot;, ...)</code></td>
+<td align="left"><code>Alpine.store('name', data)</code></td>
+<td align="left">Register global shared state</td>
+</tr>
+</tbody>
+</table>
+<p>Both functions return <code>htmltools::tagList</code> containing a <code><script></code> tag and the
+Alpine.js dependency. Include the result anywhere in your page HTML.</p>
+<hr />
+<h2 id="sec:next-steps">Next Steps</h2>
+<ul>
+<li><strong>Input Modifiers</strong>: See the <a href="input-modifiers.qmd">Input Modifiers Vignette</a> for <code>.lazy</code>, <code>.debounce</code>, <code>.number</code>, and <code>.trim</code></li>
+<li><strong>Plugin Ecosystem</strong>: See the <a href="plugin-ecosystem.qmd">Plugin Ecosystem Vignette</a> for Persist, Mask, and Sort plugins</li>
+<li><strong>Crosstalk Integration</strong>: See the <a href="crosstalk-integration.qmd">Crosstalk Integration Vignette</a> for cross-widget reactivity</li>
+</ul>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+<nav style="margin-bottom: 1.5rem; font-size: 0.9em;">
+      <a href="../index.html" style="color: #0000ff; text-decoration: underline;">Home</a> &gt;
+      <a href="../guides/index.html" style="color: #0000ff; text-decoration: underline;">Guides</a> &gt;
+      <span style="color: #666;">Reactivity & Globals</span>
+      </nav>
+  </main>
+
+  <footer>
+    <p>
+      alpinejs &mdash; R interface for Alpine.js<br>
+      <a href="https://github.com/brownag/alpinejs">View on GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

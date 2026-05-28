@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Modifiers | alpinejs</title>
+  <!-- Load Crosstalk for cross-widget reactivity -->
+  <script src="https://cdn.jsdelivr.net/npm/crosstalk@1.2.0/dist/crosstalk.min.js"></script>
+  <!-- Load Alpine.js for interactive components -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+  <style>
+    /* 1990s Web 1.0 aesthetic - authentic retro feel */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Verdana, Geneva, sans-serif;
+      line-height: 1.6;
+      color: #000;
+      background: #c0c0c0;
+      font-size: 14px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: #dfdfdf;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #dfdfdf;
+      padding-top: 0.8rem;
+    }
+
+    nav a {
+      color: #0000ff;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    nav a:visited {
+      color: #800080;
+    }
+
+    nav a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Main content */
+    main {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      padding: 1rem;
+      background: #fff;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      min-height: calc(100vh - 250px);
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1.5rem 0 0.5rem;
+      font-weight: bold;
+      line-height: 1.3;
+    }
+
+    h1 { 
+      font-size: 2rem;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+      margin-top: 0;
+      color: #0000ff;
+    }
+
+    h2 { 
+      font-size: 1.4rem;
+      color: #0000cc;
+      border-bottom: 1px solid #000;
+    }
+
+    h3 { font-size: 1.1rem; color: #000080; }
+    h4 { font-size: 1rem; color: #000; font-weight: bold; }
+
+    /* Paragraphs & text */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #800080;
+    }
+
+    a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Inline code */
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+      color: #000;
+      border: 1px solid #ccc;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #f0f0f0;
+      border: 1px solid #999;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.4;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #000;
+      border: none;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid #999;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #333;
+      font-style: italic;
+      background: #f5f5f5;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #999;
+      margin: 1.5rem 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      border: 1px solid #999;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border: 1px solid #999;
+    }
+
+    th {
+      background: #c0c0c0;
+      font-weight: bold;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #999;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      color: #000;
+      font-size: 0.85rem;
+      margin: 2rem 1rem 0;
+      background: #dfdfdf;
+    }
+
+    footer a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    footer a:visited {
+      color: #800080;
+    }
+
+    /* Horizontal rule dividers */
+    .divider {
+      border: none;
+      height: 2px;
+      background: linear-gradient(to right, #dfdfdf 0%, #000 50%, #dfdfdf 100%);
+      margin: 1.5rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      main {
+        padding: 0.8rem;
+      }
+
+      header {
+        padding: 0.8rem;
+      }
+
+      nav {
+        gap: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html" style="color: #000; text-decoration: none;">alpinejs</a></h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../guides/">Guides</a>
+      <a href="../examples/">Examples</a>
+      <a href="../reference/">Reference</a>
+      <a href="https://github.com/brownag/alpinejs" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    
+<div class="frontmatter">
+<div class="title"><h1>Input Modifiers: Enhancing Form Controls</h1></div>
+</div>
+<div class="body">
+<h2 id="sec:overview">Overview</h2>
+<p>Alpine.js input modifiers modify form control behavior including debouncing, lazy updates, and automatic type conversion. The <code>alpine_model()</code> function supports these modifiers using parameters prefixed with a dot (<code>.</code>).</p>
+<p><strong>Available Modifiers:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Modifier</th>
+<th>Behavior</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.lazy</code></td>
+<td>Update on blur instead of keystroke</td>
+<td>Validation, expensive operations</td>
+</tr>
+<tr>
+<td><code>.debounce</code></td>
+<td>Delay updates by N milliseconds</td>
+<td>Search, filter, API calls</td>
+</tr>
+<tr>
+<td><code>.number</code></td>
+<td>Auto-convert input to numeric</td>
+<td>Age, price, quantity fields</td>
+</tr>
+<tr>
+<td><code>.trim</code></td>
+<td>Strip whitespace</td>
+<td>Username, email, API keys</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sec:basic-usage">Basic Usage</h2>
+<h3 id="sec:syntax">Syntax</h3>
+<pre><code class="language-r"># Single modifier
+alpine_tag(&quot;input&quot;) |> alpine_model(&quot;fieldName&quot;, .lazy = TRUE)
+
+# Multiple modifiers
+alpine_tag(&quot;input&quot;) |> alpine_model(&quot;fieldName&quot;, .lazy = TRUE, .debounce = 300, .number = TRUE)
+
+# Pipe-friendly chaining
+alpine_tag(&quot;input&quot;, placeholder = &quot;Search...&quot;) |>
+  alpine_model(&quot;query&quot;, .debounce = 300)
+</code></pre>
+<h3 id="sec:simple-example">Simple Example</h3>
+<pre><code class="language-r">library(alpinejs)
+library(htmltools)
+
+alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;label&quot;, &quot;Email:&quot;),
+  alpine_tag(&quot;input&quot;,
+    type = &quot;email&quot;,
+    placeholder = &quot;Enter email&quot;
+  ) |>
+    alpine_model(&quot;email&quot;, .lazy = TRUE),
+  
+  alpine_tag(&quot;div&quot;,
+    &quot;Current: &quot;, 
+    alpine_tag(&quot;span&quot;,
+      alpine_attr(`x-bind:textContent` = &quot;email&quot;)
+    )
+  )
+) |>
+  alpine_data(email = &quot;&quot;) |>
+  htmltools::browsable()
+</code></pre>
+<p>The <code>.lazy</code> modifier defers updates until the element loses focus (blur event).</p>
+<h2 id="sec:modifier-behaviors">Modifier Behaviors</h2>
+<h3 id="sec:1-lazy-true-lazy-evaluation">1. <code>.lazy = TRUE</code> – Lazy Evaluation</h3>
+<p>By default, Alpine.js updates the model on every keystroke. The <code>.lazy</code> modifier defers updates until the element loses focus (blur event).</p>
+<p><strong>When to use:</strong></p>
+<ul>
+<li>Form validation (email, password, username)</li>
+<li>Expensive operations (database lookups)</li>
+<li>Reducing network traffic</li>
+</ul>
+<pre><code class="language-r"># Email validation example
+alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;input&quot;,
+    type = &quot;email&quot;,
+    placeholder = &quot;your@email.com&quot;
+  ) |>
+    alpine_model(&quot;email&quot;, .lazy = TRUE),
+  
+  alpine_tag(&quot;span&quot;,
+    &quot;Valid: &quot;,
+    alpine_tag(&quot;span&quot;,
+      alpine_attr(`x-bind:textContent` = &quot;isValidEmail()&quot;)
+    )
+  )
+) |>
+  alpine_data(
+    email = &quot;&quot;,
+    isValidEmail = htmlwidgets::JS(
+      &quot;function() { return this.email.includes('@'); }&quot;
+    )
+  )
+</code></pre>
+<h3 id="sec:2-debounce-n-debounced-updates">2. <code>.debounce = N</code> – Debounced Updates</h3>
+<p>Debouncing adds a delay (in milliseconds) between keystroke and model update.</p>
+<p><strong>When to use:</strong></p>
+<ul>
+<li>Search inputs (typing triggers database queries)</li>
+<li>Auto-save features</li>
+<li>Real-time filtering</li>
+<li>API rate limiting</li>
+</ul>
+<pre><code class="language-r"># Live search example
+alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;input&quot;,
+    type = &quot;text&quot;,
+    placeholder = &quot;Search...&quot;
+  ) |>
+    alpine_model(&quot;searchQuery&quot;, .debounce = 300),
+  
+  alpine_tag(&quot;ul&quot;,
+    alpine_tag(&quot;li&quot;, &quot;Results will appear here&quot;)
+  )
+) |>
+  alpine_data(searchQuery = &quot;&quot;) |>
+  htmltools::browsable()
+
+# With debounce = 300ms, updates trigger 300ms after user stops typing
+</code></pre>
+<p>Typical use: 200-500ms.</p>
+<h3 id="sec:3-number-true-automatic-type-conversion">3. <code>.number = TRUE</code> – Automatic Type Conversion</h3>
+<p>Type conversion converts string input to numeric value.</p>
+<p><strong>When to use:</strong></p>
+<ul>
+<li>Numeric form fields (age, price, quantity)</li>
+<li>Math operations</li>
+<li>Range sliders, spinners</li>
+</ul>
+<pre><code class="language-r"># Age input example
+alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;label&quot;, &quot;Age:&quot;),
+  alpine_tag(&quot;input&quot;,
+    type = &quot;number&quot;,
+    min = &quot;0&quot;,
+    max = &quot;120&quot;,
+    placeholder = &quot;Enter age&quot;
+  ) |>
+    alpine_model(&quot;age&quot;, .number = TRUE),
+  
+  alpine_tag(&quot;div&quot;,
+    alpine_tag(&quot;span&quot;,
+      alpine_attr(`x-bind:textContent` = &quot;age&quot;)
+    ),
+    &quot; years old&quot;
+  )
+) |>
+  alpine_data(age = 0) |>
+  htmltools::browsable()
+</code></pre>
+<p><strong>Automatic behavior:</strong></p>
+<ul>
+<li>Input <code>&quot;25&quot;</code> -> <code>age = 25</code> (numeric)</li>
+<li>Input <code>&quot;invalid&quot;</code> -> <code>age = NaN</code></li>
+<li>Input <code>&quot;&quot;</code> -> <code>age = null</code></li>
+</ul>
+<h3 id="sec:4-trim-true-strip-whitespace">4. <code>.trim = TRUE</code> – Strip Whitespace</h3>
+<p>Removes leading and trailing whitespace before updating the model.</p>
+<p><strong>When to use:</strong></p>
+<ul>
+<li>Username/email fields</li>
+<li>API keys, credentials</li>
+<li>Search inputs</li>
+</ul>
+<pre><code class="language-r"># Username input
+alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;input&quot;,
+    placeholder = &quot;Username&quot;
+  ) |>
+    alpine_model(&quot;username&quot;, .trim = TRUE),
+  
+  alpine_tag(&quot;div&quot;,
+    &quot;Length: &quot;,
+    alpine_tag(&quot;span&quot;,
+      alpine_attr(`x-bind:textContent` = &quot;username.length&quot;)
+    )
+  )
+) |>
+  alpine_data(username = &quot;&quot;) |>
+  htmltools::browsable()
+</code></pre>
+<p><strong>Behavior:</strong></p>
+<ul>
+<li>Input <code>&quot;  john  &quot;</code> -> <code>username = &quot;john&quot;</code></li>
+<li>Input <code>&quot;  a  &quot;</code> -> <code>username = &quot;a&quot;</code></li>
+</ul>
+<h2 id="sec:combining-modifiers">Combining Modifiers</h2>
+<p>Multiple modifiers work together:</p>
+<pre><code class="language-r"># Form field with all modifiers
+alpine_tag(&quot;textarea&quot;, placeholder = &quot;Notes...&quot;) |>
+  alpine_model(
+    &quot;notes&quot;,
+    .lazy = TRUE,      # Update on blur
+    .debounce = 500,   # Wait 500ms
+    .trim = TRUE       # Remove whitespace
+  )
+
+# This updates only after user:
+# 1. Stops typing for 500ms, AND
+# 2. Clicks away, AND
+# 3. The value gets trimmed
+</code></pre>
+<h2 id="sec:real-world-examples">Real-World Examples</h2>
+<h3 id="sec:example-1-password-strength-validator">Example 1: Password Strength Validator</h3>
+<pre><code class="language-r">library(alpinejs)
+library(htmltools)
+
+alpine_tag(&quot;div&quot;,
+  style = &quot;max-width: 400px; padding: 20px;&quot;,
+  
+  alpine_tag(&quot;h3&quot;, &quot;Password Strength Checker&quot;),
+  
+  # Password input
+  alpine_tag(&quot;div&quot;,
+    alpine_tag(&quot;label&quot;, &quot;Password:&quot;),
+    alpine_tag(&quot;input&quot;,
+      type = &quot;password&quot;,
+      placeholder = &quot;Enter password&quot;
+    ) |>
+      alpine_model(&quot;password&quot;, .lazy = TRUE)
+  ),
+  
+  # Strength indicator
+  alpine_tag(&quot;div&quot;,
+    style = &quot;display: flex; gap: 5px; margin-top: 10px;&quot;,
+    alpine_tag(&quot;div&quot;,
+      style = &quot;width: 25px; height: 4px; background: #ccc;&quot;,
+      alpine_attr(`x-bind:class` = &quot;strengthClass()&quot;)
+    ),
+    alpine_tag(&quot;span&quot;,
+      alpine_attr(`x-bind:textContent` = &quot;strengthLabel()&quot;)
+    )
+  )
+) |>
+  alpine_data(
+    password = &quot;&quot;,
+    strengthClass = htmlwidgets::JS(&quot;function() {
+      const len = this.password.length;
+      if (len < 4) return 'weak';
+      if (len < 8) return 'fair';
+      if (len < 12) return 'good';
+      return 'excellent';
+    }&quot;),
+    strengthLabel = htmlwidgets::JS(&quot;function() {
+      const classes = {weak: 'Weak', fair: 'Fair', good: 'Good', excellent: 'Excellent'};
+      return classes[this.strengthClass()];
+    }&quot;)
+  ) |>
+  htmltools::browsable()
+</code></pre>
+<h3 id="sec:example-2-dynamic-form-with-debounced-search">Example 2: Dynamic Form with Debounced Search</h3>
+<pre><code class="language-r">library(alpinejs)
+library(htmltools)
+
+alpine_tag(&quot;div&quot;,
+  style = &quot;padding: 20px;&quot;,
+  
+  alpine_tag(&quot;h3&quot;, &quot;User Search&quot;),
+  
+  # Search input with .debounce
+  alpine_tag(&quot;input&quot;,
+    type = &quot;text&quot;,
+    placeholder = &quot;Search users...&quot;
+  ) |>
+    alpine_model(&quot;searchQuery&quot;, .debounce = 300),
+  
+  # Loading indicator
+  alpine_tag(&quot;div&quot;,
+    &quot;Loading...&quot; |>
+      alpine_show(&quot;isSearching&quot;)
+  ),
+  
+  # Results
+  alpine_tag(&quot;div&quot;,
+    alpine_tag(&quot;ul&quot;,
+      alpine_tag(&quot;li&quot;,
+        &quot;Result 1&quot; |> alpine_show(&quot;!isSearching &amp;&amp; searchQuery&quot;)
+      )
+    )
+  )
+) |>
+  alpine_data(
+    searchQuery = &quot;&quot;,
+    isSearching = htmlwidgets::JS(&quot;false&quot;),
+    performSearch = htmlwidgets::JS(&quot;
+      function() {
+        if (!this.searchQuery) return;
+        this.isSearching = true;
+        // Simulate API call
+        setTimeout(() => { this.isSearching = false; }, 500);
+      }
+    &quot;)
+  ) |>
+  htmltools::browsable()
+</code></pre>
+<h3 id="sec:example-3-multi-field-form-with-mixed-modifiers">Example 3: Multi-Field Form with Mixed Modifiers</h3>
+<pre><code class="language-r"># Registration form with different modifier strategies
+alpine_tag(&quot;form&quot;,
+  style = &quot;max-width: 500px; padding: 20px;&quot;,
+  
+  # Username: lazy + trim
+  alpine_tag(&quot;div&quot;,
+    alpine_tag(&quot;label&quot;, &quot;Username:&quot;),
+    alpine_tag(&quot;input&quot;,
+      type = &quot;text&quot;,
+      placeholder = &quot;Choose username&quot;
+    ) |>
+      alpine_model(&quot;username&quot;, .lazy = TRUE, .trim = TRUE)
+  ),
+  
+  # Email: lazy (for validation)
+  alpine_tag(&quot;div&quot;,
+    alpine_tag(&quot;label&quot;, &quot;Email:&quot;),
+    alpine_tag(&quot;input&quot;,
+      type = &quot;email&quot;,
+      placeholder = &quot;your@email.com&quot;
+    ) |>
+      alpine_model(&quot;email&quot;, .lazy = TRUE)
+  ),
+  
+  # Age: number conversion
+  alpine_tag(&quot;div&quot;,
+    alpine_tag(&quot;label&quot;, &quot;Age:&quot;),
+    alpine_tag(&quot;input&quot;,
+      type = &quot;number&quot;,
+      min = &quot;18&quot;,
+      max = &quot;120&quot;
+    ) |>
+      alpine_model(&quot;age&quot;, .number = TRUE)
+  ),
+  
+  # Bio: lazy + debounce + trim (auto-save)
+  alpine_tag(&quot;div&quot;,
+    alpine_tag(&quot;label&quot;, &quot;Bio:&quot;),
+    alpine_tag(&quot;textarea&quot;, placeholder = &quot;Tell us about yourself&quot;) |>
+      alpine_model(&quot;bio&quot;, .lazy = TRUE, .debounce = 500, .trim = TRUE)
+  ),
+  
+  # Submit button
+  alpine_tag(&quot;button&quot;, &quot;Register&quot;) |>
+    alpine_on(&quot;click&quot;, &quot;submitForm()&quot;)
+) |>
+  alpine_data(
+    username = &quot;&quot;,
+    email = &quot;&quot;,
+    age = 18,
+    bio = &quot;&quot;,
+    submitForm = htmlwidgets::JS(&quot;function() {
+      console.log({
+        username: this.username,
+        email: this.email,
+        age: this.age,
+        bio: this.bio
+      });
+    }&quot;)
+  ) |>
+  htmltools::browsable()
+</code></pre>
+<h2 id="sec:browser-compatibility">Browser Compatibility</h2>
+<p>All input modifiers work in modern browsers:</p>
+<ul>
+<li>Chrome/Edge 88+</li>
+<li>Firefox 78+</li>
+<li>Safari 14+</li>
+<li>IE: Not supported (use polyfill if needed)</li>
+</ul>
+<h2 id="sec:performance-optimization">Performance Optimization</h2>
+<h3 id="sec:debounce-values-by-use-case">Debounce Values by Use Case</h3>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>Recommended</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Live search</td>
+<td>300-500ms</td>
+<td>Balance responsiveness &amp; server load</td>
+</tr>
+<tr>
+<td>Input validation</td>
+<td>200ms</td>
+<td>Fast feedback for users</td>
+</tr>
+<tr>
+<td>Text input</td>
+<td>150-300ms</td>
+<td>Feel responsive without lag</td>
+</tr>
+<tr>
+<td>Multi-field form</td>
+<td>200-400ms</td>
+<td>Depends on complexity</td>
+</tr>
+<tr>
+<td>Auto-save</td>
+<td>500ms-1s</td>
+<td>Reduces API calls</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sec:common-pattern-search-with-loading-state">Common Pattern: Search with Loading State</h3>
+<pre><code class="language-r"># Optimize with debounce + loading indicator
+alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;input&quot;,
+    type = &quot;text&quot;,
+    placeholder = &quot;Search...&quot;
+  ) |>
+    alpine_model(&quot;query&quot;, .debounce = 400),  # Wait 400ms
+  
+  alpine_tag(&quot;div&quot;, &quot;Searching...&quot;) |> alpine_show(&quot;isSearching&quot;)
+) |>
+  alpine_data(
+    query = &quot;&quot;,
+    isSearching = htmlwidgets::JS(&quot;false&quot;)
+  )
+</code></pre>
+<h2 id="sec:troubleshooting">Troubleshooting</h2>
+<p><strong>Q: Input seems unresponsive with .lazy modifier</strong>
+A: This is normal–updates only happen on blur. Combine with <code>.debounce</code> for faster feedback during typing.</p>
+<p><strong>Q: Numbers appearing as strings despite .number</strong>
+A: Verify input uses <code>type = &quot;number&quot;</code> and check browser console for errors.</p>
+<p><strong>Q: Debounce delays too much</strong>
+A: Reduce the delay value (try 200ms instead of 500ms) or combine with other feedback mechanisms.</p>
+<p><strong>Q: Whitespace not trimming with .trim</strong>
+A: Trim only applies to model binding, not to display. Trim in JavaScript if needed: <code>value.trim()</code>.</p>
+<h2 id="sec:see-also">See Also</h2>
+<ul>
+<li><a href="https://alpinejs.dev/">Alpine.js Modifier Documentation</a></li>
+<li><a href="getting-started.qmd">Getting Started with alpinejs</a></li>
+<li><a href="components-and-patterns.qmd">Components and Patterns</a></li>
+</ul>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+<nav style="margin-bottom: 1.5rem; font-size: 0.9em;">
+      <a href="../index.html" style="color: #0000ff; text-decoration: underline;">Home</a> &gt;
+      <a href="../guides/index.html" style="color: #0000ff; text-decoration: underline;">Guides</a> &gt;
+      <span style="color: #666;">Input Modifiers</span>
+      </nav>
+  </main>
+
+  <footer>
+    <p>
+      alpinejs &mdash; R interface for Alpine.js<br>
+      <a href="https://github.com/brownag/alpinejs">View on GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

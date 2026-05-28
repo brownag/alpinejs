@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced JSON | alpinejs</title>
+  <!-- Load Crosstalk for cross-widget reactivity -->
+  <script src="https://cdn.jsdelivr.net/npm/crosstalk@1.2.0/dist/crosstalk.min.js"></script>
+  <!-- Load Alpine.js for interactive components -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+  <style>
+    /* 1990s Web 1.0 aesthetic - authentic retro feel */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Verdana, Geneva, sans-serif;
+      line-height: 1.6;
+      color: #000;
+      background: #c0c0c0;
+      font-size: 14px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: #dfdfdf;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #dfdfdf;
+      padding-top: 0.8rem;
+    }
+
+    nav a {
+      color: #0000ff;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    nav a:visited {
+      color: #800080;
+    }
+
+    nav a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Main content */
+    main {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      padding: 1rem;
+      background: #fff;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      min-height: calc(100vh - 250px);
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1.5rem 0 0.5rem;
+      font-weight: bold;
+      line-height: 1.3;
+    }
+
+    h1 { 
+      font-size: 2rem;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+      margin-top: 0;
+      color: #0000ff;
+    }
+
+    h2 { 
+      font-size: 1.4rem;
+      color: #0000cc;
+      border-bottom: 1px solid #000;
+    }
+
+    h3 { font-size: 1.1rem; color: #000080; }
+    h4 { font-size: 1rem; color: #000; font-weight: bold; }
+
+    /* Paragraphs & text */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #800080;
+    }
+
+    a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Inline code */
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+      color: #000;
+      border: 1px solid #ccc;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #f0f0f0;
+      border: 1px solid #999;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.4;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #000;
+      border: none;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid #999;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #333;
+      font-style: italic;
+      background: #f5f5f5;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #999;
+      margin: 1.5rem 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      border: 1px solid #999;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border: 1px solid #999;
+    }
+
+    th {
+      background: #c0c0c0;
+      font-weight: bold;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #999;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      color: #000;
+      font-size: 0.85rem;
+      margin: 2rem 1rem 0;
+      background: #dfdfdf;
+    }
+
+    footer a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    footer a:visited {
+      color: #800080;
+    }
+
+    /* Horizontal rule dividers */
+    .divider {
+      border: none;
+      height: 2px;
+      background: linear-gradient(to right, #dfdfdf 0%, #000 50%, #dfdfdf 100%);
+      margin: 1.5rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      main {
+        padding: 0.8rem;
+      }
+
+      header {
+        padding: 0.8rem;
+      }
+
+      nav {
+        gap: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html" style="color: #000; text-decoration: none;">alpinejs</a></h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../guides/">Guides</a>
+      <a href="../examples/">Examples</a>
+      <a href="../reference/">Reference</a>
+      <a href="https://github.com/brownag/alpinejs" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    
+<div class="frontmatter">
+<div class="title"><h1>Advanced: Data Serialization and JavaScript Injection</h1></div>
+</div>
+<div class="body">
+<pre><code class="language-r">library(alpinejs)
+library(htmltools)
+library(jsonlite)
+</code></pre>
+<h1 id="chp:advanced-data-serialization-and-javascript-injection">Advanced: Data Serialization and JavaScript Injection</h1>
+<p>This vignette covers how alpinejs converts R data types to JSON and how to inject raw JavaScript expressions.</p>
+<h2 id="sec:type-conversion-rules">Type Conversion Rules</h2>
+<p>When you call <code>alpine_data()</code>, alpinejs serializes R objects to JSON using specific rules:</p>
+<h3 id="sec:atomic-types">Atomic Types</h3>
+<pre><code class="language-r"># Numeric, logical, character -> JSON equivalents
+result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    count = 42,            # number -> 42
+    ratio = 3.14,          # numeric -> 3.14
+    active = TRUE,         # logical -> true
+    name = &quot;Alice&quot;         # character -> &quot;Alice&quot;
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;count&amp;quot;:42,&amp;quot;ratio&amp;quot;:3.14,&amp;quot;active&amp;quot;:true,&amp;quot;name&amp;quot;:&amp;quot;Alice&amp;quot;}&quot;></div>
+#> ```
+</code></pre>
+<h3 id="sec:vectors">Vectors</h3>
+<p>Unnamed vectors become JSON arrays:</p>
+<pre><code class="language-r">result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    ids = c(1, 2, 3, 4, 5),                    # -> [1,2,3,4,5]
+    names = c(&quot;Alice&quot;, &quot;Bob&quot;, &quot;Charlie&quot;),      # -> [&quot;Alice&quot;,&quot;Bob&quot;,&quot;Charlie&quot;]
+    enabled = c(TRUE, FALSE, TRUE)             # -> [true,false,true]
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;ids&amp;quot;:[1,2,3,4,5],&amp;quot;names&amp;quot;:[&amp;quot;Alice&amp;quot;,&amp;quot;Bob&amp;quot;,&amp;quot;Charlie&amp;quot;],&amp;quot;enabled&amp;quot;:[true,false,true]}&quot;></div>
+#> ```
+</code></pre>
+<h3 id="sec:lists">Lists</h3>
+<p>Named lists become JSON objects:</p>
+<pre><code class="language-r">result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    user = list(
+      name = &quot;Alice&quot;,
+      age = 30,
+      email = &quot;alice@example.com&quot;
+    ),
+    config = list(
+      apiUrl = &quot;https://api.example.com&quot;,
+      timeout = 5000,
+      debug = FALSE
+    )
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;user&amp;quot;:{&amp;quot;name&amp;quot;:&amp;quot;Alice&amp;quot;,&amp;quot;age&amp;quot;:30,&amp;quot;email&amp;quot;:&amp;quot;alice@example.com&amp;quot;},&amp;quot;config&amp;quot;:{&amp;quot;apiUrl&amp;quot;:&amp;quot;https://api.example.com&amp;quot;,&amp;quot;timeout&amp;quot;:5000,&amp;quot;debug&amp;quot;:false}}&quot;></div>
+#> ```
+</code></pre>
+<p>This renders as:</p>
+<pre><code class="language-javascript">{
+  user: {name: &quot;Alice&quot;, age: 30, email: &quot;alice@example.com&quot;},
+  config: {apiUrl: &quot;https://api.example.com&quot;, timeout: 5000, debug: false}
+}
+</code></pre>
+<h3 id="sec:data-frames">Data Frames</h3>
+<p>Data frames become arrays of objects (row-oriented to column-oriented):</p>
+<pre><code class="language-r"># Simple data frame
+df <- data.frame(
+  id = 1:3,
+  name = c(&quot;Alice&quot;, &quot;Bob&quot;, &quot;Charlie&quot;),
+  score = c(95, 87, 92),
+  stringsAsFactors = FALSE
+)
+
+result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(data = df)
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;data&amp;quot;:[{&amp;quot;id&amp;quot;:1,&amp;quot;name&amp;quot;:&amp;quot;Alice&amp;quot;,&amp;quot;score&amp;quot;:95},{&amp;quot;id&amp;quot;:2,&amp;quot;name&amp;quot;:&amp;quot;Bob&amp;quot;,&amp;quot;score&amp;quot;:87},{&amp;quot;id&amp;quot;:3,&amp;quot;name&amp;quot;:&amp;quot;Charlie&amp;quot;,&amp;quot;score&amp;quot;:92}]}&quot;></div>
+#> ```
+</code></pre>
+<p>This becomes:</p>
+<pre><code class="language-javascript">{
+  data: [
+    {id: 1, name: &quot;Alice&quot;, score: 95},
+    {id: 2, name: &quot;Bob&quot;, score: 87},
+    {id: 3, name: &quot;Charlie&quot;, score: 92}
+  ]
+}
+</code></pre>
+<h3 id="sec:special-r-types">Special R Types</h3>
+<p><strong>Factors</strong> are converted to character vectors:</p>
+<pre><code class="language-r"># Factor -> character vector
+factors_data <- factor(c(&quot;A&quot;, &quot;B&quot;, &quot;B&quot;, &quot;C&quot;))
+
+result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(categories = factors_data) |>  # -> [&quot;A&quot;,&quot;B&quot;,&quot;B&quot;,&quot;C&quot;]
+  htmltools::browsable()
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;categories&amp;quot;:[&amp;quot;A&amp;quot;,&amp;quot;B&amp;quot;,&amp;quot;B&amp;quot;,&amp;quot;C&amp;quot;]}&quot;></div>
+#> ```
+</code></pre>
+<p><strong>Dates and POSIXct</strong> are converted to ISO 8601 strings:</p>
+<pre><code class="language-r"># Date -> ISO 8601 string
+today <- Sys.Date()
+now <- Sys.time()
+
+result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    date = today,    # -> &quot;2026-02-21&quot;
+    datetime = now   # -> &quot;2026-02-21T10:30:45Z&quot;
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;date&amp;quot;:&amp;quot;2026-05-28&amp;quot;,&amp;quot;datetime&amp;quot;:&amp;quot;2026-05-28T07:23:06Z&amp;quot;}&quot;></div>
+#> ```
+</code></pre>
+<p><strong>NA values</strong> become JSON <code>null</code>:</p>
+<pre><code class="language-r"># NA -> null
+result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    value = NA,
+    text = NA_character_,
+    date = as.Date(NA)
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;value&amp;quot;:null,&amp;quot;text&amp;quot;:null,&amp;quot;date&amp;quot;:null}&quot;></div>
+#> ```
+</code></pre>
+<p>Renders as:</p>
+<pre><code class="language-javascript">{value: null, text: null, date: null}
+</code></pre>
+<h2 id="sec:nested-and-complex-structures">Nested and Complex Structures</h2>
+<p>You can combine different types by nesting:</p>
+<pre><code class="language-r"># Complex nested structure
+result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    analytics = list(
+      users = data.frame(
+        id = 1:3,
+        name = c(&quot;Alice&quot;, &quot;Bob&quot;, &quot;Charlie&quot;),
+        active = c(TRUE, FALSE, TRUE),
+        stringsAsFactors = FALSE
+      ),
+      summary = list(
+        total = 3,
+        active = 2,
+        lastUpdated = Sys.time()
+      ),
+      categories = c(&quot;A&quot;, &quot;B&quot;, &quot;B&quot;, &quot;C&quot;)
+    )
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;analytics&amp;quot;:{&amp;quot;users&amp;quot;:[{&amp;quot;id&amp;quot;:1,&amp;quot;name&amp;quot;:&amp;quot;Alice&amp;quot;,&amp;quot;active&amp;quot;:true},{&amp;quot;id&amp;quot;:2,&amp;quot;name&amp;quot;:&amp;quot;Bob&amp;quot;,&amp;quot;active&amp;quot;:false},{&amp;quot;id&amp;quot;:3,&amp;quot;name&amp;quot;:&amp;quot;Charlie&amp;quot;,&amp;quot;active&amp;quot;:true}],&amp;quot;summary&amp;quot;:{&amp;quot;total&amp;quot;:3,&amp;quot;active&amp;quot;:2,&amp;quot;lastUpdated&amp;quot;:&amp;quot;2026-05-28T07:23:06Z&amp;quot;},&amp;quot;categories&amp;quot;:[&amp;quot;A&amp;quot;,&amp;quot;B&amp;quot;,&amp;quot;B&amp;quot;,&amp;quot;C&amp;quot;]}}&quot;></div>
+#> ```
+</code></pre>
+<h2 id="sec:edge-cases-and-gotchas">Edge Cases and Gotchas</h2>
+<h3 id="sec:empty-vectors-and-lists">Empty Vectors and Lists</h3>
+<pre><code class="language-r">result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    empty_vector = c(),           # -> []
+    empty_list = list(),          # -> {}
+    null_value = NULL             # -> null
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;empty_vector&amp;quot;:[],&amp;quot;empty_list&amp;quot;:[],&amp;quot;null_value&amp;quot;:[]}&quot;></div>
+#> ```
+</code></pre>
+<h3 id="sec:mixed-types-in-vectors">Mixed Types in Vectors</h3>
+<p>R coerces mixed types; this is preserved in JSON:</p>
+<pre><code class="language-r"># Vector with mixed types (coerced to character)
+result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    mixed = c(1, &quot;two&quot;, 3.5)  # -> [&quot;1&quot;,&quot;two&quot;,&quot;3.5&quot;]
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;mixed&amp;quot;:[&amp;quot;1&amp;quot;,&amp;quot;two&amp;quot;,&amp;quot;3.5&amp;quot;]}&quot;></div>
+#> ```
+</code></pre>
+<h3 id="sec:performance-with-large-data">Performance with Large Data</h3>
+<p>For very large data frames (1000+ rows), consider:</p>
+<ol>
+<li><strong>Server-side filtering</strong>: Pass only visible rows</li>
+<li><strong>Pagination</strong>: Load data on demand</li>
+<li><strong>htmlwidgets</strong>: For specialized views (DT tables, Plotly)</li>
+</ol>
+<pre><code class="language-r"># Good: subset to first 100 rows
+large_df <- data.frame(x = 1:10000, y = rnorm(10000))
+
+result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(data = head(large_df, 100)) |>  # Only first 100 rows
+  htmltools::browsable()
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;data&amp;quot;:[{&amp;quot;x&amp;quot;:1,&amp;quot;y&amp;quot;:0.972403633718799},{&amp;quot;x&amp;quot;:2,&amp;quot;y&amp;quot;:-0.424338636420681},{&amp;quot;x&amp;quot;:3,&amp;quot;y&amp;quot;:0.433936339743191},{&amp;quot;x&amp;quot;:4,&amp;quot;y&amp;quot;:-0.134449878771502},{&amp;quot;x&amp;quot;:5,&amp;quot;y&amp;quot;:-0.518142614437457},{&amp;quot;x&amp;quot;:6,&amp;quot;y&amp;quot;:-0.617925658003406},{&amp;quot;x&amp;quot;:7,&amp;quot;y&amp;quot;:0.210281155316172},{&amp;quot;x&amp;quot;:8,&amp;quot;y&amp;quot;:-0.584175105190153},{&amp;quot;x&amp;quot;:9,&amp;quot;y&amp;quot;:0.165005046708499},{&amp;quot;x&amp;quot;:10,&amp;quot;y&amp;quot;:1.2880728070429},{&amp;quot;x&amp;quot;:11,&amp;quot;y&amp;quot;:-2.22496371269803},{&amp;quot;x&amp;quot;:12,&amp;quot;y&amp;quot;:-0.320191168733709},{&amp;quot;x&amp;quot;:13,&amp;quot;y&amp;quot;:-0.954001141264368},{&amp;quot;x&amp;quot;:14,&amp;quot;y&amp;quot;:-0.767049499095495},{&amp;quot;x&amp;quot;:15,&amp;quot;y&amp;quot;:1.57369105767767},{&amp;quot;x&amp;quot;:16,&amp;quot;y&amp;quot;:-1.66970292812465},{&amp;quot;x&amp;quot;:17,&amp;quot;y&amp;quot;:-0.390212910839466},{&amp;quot;x&amp;quot;:18,&amp;quot;y&amp;quot;:-1.30489856212856},{&amp;quot;x&amp;quot;:19,&amp;quot;y&amp;quot;:0.97559968800314},{&amp;quot;x&amp;quot;:20,&amp;quot;y&amp;quot;:-0.294145030331377},{&amp;quot;x&amp;quot;:21,&amp;quot;y&amp;quot;:-0.880954642762099},{&amp;quot;x&amp;quot;:22,&amp;quot;y&amp;quot;:-0.459999343921039},{&amp;quot;x&amp;quot;:23,&amp;quot;y&amp;quot;:-0.542739950019164},{&amp;quot;x&amp;quot;:24,&amp;quot;y&amp;quot;:1.15825173853279},{&amp;quot;x&amp;quot;:25,&amp;quot;y&amp;quot;:-0.866947630681689},{&amp;quot;x&amp;quot;:26,&amp;quot;y&amp;quot;:-0.972250133197183},{&amp;quot;x&amp;quot;:27,&amp;quot;y&amp;quot;:-0.609388596616182},{&amp;quot;x&amp;quot;:28,&amp;quot;y&amp;quot;:0.18287631151876},{&amp;quot;x&amp;quot;:29,&amp;quot;y&amp;quot;:-0.00615748623149891},{&amp;quot;x&amp;quot;:30,&amp;quot;y&amp;quot;:-1.16899450681236},{&amp;quot;x&amp;quot;:31,&amp;quot;y&amp;quot;:0.948114922961926},{&amp;quot;x&amp;quot;:32,&amp;quot;y&amp;quot;:0.0738561886482766},{&amp;quot;x&amp;quot;:33,&amp;quot;y&amp;quot;:-1.36531198999349},{&amp;quot;x&amp;quot;:34,&amp;quot;y&amp;quot;:0.396960631555867},{&amp;quot;x&amp;quot;:35,&amp;quot;y&amp;quot;:0.316533233052893},{&amp;quot;x&amp;quot;:36,&amp;quot;y&amp;quot;:-0.0386117483111109},{&amp;quot;x&amp;quot;:37,&amp;quot;y&amp;quot;:0.089188060916125},{&amp;quot;x&amp;quot;:38,&amp;quot;y&amp;quot;:-0.885835821148601},{&amp;quot;x&amp;quot;:39,&amp;quot;y&amp;quot;:-1.1179423706925},{&amp;quot;x&amp;quot;:40,&amp;quot;y&amp;quot;:0.208929574435717},{&amp;quot;x&amp;quot;:41,&amp;quot;y&amp;quot;:-0.686546958070464},{&amp;quot;x&amp;quot;:42,&amp;quot;y&amp;quot;:0.639033668388041},{&amp;quot;x&amp;quot;:43,&amp;quot;y&amp;quot;:-2.23725444021741},{&amp;quot;x&amp;quot;:44,&amp;quot;y&amp;quot;:-0.712650018806418},{&amp;quot;x&amp;quot;:45,&amp;quot;y&amp;quot;:-0.343530366514566},{&amp;quot;x&amp;quot;:46,&amp;quot;y&amp;quot;:-0.181101307840772},{&amp;quot;x&amp;quot;:47,&amp;quot;y&amp;quot;:-0.267022302286535},{&amp;quot;x&amp;quot;:48,&amp;quot;y&amp;quot;:1.15593640161411},{&amp;quot;x&amp;quot;:49,&amp;quot;y&amp;quot;:0.761661771867999},{&amp;quot;x&amp;quot;:50,&amp;quot;y&amp;quot;:1.61249084953406},{&amp;quot;x&amp;quot;:51,&amp;quot;y&amp;quot;:0.0759910275063043},{&amp;quot;x&amp;quot;:52,&amp;quot;y&amp;quot;:1.27427774496514},{&amp;quot;x&amp;quot;:53,&amp;quot;y&amp;quot;:0.53354927035651},{&amp;quot;x&amp;quot;:54,&amp;quot;y&amp;quot;:0.416897091659804},{&amp;quot;x&amp;quot;:55,&amp;quot;y&amp;quot;:-0.657664966339135},{&amp;quot;x&amp;quot;:56,&amp;quot;y&amp;quot;:0.326321744864777},{&amp;quot;x&amp;quot;:57,&amp;quot;y&amp;quot;:1.27235994392512},{&amp;quot;x&amp;quot;:58,&amp;quot;y&amp;quot;:1.51961826729837},{&amp;quot;x&amp;quot;:59,&amp;quot;y&amp;quot;:1.63596260993712},{&amp;quot;x&amp;quot;:60,&amp;quot;y&amp;quot;:0.824473581389652},{&amp;quot;x&amp;quot;:61,&amp;quot;y&amp;quot;:-0.48284866322013},{&amp;quot;x&amp;quot;:62,&amp;quot;y&amp;quot;:0.573883549869371},{&amp;quot;x&amp;quot;:63,&amp;quot;y&amp;quot;:1.05184809623671},{&amp;quot;x&amp;quot;:64,&amp;quot;y&amp;quot;:0.0454050201119939},{&amp;quot;x&amp;quot;:65,&amp;quot;y&amp;quot;:0.751382097689122},{&amp;quot;x&amp;quot;:66,&amp;quot;y&amp;quot;:-0.929310655250318},{&amp;quot;x&amp;quot;:67,&amp;quot;y&amp;quot;:-0.793092149713913},{&amp;quot;x&amp;quot;:68,&amp;quot;y&amp;quot;:-1.65559877108564},{&amp;quot;x&amp;quot;:69,&amp;quot;y&amp;quot;:-0.843433725916248},{&amp;quot;x&amp;quot;:70,&amp;quot;y&amp;quot;:-0.121997402068996},{&amp;quot;x&amp;quot;:71,&amp;quot;y&amp;quot;:0.871797492700474},{&amp;quot;x&amp;quot;:72,&amp;quot;y&amp;quot;:0.0938533555401431},{&amp;quot;x&amp;quot;:73,&amp;quot;y&amp;quot;:-0.541701562317288},{&amp;quot;x&amp;quot;:74,&amp;quot;y&amp;quot;:-0.169530077756232},{&amp;quot;x&amp;quot;:75,&amp;quot;y&amp;quot;:-0.916374486818639},{&amp;quot;x&amp;quot;:76,&amp;quot;y&amp;quot;:-0.479331756028547},{&amp;quot;x&amp;quot;:77,&amp;quot;y&amp;quot;:-0.759894652038177},{&amp;quot;x&amp;quot;:78,&amp;quot;y&amp;quot;:-0.828414766022455},{&amp;quot;x&amp;quot;:79,&amp;quot;y&amp;quot;:1.41258668731984},{&amp;quot;x&amp;quot;:80,&amp;quot;y&amp;quot;:-0.44541462199036},{&amp;quot;x&amp;quot;:81,&amp;quot;y&amp;quot;:-0.178303731993524},{&amp;quot;x&amp;quot;:82,&amp;quot;y&amp;quot;:-0.902706998796811},{&amp;quot;x&amp;quot;:83,&amp;quot;y&amp;quot;:-1.03945058550069},{&amp;quot;x&amp;quot;:84,&amp;quot;y&amp;quot;:-0.0328721639961685},{&amp;quot;x&amp;quot;:85,&amp;quot;y&amp;quot;:-0.0343580473231585},{&amp;quot;x&amp;quot;:86,&amp;quot;y&amp;quot;:0.871289288673431},{&amp;quot;x&amp;quot;:87,&amp;quot;y&amp;quot;:0.82082393596239},{&amp;quot;x&amp;quot;:88,&amp;quot;y&amp;quot;:-0.613278355360862},{&amp;quot;x&amp;quot;:89,&amp;quot;y&amp;quot;:-0.544852297018886},{&amp;quot;x&amp;quot;:90,&amp;quot;y&amp;quot;:-0.875717384486533},{&amp;quot;x&amp;quot;:91,&amp;quot;y&amp;quot;:-1.13024120501596},{&amp;quot;x&amp;quot;:92,&amp;quot;y&amp;quot;:-1.48344521273782},{&amp;quot;x&amp;quot;:93,&amp;quot;y&amp;quot;:0.627583734831165},{&amp;quot;x&amp;quot;:94,&amp;quot;y&amp;quot;:0.157538863366952},{&amp;quot;x&amp;quot;:95,&amp;quot;y&amp;quot;:0.769100584528887},{&amp;quot;x&amp;quot;:96,&amp;quot;y&amp;quot;:-0.0937723558971763},{&amp;quot;x&amp;quot;:97,&amp;quot;y&amp;quot;:1.16043371414387},{&amp;quot;x&amp;quot;:98,&amp;quot;y&amp;quot;:-1.652003007344},{&amp;quot;x&amp;quot;:99,&amp;quot;y&amp;quot;:-0.908614445124587},{&amp;quot;x&amp;quot;:100,&amp;quot;y&amp;quot;:0.833323388278791}]}&quot;></div>
+#> ```
+</code></pre>
+<h2 id="sec:javascript-injection-with-js">JavaScript Injection with JS()</h2>
+<p>For custom logic, inject raw JavaScript using <code>htmlwidgets::JS()</code>:</p>
+<pre><code class="language-r"># Define a method using JS()
+result <- alpine_tag(&quot;div&quot;,
+  alpine_tag(&quot;button&quot;, &quot;Greet&quot;,
+    alpine_attr(`@click` = &quot;greet()&quot;)
+  ),
+  alpine_tag(&quot;p&quot;,
+    alpine_attr(`x-bind:textContent` = &quot;greeting&quot;)
+  )
+) |>
+  alpine_data(
+    greeting = &quot;Ready&quot;,
+    greet = htmlwidgets::JS(
+      &quot;function() { this.greeting = 'Hello, Alpine!'; }&quot;
+    )
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;greeting&amp;quot;:&amp;quot;Ready&amp;quot;,&amp;quot;greet&amp;quot;:function() { this.greeting = &amp;#39;Hello, Alpine!&amp;#39;; }}&quot;>
+#>   <button @click=&quot;greet()&quot;>Greet</button>
+#>   <p x-bind:textContent=&quot;greeting&quot;></p>
+#> </div>
+#> ```
+</code></pre>
+<h3 id="sec:when-to-use-js">When to Use JS()</h3>
+<p>Use <code>JS()</code> for:</p>
+<p><strong>Functions and Methods</strong></p>
+<pre><code class="language-r">result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    increment = htmlwidgets::JS(&quot;function() { this.count++; }&quot;),
+    formatDate = htmlwidgets::JS(&quot;(date) => new Date(date).toLocaleDateString()&quot;)
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;increment&amp;quot;:function() { this.count++; },&amp;quot;formatDate&amp;quot;:(date) =&amp;gt; new Date(date).toLocaleDateString()}&quot;></div>
+#> ```
+</code></pre>
+<p><strong>Arrow Functions</strong></p>
+<pre><code class="language-r">result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    double = htmlwidgets::JS(&quot;(x) => x * 2&quot;),
+    filter = htmlwidgets::JS(&quot;(arr, pred) => arr.filter(pred)&quot;)
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;double&amp;quot;:(x) =&amp;gt; x * 2,&amp;quot;filter&amp;quot;:(arr, pred) =&amp;gt; arr.filter(pred)}&quot;></div>
+#> ```
+</code></pre>
+<p><strong>Complex Expressions</strong></p>
+<pre><code class="language-r">result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    timestamp = htmlwidgets::JS(&quot;Date.now()&quot;),
+    location = htmlwidgets::JS(&quot;window.location.href&quot;)
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;timestamp&amp;quot;:Date.now(),&amp;quot;location&amp;quot;:window.location.href}&quot;></div>
+#> ```
+</code></pre>
+<p><strong>Simple Values</strong> (use plain R instead)</p>
+<pre><code class="language-r"># Don't do this (syntactically valid but wasteful):
+result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(name = htmlwidgets::JS('&quot;Alice&quot;')) |>  # Use: name = &quot;Alice&quot;
+  htmltools::browsable()
+
+# Better approach:
+alpine_tag(&quot;div&quot;) |>
+  alpine_data(count = 5) |>  # Use plain R, not JS()
+  htmltools::browsable()
+#> <div x-data=&quot;{&amp;quot;count&amp;quot;:5}&quot;></div>
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;name&amp;quot;:&amp;quot;Alice&amp;quot;}&quot;></div>
+#> ```
+</code></pre>
+<h2 id="sec:csp-safe-javascript">CSP-Safe JavaScript</h2>
+<p>The default CSP-compliant build of Alpine.js limits what JavaScript expressions you can use. The following expressions are allowed:</p>
+<h3 id="sec:permitted-expressions-csp-safe">Permitted Expressions (CSP-safe)</h3>
+<pre><code class="language-r">result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    count = 0,
+    doubled = htmlwidgets::JS(&quot;this.count * 2&quot;),           # arithmetic
+    message = htmlwidgets::JS(&quot;this.name + ' is here'&quot;),   # string concat
+    result = htmlwidgets::JS(&quot;this.x > 10 ? 'Yes' : 'No'&quot;) # ternary
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;count&amp;quot;:0,&amp;quot;doubled&amp;quot;:this.count * 2,&amp;quot;message&amp;quot;:this.name + &amp;#39; is here&amp;#39;,&amp;quot;result&amp;quot;:this.x &amp;gt; 10 ? &amp;#39;Yes&amp;#39; : &amp;#39;No&amp;#39;}&quot;></div>
+#> ```
+</code></pre>
+<h3 id="sec:restricted-expressions-csp-incompatible">Restricted Expressions (CSP-incompatible)</h3>
+<p>These require <code>options(alpinejs.use_csp = FALSE)</code>:</p>
+<pre><code class="language-r"># NOT CSP-safe: function definition
+greet = htmlwidgets::JS(&quot;function() { return 'Hi'; }&quot;)
+
+# NOT CSP-safe: arrow function
+double = htmlwidgets::JS(&quot;x => x * 2&quot;)
+
+# NOT CSP-safe: constructor
+data = htmlwidgets::JS(&quot;new Map()&quot;)
+
+# NOT CSP-safe: eval/exec
+result = htmlwidgets::JS(&quot;eval('1+1')&quot;)
+</code></pre>
+<p>To use unsafe expressions:</p>
+<pre><code class="language-r"># Disable CSP mode for the entire session
+options(alpinejs.use_csp = FALSE)
+
+# Now arrow functions work
+result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    double = htmlwidgets::JS(&quot;(x) => x * 2&quot;)
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;double&amp;quot;:(x) =&amp;gt; x * 2}&quot;></div>
+#> ```
+</code></pre>
+<h2 id="sec:debugging-serialization">Debugging Serialization</h2>
+<p>To inspect what JSON is generated, use browser dev tools or R itself:</p>
+<pre><code class="language-r"># Examine the generated HTML
+component <- result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    users = data.frame(name = c(&quot;Alice&quot;, &quot;Bob&quot;), age = c(30, 25)),
+    config = list(debug = TRUE, version = &quot;1.0&quot;)
+  )
+
+# View raw HTML
+as.character(component)  # Shows the x-data attribute value
+#> [1] &quot;<div x-data=\&quot;{&amp;quot;users&amp;quot;:[{&amp;quot;name&amp;quot;:&amp;quot;Alice&amp;quot;,&amp;quot;age&amp;quot;:30},{&amp;quot;name&amp;quot;:&amp;quot;Bob&amp;quot;,&amp;quot;age&amp;quot;:25}],&amp;quot;config&amp;quot;:{&amp;quot;debug&amp;quot;:true,&amp;quot;version&amp;quot;:&amp;quot;1.0&amp;quot;}}\&quot;></div>&quot;
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;users&amp;quot;:[{&amp;quot;name&amp;quot;:&amp;quot;Alice&amp;quot;,&amp;quot;age&amp;quot;:30},{&amp;quot;name&amp;quot;:&amp;quot;Bob&amp;quot;,&amp;quot;age&amp;quot;:25}],&amp;quot;config&amp;quot;:{&amp;quot;debug&amp;quot;:true,&amp;quot;version&amp;quot;:&amp;quot;1.0&amp;quot;}}&quot;></div>
+#> ```
+</code></pre>
+<p>Or check in browser:</p>
+<pre><code class="language-javascript">// Browser console
+console.log(Alpine.$data(document.querySelector('div')))  // Inspect component state
+</code></pre>
+<h2 id="sec:working-with-dates-and-times">Working with Dates and Times</h2>
+<p>Be explicit about timezone handling:</p>
+<pre><code class="language-r"># UTC datetime
+utc_time <- as.POSIXct(&quot;2026-02-21 12:00:00&quot;, tz = &quot;UTC&quot;)
+
+# Local time (converted to ISO with Z suffix)
+local_time <- Sys.time()
+
+result <- alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    created = utc_time,    # -> &quot;2026-02-21T12:00:00Z&quot;
+    modified = local_time   # -> &quot;2026-02-21T10:30:45Z&quot; (or local TZ)
+  )
+
+cat(&quot;```html\n&quot;, as.character(result), &quot;\n```&quot;, sep=&quot;&quot;)
+#> ```html
+#> <div x-data=&quot;{&amp;quot;created&amp;quot;:&amp;quot;2026-02-21T12:00:00Z&amp;quot;,&amp;quot;modified&amp;quot;:&amp;quot;2026-05-28T07:23:06Z&amp;quot;}&quot;></div>
+#> ```
+</code></pre>
+<p>In Alpine.js, parse ISO strings back to dates:</p>
+<pre><code class="language-r">alpine_tag(&quot;div&quot;) |>
+  alpine_data(
+    created = Sys.time(),
+    createdDate = htmlwidgets::JS(&quot;new Date(this.created)&quot;)
+  )
+</code></pre>
+<h2 id="sec:performance-tips">Performance Tips</h2>
+<ol>
+<li><strong>Avoid huge data frames in alpine_data</strong>: Pass only what’s needed for the UI</li>
+<li><strong>Use lists for structured data</strong>: More efficient than nested data frames</li>
+<li><strong>Minimize nested structures</strong>: Flatten when possible</li>
+<li><strong>Cache computed values</strong>: Pre-calculate in R, pass as state</li>
+</ol>
+<pre><code class="language-r"># Good: pre-compute statistics
+system_status <- list(
+  total_users = 1000,
+  active_users = 750,
+  inactive_users = 250  # Pre-computed instead of calculated in JS
+)
+
+# Instead of:
+# total_users = 1000,
+# active_users = ...,
+# inactive_users = htmlwidgets::JS(&quot;this.total_users - this.active_users&quot;)
+</code></pre>
+<h2 id="sec:troubleshooting">Troubleshooting</h2>
+<p><strong>Q: “JSON.parse error”</strong></p>
+<ul>
+<li>Your data contains invalid characters (e.g., backslashes)</li>
+<li>Solution: Let alpinejs handle serialization; don’t pre-stringify</li>
+</ul>
+<p><strong>Q: “Undefined variable”</strong></p>
+<ul>
+<li>Typo in variable name or JS() expression</li>
+<li>Solution: Check browser console; verify spelling in both R and HTML</li>
+</ul>
+<p><strong>Q: Data looks wrong in Alpine</strong></p>
+<ul>
+<li>Factor converted to character (unexpected)?</li>
+<li>Solution: Convert factors to character explicitly before alpine_data()</li>
+</ul>
+<p><strong>Q: CSP violation in production</strong></p>
+<ul>
+<li>Using unsafe expressions with CSP mode enabled</li>
+<li>Solution: Set <code>options(alpinejs.use_csp = FALSE)</code> or simplify expressions</li>
+</ul>
+<hr />
+<p>For examples, see the vignettes and <code>examples/</code> directory (e.g., <code>examples/01-todo-list.R</code>)!</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+<nav style="margin-bottom: 1.5rem; font-size: 0.9em;">
+      <a href="../index.html" style="color: #0000ff; text-decoration: underline;">Home</a> &gt;
+      <a href="../guides/index.html" style="color: #0000ff; text-decoration: underline;">Guides</a> &gt;
+      <span style="color: #666;">Advanced JSON</span>
+      </nav>
+  </main>
+
+  <footer>
+    <p>
+      alpinejs &mdash; R interface for Alpine.js<br>
+      <a href="https://github.com/brownag/alpinejs">View on GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

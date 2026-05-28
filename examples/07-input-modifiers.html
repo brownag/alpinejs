@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Modifiers | alpinejs</title>
+  <!-- Load Crosstalk for cross-widget reactivity -->
+  <script src="https://cdn.jsdelivr.net/npm/crosstalk@1.2.0/dist/crosstalk.min.js"></script>
+  <!-- Load Alpine.js for interactive components -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+  <style>
+    /* 1990s Web 1.0 aesthetic - authentic retro feel */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Verdana, Geneva, sans-serif;
+      line-height: 1.6;
+      color: #000;
+      background: #c0c0c0;
+      font-size: 14px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: #dfdfdf;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #dfdfdf;
+      padding-top: 0.8rem;
+    }
+
+    nav a {
+      color: #0000ff;
+      text-decoration: underline;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    nav a:visited {
+      color: #800080;
+    }
+
+    nav a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Main content */
+    main {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      padding: 1rem;
+      background: #fff;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      min-height: calc(100vh - 250px);
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1.5rem 0 0.5rem;
+      font-weight: bold;
+      line-height: 1.3;
+    }
+
+    h1 { 
+      font-size: 2rem;
+      border-bottom: 3px double #0000ff;
+      padding-bottom: 0.3rem;
+      margin-top: 0;
+      color: #0000ff;
+    }
+
+    h2 { 
+      font-size: 1.4rem;
+      color: #0000cc;
+      border-bottom: 1px solid #000;
+    }
+
+    h3 { font-size: 1.1rem; color: #000080; }
+    h4 { font-size: 1rem; color: #000; font-weight: bold; }
+
+    /* Paragraphs & text */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #800080;
+    }
+
+    a:hover {
+      background: #0000ff;
+      color: #fff;
+    }
+
+    /* Inline code */
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+      color: #000;
+      border: 1px solid #ccc;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #f0f0f0;
+      border: 1px solid #999;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.4;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #000;
+      border: none;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid #999;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #333;
+      font-style: italic;
+      background: #f5f5f5;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #999;
+      margin: 1.5rem 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      border: 1px solid #999;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border: 1px solid #999;
+    }
+
+    th {
+      background: #c0c0c0;
+      font-weight: bold;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #999;
+      border: 2px solid;
+      border-color: #dfdfdf #808080 #808080 #dfdfdf;
+      color: #000;
+      font-size: 0.85rem;
+      margin: 2rem 1rem 0;
+      background: #dfdfdf;
+    }
+
+    footer a {
+      color: #0000ff;
+      text-decoration: underline;
+    }
+
+    footer a:visited {
+      color: #800080;
+    }
+
+    /* Horizontal rule dividers */
+    .divider {
+      border: none;
+      height: 2px;
+      background: linear-gradient(to right, #dfdfdf 0%, #000 50%, #dfdfdf 100%);
+      margin: 1.5rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      main {
+        padding: 0.8rem;
+      }
+
+      header {
+        padding: 0.8rem;
+      }
+
+      nav {
+        gap: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html" style="color: #000; text-decoration: none;">alpinejs</a></h1>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../guides/">Guides</a>
+      <a href="../examples/">Examples</a>
+      <a href="../reference/">Reference</a>
+      <a href="https://github.com/brownag/alpinejs" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    
+<div class="frontmatter">
+<div class="title"><h1>Example: Input Modifiers Example: Form with Debounced Search and Lazy Validation</h1></div>
+</div>
+<div class="body">
+<div style="max-width: 600px; margin: 40px auto; font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, sans-serif;" x-data="{&quot;searchQuery&quot;:&quot;&quot;,&quot;emailInput&quot;:&quot;&quot;,&quot;username&quot;:&quot;&quot;,&quot;description&quot;:&quot;&quot;,&quot;userAge&quot;:null}">
+  <h1 id="chp:input-modifiers-demo">Input Modifiers Demo</h1>
+  <p>Try the different input modifiers and watch the state update in real-time.</p>
+  <div style="margin-bottom: 20px;">
+    <label style="display: block; font-weight: bold; margin-bottom: 5px;">1. Debounced Search (300ms delay)</label>
+    <input type="text" placeholder="Type to search (waits 300ms after you stop)..." style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" x-model.debounce.300="searchQuery"/>
+    <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 14px; color: #666; margin-top: 5px;">
+      Uses modifiers: x-model.debounce.300
+      <div style="margin-top: 10px; font-size: 12px; color: #999;">
+        Current search: 
+        <span x-text="searchQuery"></span>
+      </div>
+    </div>
+  </div>
+  <div style="margin-bottom: 20px;">
+    <label style="display: block; font-weight: bold; margin-bottom: 5px;">2. Email Input (Lazy Validation)</label>
+    <input type="text" placeholder="example@email.com" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" x-model.lazy="emailInput"/>
+    <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 14px; color: #666; margin-top: 5px;">
+      Uses modifiers: x-model.lazy
+      <div style="margin-top: 10px; font-size: 12px; color: #999;">
+        Email (updates on blur): 
+        <span x-text="emailInput"></span>
+      </div>
+      <div style="margin-top: 10px; padding: 8px; border-radius: 4px;" x-bind:class="emailInput &amp;&amp; /^[^@]+@[^@]+\.\w+$/.test(emailInput) ? &#39;valid&#39; : &#39;invalid&#39;"></div>
+      <div style="margin-top: 10px; font-size: 12px;" x-text="emailInput &amp;&amp; /^[^@]+@[^@]+\.\w+$/.test(emailInput) ? &#39;Valid&#39; : &#39;Invalid&#39;" x-bind:style="emailInput &amp;&amp; /^[^@]+@[^@]+\.\w+$/.test(emailInput) ? &#39;color:green&#39; : &#39;color:red&#39;"></div>
+    </div>
+  </div>
+  <div style="margin-bottom: 20px;">
+    <label style="display: block; font-weight: bold; margin-bottom: 5px;">3. Age Input (Auto-number Conversion)</label>
+    <input type="text" placeholder="Enter your age" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" x-model.number="userAge"/>
+    <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 14px; color: #666; margin-top: 5px;">
+      Uses modifiers: x-model.number
+      <div style="margin-top: 10px; font-size: 12px; color: #999;">
+        Current age: 
+        <span x-text="userAge"></span>
+         (type: 
+        <span x-text="typeof userAge"></span>
+        )
+      </div>
+    </div>
+  </div>
+  <div style="margin-bottom: 20px;">
+    <label style="display: block; font-weight: bold; margin-bottom: 5px;">4. Trimmed Input (whitespace automatically removed)</label>
+    <input type="text" placeholder="Type with spaces (they will be trimmed)" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" x-model.trim="username"/>
+    <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 14px; color: #666; margin-top: 5px;">
+      Uses modifiers: x-model.trim
+      <div style="margin-top: 10px; font-size: 12px; color: #999;">
+        Username: "
+        <span x-text="username"></span>
+        "
+      </div>
+    </div>
+  </div>
+  <div style="margin-bottom: 20px;">
+    <label style="display: block; font-weight: bold; margin-bottom: 5px;">5. Combined Modifiers (lazy + debounce + trim)</label>
+    <textarea placeholder="Description (lazy + debounce.250 + trim)" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; min-height: 100px;" x-model.lazy.debounce.250.trim="description"></textarea>
+    <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 14px; color: #666; margin-top: 5px;">
+      Uses modifiers: x-model.lazy.debounce.250.trim
+      <div style="margin-top: 10px; font-size: 12px; color: #999;">
+        Description length: 
+        <span x-text="description.length"></span>
+         characters
+      </div>
+    </div>
+  </div>
+  <div style="background: #e8f4f8; padding: 15px; border-radius: 4px; margin-top: 30px; font-family: monospace; white-space: pre-wrap; word-break: break-word; font-size: 12px;" x-text="JSON.stringify({ searchQuery, emailInput, userAge, username, description }, null, 2)"></div>
+</div>
+</div>
+<nav style="margin-bottom: 1.5rem; font-size: 0.9em;">
+      <a href="../index.html" style="color: #0000ff; text-decoration: underline;">Home</a> &gt;
+      <a href="../examples/index.html" style="color: #0000ff; text-decoration: underline;">Examples</a> &gt;
+      <span style="color: #666;">Input Modifiers</span>
+      </nav>
+  </main>
+
+  <footer>
+    <p>
+      alpinejs &mdash; R interface for Alpine.js<br>
+      <a href="https://github.com/brownag/alpinejs">View on GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>
