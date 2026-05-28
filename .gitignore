@@ -8,3 +8,4 @@
 scratch/
 _site/
 altdoc/freeze.rds
+.docs_build_cache
